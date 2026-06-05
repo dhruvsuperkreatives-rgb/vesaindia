@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Organizations - Aashayein</title>
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#F97316',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        info: '#8b5cf6',
+                        'primary-light': 'rgba(59,130,246,0.1)',
+                        'secondary-light': 'rgba(249,115,22,0.1)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --secondary: #F97316;
+            --primary-light: rgba(59, 130, 246, 0.1);
+            --secondary-light: rgba(249, 115, 22, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            overflow: hidden; 
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        /* Mesh Grid Background */
+        .mesh-bg {
+            background-image: 
+                linear-gradient(var(--primary-light) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-light) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: fixed;
+            inset: 0;
+            opacity: 0.3;
+            z-index: -2;
+            animation: meshMove 20s linear infinite;
+        }
+
+        @keyframes meshMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        /* Gradient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: -1;
+            animation: orbPulse 12s ease-in-out infinite;
+        }
+        .orb-1 { width: 500px; height: 500px; background: var(--primary); top: -200px; right: -100px; animation-delay: 0s; }
+        .orb-2 { width: 400px; height: 400px; background: var(--secondary); bottom: -150px; left: -100px; animation-delay: -4s; }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1) translate(0, 0); }
+            33% { transform: scale(1.1) translate(30px, -20px); }
+            66% { transform: scale(0.9) translate(-20px, 30px); }
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .header-title-wrap h1 { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem;}
+        .header-subtitle { font-size: 0.875rem; color: #64748b; }
+
+        .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+        
+        .search-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            color: #94a3b8;
+        }
+        .search-bar input {
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            outline: none;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .search-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .action-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 1rem; border-radius: 0.5rem;
+            font-size: 0.875rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; border: 1px solid #e2e8f0; background: white; color: #475569;
+        }
+        .action-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); color: white; border-color: transparent;}
+
+        /* Container & Cards */
+        .dashboard-container { padding: 2rem; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* For table rounded corners */
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        .data-table { width: 100%; text-align: left; border-collapse: collapse; white-space: nowrap; }
+        .data-table th { 
+            font-size: 0.75rem; font-weight: 700; color: #64748b; 
+            text-transform: uppercase; padding: 1rem; 
+            background: #f8fafc; border-bottom: 1px solid #e2e8f0; 
+            letter-spacing: 0.05em;
+        }
+        .data-table td { 
+            padding: 1.25rem 1rem; font-size: 0.875rem; color: #1e293b; 
+            font-weight: 500; border-bottom: 1px solid #f1f5f9; 
+        }
+        .data-table tbody tr { transition: background 0.2s ease; }
+        .data-table tbody tr:hover { background: #f8fafc; }
+        
+        .org-name { font-weight: 700; color: #0f172a; }
+        .org-sub { font-size: 0.75rem; color: #94a3b8; font-weight: 400; display: block; margin-top: 0.25rem; }
+
+        /* Badges */
+        .type-badge { padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.7rem; font-weight: 600; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;}
+        
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem;}
+        .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-active::before { background: #166534; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-pending::before { background: #854d0e; }
+
+        .btn-icon { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: #64748b; transition: all 0.2s ease; cursor: pointer; border: none; margin-right: 0.25rem;}
+        .btn-icon:hover { background: var(--primary-light); color: var(--primary); }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="mesh-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <main class="main-content">
+        
+        <header class="top-header">
+            <div class="header-title-wrap">
+                <h1>Organizations Directory</h1>
+                <div class="header-subtitle">Manage and track enrolled entities</div>
+            </div>
+            <div class="header-actions">
+                <div class="search-bar hidden md:flex">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search organizations...">
+                </div>
+                <button class="action-btn"><i class="fas fa-filter"></i> Filter</button>
+                <a href="enrollment.html" class="action-btn btn-primary" style="text-decoration: none;">
+                    <i class="fas fa-plus"></i> Add Organization
+                </a>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            
+            <div class="card" style="padding: 0;">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Organization Name</th>
+                                <th>Registration Type</th>
+                                <th>Location</th>
+                                <th>Participants</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="org-name">Aashayein Foundation</span>
+                                    <span class="org-sub">Primary Wing: Education & Livelihood</span>
+                                </td>
+                                <td><span class="type-badge">NGO / Civil Group</span></td>
+                                <td>
+                                    <div>Pune</div>
+                                    <span class="org-sub">Maharashtra</span>
+                                </td>
+                                <td>150</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                                <td>
+                                    <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="org-name">Green Earth Tech</span>
+                                    <span class="org-sub">Primary Wing: CSR Department</span>
+                                </td>
+                                <td><span class="type-badge">Corporate Entity</span></td>
+                                <td>
+                                    <div>Mumbai</div>
+                                    <span class="org-sub">Maharashtra</span>
+                                </td>
+                                <td>320</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                                <td>
+                                    <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="org-name">Sunrise Institute of Science</span>
+                                    <span class="org-sub">Primary Wing: Student Volunteer Club</span>
+                                </td>
+                                <td><span class="type-badge">Educational Inst.</span></td>
+                                <td>
+                                    <div>Nagpur</div>
+                                    <span class="org-sub">Maharashtra</span>
+                                </td>
+                                <td>500</td>
+                                <td><span class="status-badge status-pending">Pending Review</span></td>
+                                <td>
+                                    <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="org-name">Maharashtra Rural Development</span>
+                                    <span class="org-sub">Primary Wing: Implementation Office</span>
+                                </td>
+                                <td><span class="type-badge">Government State</span></td>
+                                <td>
+                                    <div>Nashik</div>
+                                    <span class="org-sub">Maharashtra</span>
+                                </td>
+                                <td>1,200</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                                <td>
+                                    <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <script src="sidebar.js"></script>
+</body>
+</html>

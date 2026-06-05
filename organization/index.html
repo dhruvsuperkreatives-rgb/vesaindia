@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="0; url=/admin/">
+    <title>Organisation Review - AASHAYEIN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --ink: #172033;
+            --muted: #667085;
+            --line: #d9e2ec;
+            --paper: #ffffff;
+            --wash: #f5f8fb;
+            --green: #2f8f6b;
+            --blue: #2f6fed;
+            --orange: #b85c00;
+            --red: #b42318;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, sans-serif;
+            color: var(--ink);
+            background: var(--wash);
+        }
+        .topbar {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 28px;
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .brand, .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 800;
+        }
+        .nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nav a, button {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            min-height: 40px;
+            padding: 0 14px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        main {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 34px 20px 60px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-end;
+            margin-bottom: 22px;
+        }
+        h1 {
+            font-size: clamp(28px, 5vw, 44px);
+            line-height: 1.06;
+            margin: 0 0 8px;
+            letter-spacing: 0;
+        }
+        .header p, .empty {
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 0;
+        }
+        .table-card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 940px;
+        }
+        th, td {
+            text-align: left;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+        th {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            background: #fbfcfe;
+        }
+        td {
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        .name {
+            font-weight: 800;
+            color: var(--ink);
+        }
+        .sub {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 3px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-weight: 800;
+            font-size: 12px;
+            background: #eef8f3;
+            color: var(--green);
+        }
+        .badge.pending { background: #fff7e6; color: var(--orange); }
+        .badge.rejected { background: #fff1f0; color: var(--red); }
+        .status {
+            font-weight: 800;
+            margin: 14px 0;
+        }
+        .status.error { color: var(--red); }
+        @media (max-width: 760px) {
+            .topbar, .header { align-items: flex-start; flex-direction: column; }
+            .topbar { padding: 16px; }
+            main { padding: 28px 14px 48px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+            <a class="brand" href="/">
+                <img src="/favicon.jpeg" alt="Logo" style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover;">
+                <span>AASHAYEIN</span>
+            </a>
+            <!-- Partner & Government Logos -->
+            <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--line); padding-left: 20px;">
+                <img src="/sidebar.jpeg" alt="Sidebar Logo" style="height: 36px; width: 36px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line);">
+                <img src="/gov.jpeg" alt="Government Logo" style="height: 36px; object-fit: contain;">
+            </div>
+        </div>
+        <nav class="nav" aria-label="Primary">
+            <a href="/register/"><i class="fa-solid fa-plus"></i> New Registration</a>
+            <a href="/login/"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="header">
+            <div>
+                <h1>Organisation Review</h1>
+                <p>Admin-only view of submitted organisation registrations.</p>
+            </div>
+            <button id="refreshButton" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </section>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+        <section class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organisation</th>
+                        <th>Type</th>
+                        <th>Scope</th>
+                        <th>Participants</th>
+                        <th>Nodal Officer</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody id="registrationRows">
+                    <tr><td colspan="7" class="empty">Loading registrations...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script type="module">
+        import { supabase } from "../supabaseClient.js";
+
+        const rows = document.getElementById("registrationRows");
+        const statusEl = document.getElementById("status");
+        const refreshButton = document.getElementById("refreshButton");
+
+        const labels = {
+            government_state: "Government State",
+            government_central: "Government Central",
+            corporate: "Corporate Entity",
+            educational: "Educational Institution",
+            ngo_civil_group: "NGO / Civil Group",
+            other: "Other",
+            single_office: "Single Office",
+            state_wide_mh: "State-wide MH",
+            pan_india: "Pan-India"
+        };
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function formatDate(value) {
+            if (!value) return "";
+            return new Intl.DateTimeFormat("en-IN", {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }).format(new Date(value));
+        }
+
+        function render(data) {
+            if (!data.length) {
+                rows.innerHTML = '<tr><td colspan="7" class="empty">No registrations submitted yet.</td></tr>';
+                return;
+            }
+
+            rows.innerHTML = data.map((item) => `
+                <tr>
+                    <td>
+                        <div class="name">${escapeHtml(item.organization_name)}</div>
+                        <div class="sub">${escapeHtml(item.core_work_location)}</div>
+                    </td>
+                    <td>${escapeHtml(labels[item.registration_type] || item.registration_type)}</td>
+                    <td>
+                        ${escapeHtml(labels[item.implementation_scope] || item.implementation_scope)}
+                        <div class="sub">${escapeHtml(item.participating_locations)} location(s)</div>
+                    </td>
+                    <td>
+                        ${escapeHtml(item.estimated_participants)}
+                        <div class="sub">${escapeHtml(item.target_nwpp_bags)} NWPP target</div>
+                    </td>
+                    <td>
+                        <div class="name">${escapeHtml(item.nodal_officer_name)}</div>
+                        <div class="sub">${escapeHtml(item.nodal_designation)} · ${escapeHtml(item.nodal_mobile)}</div>
+                    </td>
+                    <td><span class="badge ${escapeHtml(item.status)}">${escapeHtml(item.status)}</span></td>
+                    <td>${escapeHtml(formatDate(item.created_at))}</td>
+                </tr>
+            `).join("");
+        }
+
+        async function loadRegistrations() {
+            statusEl.textContent = "";
+            rows.innerHTML = '<tr><td colspan="7" class="empty">Loading registrations...</td></tr>';
+
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData.session) {
+                rows.innerHTML = '<tr><td colspan="7" class="empty">Please login as an admin to view registrations.</td></tr>';
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from("organization_registrations")
+                .select("id, created_at, status, organization_name, registration_type, core_work_location, implementation_scope, participating_locations, estimated_participants, target_nwpp_bags, nodal_officer_name, nodal_designation, nodal_mobile")
+                .order("created_at", { ascending: false });
+
+            if (error) {
+                rows.innerHTML = '<tr><td colspan="7" class="empty">Unable to load registrations.</td></tr>';
+                statusEl.textContent = error.message;
+                statusEl.className = "status error";
+                return;
+            }
+
+            render(data || []);
+        }
+
+        refreshButton.addEventListener("click", loadRegistrations);
+        loadRegistrations();
+    </script>
+</body>
+</html>

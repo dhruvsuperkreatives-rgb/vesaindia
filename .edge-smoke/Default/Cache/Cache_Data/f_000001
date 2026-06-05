@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organisation Dashboard - AASHAYEIN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --ink: #172033;
+            --muted: #667085;
+            --line: #d9e2ec;
+            --paper: #ffffff;
+            --wash: #f5f8fb;
+            --green: #2f8f6b;
+            --blue: #2f6fed;
+            --orange: #b85c00;
+            --red: #b42318;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, sans-serif;
+            color: var(--ink);
+            background: var(--wash);
+        }
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+        }
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            border-right: 1px solid var(--line);
+            background: #ffffff;
+            padding: 22px 16px;
+            overflow: auto;
+        }
+        .brand, .side-link, .topbar a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 800;
+        }
+        .brand { margin-bottom: 22px; }
+        .side-title {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin: 20px 10px 8px;
+        }
+        .side-nav {
+            display: grid;
+            gap: 6px;
+        }
+        .side-link {
+            min-height: 42px;
+            padding: 0 10px;
+            border-radius: 8px;
+            color: #334155;
+            font-size: 14px;
+        }
+        .side-link.active,
+        .side-link:hover {
+            background: #e8f5ef;
+            color: var(--green);
+        }
+        .main-pane { min-width: 0; }
+        .topbar {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 28px;
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        button, .topbar a {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            min-height: 38px;
+            padding: 0 12px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            background: white;
+            cursor: pointer;
+            color: var(--ink);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        main {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 34px 20px 60px;
+        }
+        h1 {
+            font-size: clamp(30px, 5vw, 48px);
+            line-height: 1.04;
+            margin: 0 0 10px;
+            letter-spacing: 0;
+        }
+        h2 {
+            font-size: 20px;
+            margin: 0 0 12px;
+        }
+        .lead {
+            color: var(--muted);
+            line-height: 1.7;
+            margin: 0 0 24px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+        .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+            min-width: 0;
+        }
+        .metric-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .metric-value {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--green);
+        }
+        .metric-unit {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        label {
+            display: block;
+            font-weight: 800;
+            font-size: 13px;
+            margin: 12px 0 7px;
+        }
+        input, select, textarea {
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid #c9d4e2;
+            border-radius: 8px;
+            padding: 10px 11px;
+            font: inherit;
+            background: #fbfcfe;
+            outline: none;
+        }
+        textarea {
+            min-height: 88px;
+            resize: vertical;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 4px rgba(47, 143, 107, 0.14);
+            background: white;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 12px;
+        }
+        .full { grid-column: 1 / -1; }
+        .primary {
+            background: var(--green);
+            color: white;
+            border-color: var(--green);
+            min-height: 46px;
+            margin-top: 14px;
+        }
+        .danger {
+            color: var(--red);
+            border-color: #f1b8b1;
+        }
+        .muted {
+            color: var(--muted);
+            line-height: 1.55;
+        }
+        .status {
+            margin-top: 12px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+        .status.ok { color: var(--green); }
+        .status.error { color: var(--red); }
+        .dashboard-panel { display: none; }
+        .dashboard-panel.active { display: block; }
+        .hidden { display: none !important; }
+        .list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .list li {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+            background: #fbfcfe;
+            line-height: 1.55;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: flex-start;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 800;
+            background: #e8f5ef;
+            color: var(--green);
+            white-space: nowrap;
+        }
+        .pill.warn { background: #fff7e6; color: var(--orange); }
+        .checkbox {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .checkbox input {
+            width: 18px;
+            min-height: 18px;
+            accent-color: var(--green);
+        }
+        @media (max-width: 900px) {
+            .stats, .grid, .grid.three { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 700px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+            .topbar { justify-content: flex-start; flex-wrap: wrap; padding: 16px; }
+            main { padding: 28px 14px 48px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="Dashboard modules">
+            <a class="brand" href="/dashboard/"><i class="fa-solid fa-leaf"></i> AASHAYEIN</a>
+            <div class="side-title">Workspace</div>
+            <nav class="side-nav">
+                <a class="side-link active" href="#overview" data-panel-link="overview"><i class="fa-solid fa-gauge"></i> Overview</a>
+                <a class="side-link" href="#contribute" data-panel-link="contribute"><i class="fa-solid fa-hand-holding-heart"></i> Contribute</a>
+                <a class="side-link" href="#departments" data-panel-link="departments"><i class="fa-solid fa-sitemap"></i> Departments</a>
+                <a class="side-link" href="#people" data-panel-link="people"><i class="fa-solid fa-users"></i> People</a>
+                <a class="side-link" href="#balances" data-panel-link="balances"><i class="fa-solid fa-indian-rupee-sign"></i> Balances</a>
+            </nav>
+            <div class="side-title">Admin</div>
+            <nav class="side-nav">
+                <a class="side-link" href="/admin/"><i class="fa-solid fa-list-check"></i> Admin Review</a>
+            </nav>
+        </aside>
+
+        <div class="main-pane">
+            <header class="topbar">
+                <a href="/register/"><i class="fa-solid fa-building-circle-check"></i> Register</a>
+                <button id="logoutButton" type="button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </header>
+
+            <main>
+                <section>
+                    <h1 id="pageTitle">Organisation Dashboard</h1>
+                    <p class="lead" id="pageLead">Loading your workspace...</p>
+                </section>
+
+                <section id="loginNotice" class="card hidden">
+                    <p class="lead">Please login with your organisation, Nodal Officer, employee, or admin account.</p>
+                    <a href="/login/">Open login</a>
+                </section>
+
+                <section id="pendingPanel" class="hidden">
+                    <article class="card">
+                        <h2>Approval Pending</h2>
+                        <p class="lead">Your organisation account is created. Until admin approval, this login can only view public platform totals.</p>
+                        <span class="pill warn" id="pendingStatus">Pending</span>
+                    </article>
+                    <div class="stats">
+                        <article class="card">
+                            <div class="metric-label">Public NWPP total</div>
+                            <div class="metric-value" id="publicNwpp">0</div>
+                            <div class="metric-unit">bags</div>
+                        </article>
+                        <article class="card">
+                            <div class="metric-label">Public garment total</div>
+                            <div class="metric-value" id="publicGarments">0</div>
+                            <div class="metric-unit">garments</div>
+                        </article>
+                        <article class="card">
+                            <div class="metric-label">Utility bags requested</div>
+                            <div class="metric-value" id="publicUtility">0</div>
+                            <div class="metric-unit">requests</div>
+                        </article>
+                        <article class="card">
+                            <div class="metric-label">Labour fee pending</div>
+                            <div class="metric-value" id="publicFee">0</div>
+                            <div class="metric-unit">rupees</div>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="approvedPanel" class="hidden">
+                    <section class="dashboard-panel active" data-panel="overview">
+                        <div class="stats">
+                            <article class="card">
+                                <div class="metric-label">Organisation NWPP</div>
+                                <div class="metric-value" id="orgNwpp">0</div>
+                                <div class="metric-unit">bags</div>
+                            </article>
+                            <article class="card">
+                                <div class="metric-label">Organisation garments</div>
+                                <div class="metric-value" id="orgGarments">0</div>
+                                <div class="metric-unit">items</div>
+                            </article>
+                            <article class="card">
+                                <div class="metric-label">Department NWPP</div>
+                                <div class="metric-value" id="deptNwpp">0</div>
+                                <div class="metric-unit">bags</div>
+                            </article>
+                            <article class="card">
+                                <div class="metric-label">Department garments</div>
+                                <div class="metric-value" id="deptGarments">0</div>
+                                <div class="metric-unit">items</div>
+                            </article>
+                        </div>
+                        <div class="grid">
+                            <article class="card">
+                                <h2>Organisation Snapshot</h2>
+                                <ul class="list" id="snapshotList"></ul>
+                            </article>
+                            <article class="card">
+                                <h2>Department Snapshot</h2>
+                                <ul class="list" id="departmentSnapshot"></ul>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel" data-panel="contribute">
+                        <div class="grid">
+                            <form id="nwppForm" class="card">
+                                <h2>NWPP Bag Donation</h2>
+                                <label for="bags_count">How many NWPP bags?</label>
+                                <input id="bags_count" name="bags_count" type="number" min="10" step="1" value="10" required>
+                                <label for="nwpp_notes">Notes</label>
+                                <textarea id="nwpp_notes" name="nwpp_notes" placeholder="Optional"></textarea>
+                                <button class="primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save NWPP</button>
+                                <div class="status" id="nwppStatus" role="status" aria-live="polite"></div>
+                            </form>
+
+                            <form id="garmentForm" class="card">
+                                <h2>Garment Donation</h2>
+                                <label for="garment_count">How many garments?</label>
+                                <input id="garment_count" name="garment_count" type="number" min="1" step="1" value="1" required>
+                                <label class="checkbox" for="wants_utility_bag">
+                                    <input id="wants_utility_bag" name="wants_utility_bag" type="checkbox">
+                                    Wants a utility bag after labour fee
+                                </label>
+                                <label for="labour_fee">Labour fee amount</label>
+                                <input id="labour_fee" name="labour_fee" type="number" min="0" step="1" value="0">
+                                <label for="garment_notes">Notes</label>
+                                <textarea id="garment_notes" name="garment_notes" placeholder="Optional"></textarea>
+                                <button class="primary" type="submit"><i class="fa-solid fa-shirt"></i> Save Garments</button>
+                                <div class="status" id="garmentStatus" role="status" aria-live="polite"></div>
+                            </form>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel" data-panel="departments">
+                        <div class="grid">
+                            <form id="departmentForm" class="card hidden">
+                                <h2>Create Department and Nodal Officer</h2>
+                                <div class="form-grid">
+                                    <div>
+                                        <label for="department_name">Department name</label>
+                                        <input id="department_name" name="department_name" required>
+                                    </div>
+                                    <div>
+                                        <label for="department_location">Department location</label>
+                                        <input id="department_location" name="department_location" required>
+                                    </div>
+                                    <div>
+                                        <label for="planned_employee_count">Total employees planned</label>
+                                        <input id="planned_employee_count" name="planned_employee_count" type="number" min="0" step="1" value="0">
+                                    </div>
+                                    <div>
+                                        <label for="nodal_password">Nodal password</label>
+                                        <input id="nodal_password" name="nodal_password" type="password" minlength="8" required>
+                                    </div>
+                                </div>
+                                <div class="form-grid" data-nodal-fields></div>
+                                <button class="primary" type="submit"><i class="fa-solid fa-plus"></i> Create Department</button>
+                                <div class="status" id="departmentStatus" role="status" aria-live="polite"></div>
+                            </form>
+                            <article class="card">
+                                <h2>Departments</h2>
+                                <ul class="list" id="departmentList"></ul>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel" data-panel="people">
+                        <div class="grid">
+                            <form id="employeeForm" class="card hidden">
+                                <h2 id="employeeFormTitle">Create Employee Login</h2>
+                                <div class="form-grid" data-employee-fields></div>
+                                <label for="employee_password">Password</label>
+                                <input id="employee_password" name="employee_password" type="password" minlength="8">
+                                <div class="row">
+                                    <button class="primary" type="submit"><i class="fa-solid fa-user-plus"></i> Save Employee</button>
+                                    <button id="cancelEmployeeEdit" class="hidden" type="button"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                                </div>
+                                <div class="status" id="employeeStatus" role="status" aria-live="polite"></div>
+                            </form>
+                            <article class="card">
+                                <h2>People</h2>
+                                <ul class="list" id="peopleList"></ul>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel" data-panel="balances">
+                        <div class="stats">
+                            <article class="card">
+                                <div class="metric-label">Pending with donors</div>
+                                <div class="metric-value" id="feePending">0</div>
+                                <div class="metric-unit">rupees</div>
+                            </article>
+                            <article class="card">
+                                <div class="metric-label">With Nodal Officer</div>
+                                <div class="metric-value" id="feeNodal">0</div>
+                                <div class="metric-unit">rupees</div>
+                            </article>
+                            <article class="card">
+                                <div class="metric-label">Sent to Organisation</div>
+                                <div class="metric-value" id="feeOrg">0</div>
+                                <div class="metric-unit">rupees</div>
+                            </article>
+                            <article class="card">
+                                <div class="metric-label">Sent to Admin</div>
+                                <div class="metric-value" id="feeAdmin">0</div>
+                                <div class="metric-unit">rupees</div>
+                            </article>
+                        </div>
+                        <article class="card">
+                            <h2>Utility Bag Labour Fee Flow</h2>
+                            <p class="lead">Balances are grouped step-wise so the department can reconcile collections without adding heavy manual work.</p>
+                        </article>
+                    </section>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from "../supabaseClient.js";
+
+        const pendingRegistrationKey = "aashayein_pending_registration";
+        const panelLinks = [...document.querySelectorAll("[data-panel-link]")];
+        const panels = [...document.querySelectorAll("[data-panel]")];
+        const loginNotice = document.getElementById("loginNotice");
+        const pendingPanel = document.getElementById("pendingPanel");
+        const approvedPanel = document.getElementById("approvedPanel");
+        const pageTitle = document.getElementById("pageTitle");
+        const pageLead = document.getElementById("pageLead");
+        const logoutButton = document.getElementById("logoutButton");
+        const departmentForm = document.getElementById("departmentForm");
+        const employeeForm = document.getElementById("employeeForm");
+        const employeeFormTitle = document.getElementById("employeeFormTitle");
+        const cancelEmployeeEdit = document.getElementById("cancelEmployeeEdit");
+
+        const personFields = [
+            ["first_name", "First name", "text", true],
+            ["middle_name", "Middle name", "text", false],
+            ["last_name", "Last name", "text", true],
+            ["gender", "Gender", "select", true],
+            ["age", "Age", "number", true],
+            ["mobile_number", "Mobile number", "tel", true],
+            ["email", "Email", "email", true],
+            ["residential_address", "Residential address", "textarea", true],
+            ["office_location", "Office location", "text", true],
+            ["social_media_handle", "Social media handle", "text", false],
+            ["photograph_url", "Photograph URL", "url", true],
+            ["wants_volunteer", "Wants to volunteer", "checkbox", false],
+        ];
+
+        let summary = null;
+        let editingEmployeeId = null;
+
+        function numberText(value) {
+            return new Intl.NumberFormat("en-IN").format(Number(value || 0));
+        }
+
+        function moneyText(value) {
+            return numberText(Number(value || 0).toFixed(0));
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function setStatus(id, message, type = "") {
+            const el = document.getElementById(id);
+            el.textContent = message;
+            el.className = `status ${type}`;
+        }
+
+        function renderPersonFields(container, prefix) {
+            container.innerHTML = personFields.map(([name, label, type, required]) => {
+                const id = `${prefix}_${name}`;
+                if (type === "select") {
+                    return `<div><label for="${id}">${label}</label><select id="${id}" name="${name}" ${required ? "required" : ""}>
+                        <option value="">Select gender</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="non_binary">Non-binary</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                        <option value="other">Other</option>
+                    </select></div>`;
+                }
+                if (type === "textarea") {
+                    return `<div class="full"><label for="${id}">${label}</label><textarea id="${id}" name="${name}" ${required ? "required" : ""}></textarea></div>`;
+                }
+                if (type === "checkbox") {
+                    return `<div class="full"><label class="checkbox" for="${id}"><input id="${id}" name="${name}" type="checkbox"> ${label}</label></div>`;
+                }
+                return `<div><label for="${id}">${label}</label><input id="${id}" name="${name}" type="${type}" ${type === "number" ? "min=\"1\" max=\"125\" step=\"1\"" : ""} ${required ? "required" : ""}></div>`;
+            }).join("");
+        }
+
+        function readPerson(form) {
+            const data = {};
+            for (const [name, , type] of personFields) {
+                const field = form.elements[name];
+                if (!field) continue;
+                data[name] = type === "checkbox" ? field.checked : field.value.trim();
+            }
+            data.age = Number(data.age);
+            return data;
+        }
+
+        function fillPerson(form, person) {
+            for (const [name, , type] of personFields) {
+                const field = form.elements[name];
+                if (!field) continue;
+                if (type === "checkbox") field.checked = Boolean(person[name]);
+                else field.value = person[name] || "";
+            }
+        }
+
+        function showPanel(name = "overview") {
+            const selected = panels.some((panel) => panel.dataset.panel === name) ? name : "overview";
+            panelLinks.forEach((link) => link.classList.toggle("active", link.dataset.panelLink === selected));
+            panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === selected));
+            history.replaceState(null, "", `#${selected}`);
+        }
+
+        function renderPublicTotals(target, totals = {}) {
+            document.getElementById(`${target}Nwpp`).textContent = numberText(totals.nwpp_bags_total);
+            document.getElementById(`${target}Garments`).textContent = numberText(totals.garment_items_total);
+            document.getElementById(`${target}Utility`).textContent = numberText(totals.utility_bags_requested_total);
+            document.getElementById(`${target}Fee`).textContent = moneyText(totals.labour_fee_pending);
+        }
+
+        async function completePendingRegistration(user) {
+            const stored = localStorage.getItem(pendingRegistrationKey);
+            if (!stored) return;
+
+            let pending;
+            try {
+                pending = JSON.parse(stored);
+            } catch {
+                localStorage.removeItem(pendingRegistrationKey);
+                return;
+            }
+
+            if (pending.email && pending.email.toLowerCase() !== user.email.toLowerCase()) return;
+
+            const { error } = await supabase
+                .from("organization_registrations")
+                .insert({
+                    ...pending.payload,
+                    owner_id: user.id,
+                    organization_head_email: pending.payload?.organization_head_email || user.email,
+                    nodal_email: pending.payload?.nodal_email || user.email
+                });
+
+            if (!error) localStorage.removeItem(pendingRegistrationKey);
+        }
+
+        function renderPending() {
+            const org = summary.organization;
+            pageTitle.textContent = org?.organization_name || "Organisation Dashboard";
+            pageLead.textContent = "Admin approval is pending. Public totals remain visible while private tools are locked.";
+            pendingPanel.classList.remove("hidden");
+            approvedPanel.classList.add("hidden");
+            document.getElementById("pendingStatus").textContent = org?.status || "pending";
+            renderPublicTotals("public", summary.public_totals || {});
+        }
+
+        function renderApproved() {
+            const role = summary.profile?.role || "employee";
+            const org = summary.organization || {};
+            const orgTotals = summary.org_totals || {};
+            const deptTotals = summary.department_totals || {};
+            const dept = summary.department;
+
+            pageTitle.textContent = org.organization_name || "Organisation Dashboard";
+            pageLead.textContent = role === "org_head"
+                ? "Create departments, watch the full organisation picture, and contribute products."
+                : role === "nodal_officer"
+                    ? "Manage your department employees and track department detail with organisation totals."
+                    : "Add your own NWPP and garment contributions and view organisation totals.";
+
+            pendingPanel.classList.add("hidden");
+            approvedPanel.classList.remove("hidden");
+            departmentForm.classList.toggle("hidden", role !== "org_head");
+            employeeForm.classList.toggle("hidden", role !== "nodal_officer");
+
+            document.getElementById("orgNwpp").textContent = numberText(orgTotals.nwpp_bags);
+            document.getElementById("orgGarments").textContent = numberText(orgTotals.garments);
+            document.getElementById("deptNwpp").textContent = numberText(deptTotals.nwpp_bags);
+            document.getElementById("deptGarments").textContent = numberText(deptTotals.garments);
+
+            document.getElementById("snapshotList").innerHTML = `
+                <li><strong>${escapeHtml(org.organization_name)}</strong><br><span class="muted">${escapeHtml(role.replaceAll("_", " "))}</span></li>
+                <li>Target: <strong>${numberText(org.target_nwpp_bags)}</strong> NWPP bags</li>
+                <li>Utility bag requests: <strong>${numberText(orgTotals.utility_bags_requested)}</strong></li>
+            `;
+
+            document.getElementById("departmentSnapshot").innerHTML = dept
+                ? `<li><strong>${escapeHtml(dept.department_name)}</strong><br><span class="muted">${escapeHtml(dept.office_location)}</span></li><li>Employees: <strong>${numberText(deptTotals.employee_count)}</strong></li>`
+                : `<li class="muted">Organisation Head contributions are tracked at organisation level until departments are created.</li>`;
+
+            renderDepartments();
+            renderPeople();
+            renderBalances();
+        }
+
+        function renderDepartments() {
+            const rows = summary.departments || [];
+            document.getElementById("departmentList").innerHTML = rows.length ? rows.map((item) => `
+                <li>
+                    <div class="row">
+                        <div>
+                            <strong>${escapeHtml(item.department_name)}</strong>
+                            <div class="muted">${escapeHtml(item.office_location)} · Nodal: ${escapeHtml(item.nodal_name || "Assigned")}</div>
+                        </div>
+                        <span class="pill">${numberText(item.actual_employee_count)} / ${numberText(item.planned_employee_count)} employees</span>
+                    </div>
+                    <div class="muted">${numberText(item.nwpp_bags)} NWPP bags · ${numberText(item.garments)} garments</div>
+                </li>
+            `).join("") : `<li class="muted">No departments yet.</li>`;
+        }
+
+        function renderPeople() {
+            const rows = summary.employees || [];
+            const canEdit = summary.profile?.role === "nodal_officer";
+            document.getElementById("peopleList").innerHTML = rows.length ? rows.map((person) => {
+                const name = [person.first_name, person.middle_name, person.last_name].filter(Boolean).join(" ");
+                return `<li>
+                    <div class="row">
+                        <div>
+                            <strong>${escapeHtml(name || person.email)}</strong>
+                            <div class="muted">${escapeHtml(person.role.replaceAll("_", " "))} · ${escapeHtml(person.email || "")} · ${escapeHtml(person.mobile_number || "")}</div>
+                            <div class="muted">${person.wants_volunteer ? "Volunteer: yes" : "Volunteer: no"}</div>
+                        </div>
+                        <span class="pill ${person.status === "inactive" ? "warn" : ""}">${escapeHtml(person.status)}</span>
+                    </div>
+                    ${canEdit && person.role === "employee" ? `<div class="row" style="margin-top:10px; justify-content:flex-start;">
+                        <button type="button" data-edit-employee="${escapeHtml(person.id)}"><i class="fa-solid fa-pen"></i> Edit</button>
+                        <button class="danger" type="button" data-deactivate-employee="${escapeHtml(person.id)}"><i class="fa-solid fa-user-slash"></i> Deactivate</button>
+                    </div>` : ""}
+                </li>`;
+            }).join("") : `<li class="muted">No people listed yet.</li>`;
+        }
+
+        function renderBalances() {
+            const totals = summary.org_totals || {};
+            document.getElementById("feePending").textContent = moneyText(totals.labour_fee_pending);
+            document.getElementById("feeNodal").textContent = moneyText(totals.labour_fee_collected_by_nodal);
+            document.getElementById("feeOrg").textContent = moneyText(totals.labour_fee_sent_to_org);
+            document.getElementById("feeAdmin").textContent = moneyText(totals.labour_fee_sent_to_admin);
+        }
+
+        async function loadDashboard() {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const session = sessionData.session;
+            if (!session) {
+                loginNotice.classList.remove("hidden");
+                pendingPanel.classList.add("hidden");
+                approvedPanel.classList.add("hidden");
+                pageLead.textContent = "Login is required.";
+                return;
+            }
+
+            await completePendingRegistration(session.user);
+
+            const { data, error } = await supabase.rpc("get_dashboard_summary");
+            if (error) {
+                pageLead.textContent = error.message || "Dashboard could not be loaded.";
+                return;
+            }
+
+            summary = data || {};
+            loginNotice.classList.add("hidden");
+            if (summary.approved) renderApproved();
+            else renderPending();
+        }
+
+        document.getElementById("nwppForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const bags = Number(form.elements.bags_count.value);
+            if (!Number.isInteger(bags) || bags < 10) {
+                setStatus("nwppStatus", "Minimum NWPP bag contribution is 10.", "error");
+                return;
+            }
+
+            setStatus("nwppStatus", "Saving...");
+            const { data: sessionData } = await supabase.auth.getSession();
+            const { error } = await supabase.from("nwpp_contributions").insert({
+                organization_registration_id: summary.organization.id,
+                department_id: summary.profile.role === "org_head" ? null : summary.profile.department_id,
+                user_id: sessionData.session.user.id,
+                bags_count: bags,
+                notes: form.elements.nwpp_notes.value.trim() || null
+            });
+
+            if (error) setStatus("nwppStatus", error.message, "error");
+            else {
+                setStatus("nwppStatus", "NWPP contribution saved.", "ok");
+                await loadDashboard();
+            }
+        });
+
+        document.getElementById("garmentForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const count = Number(form.elements.garment_count.value);
+            const wantsUtility = form.elements.wants_utility_bag.checked;
+            if (!Number.isInteger(count) || count < 1) {
+                setStatus("garmentStatus", "Minimum garment contribution is 1.", "error");
+                return;
+            }
+
+            setStatus("garmentStatus", "Saving...");
+            const { data: sessionData } = await supabase.auth.getSession();
+            const { error } = await supabase.from("garment_contributions").insert({
+                organization_registration_id: summary.organization.id,
+                department_id: summary.profile.role === "org_head" ? null : summary.profile.department_id,
+                user_id: sessionData.session.user.id,
+                garment_count: count,
+                wants_utility_bag: wantsUtility,
+                labour_fee: Number(form.elements.labour_fee.value || 0),
+                payment_status: wantsUtility ? "pending" : "not_required",
+                notes: form.elements.garment_notes.value.trim() || null
+            });
+
+            if (error) setStatus("garmentStatus", error.message, "error");
+            else {
+                setStatus("garmentStatus", "Garment contribution saved.", "ok");
+                await loadDashboard();
+            }
+        });
+
+        departmentForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            setStatus("departmentStatus", "Creating department and login...");
+
+            const { data, error } = await supabase.functions.invoke("create-member-account", {
+                body: {
+                    action: "create_department_nodal",
+                    department_name: form.elements.department_name.value.trim(),
+                    department_location: form.elements.department_location.value.trim(),
+                    planned_employee_count: Number(form.elements.planned_employee_count.value || 0),
+                    password: form.elements.nodal_password.value,
+                    nodal_officer: readPerson(form)
+                }
+            });
+
+            if (error || data?.error) setStatus("departmentStatus", data?.error || error.message, "error");
+            else {
+                form.reset();
+                setStatus("departmentStatus", "Department and Nodal Officer login created.", "ok");
+                await loadDashboard();
+            }
+        });
+
+        employeeForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const employee = readPerson(form);
+
+            if (editingEmployeeId) {
+                setStatus("employeeStatus", "Updating employee...");
+                const { error } = await supabase
+                    .from("profiles")
+                    .update(employee)
+                    .eq("id", editingEmployeeId);
+                if (error) setStatus("employeeStatus", error.message, "error");
+                else {
+                    clearEmployeeEdit();
+                    setStatus("employeeStatus", "Employee updated.", "ok");
+                    await loadDashboard();
+                }
+                return;
+            }
+
+            if (!form.elements.employee_password.value || form.elements.employee_password.value.length < 8) {
+                setStatus("employeeStatus", "Password must be at least 8 characters.", "error");
+                return;
+            }
+
+            setStatus("employeeStatus", "Creating employee login...");
+            const { data, error } = await supabase.functions.invoke("create-member-account", {
+                body: {
+                    action: "create_employee",
+                    password: form.elements.employee_password.value,
+                    employee
+                }
+            });
+
+            if (error || data?.error) setStatus("employeeStatus", data?.error || error.message, "error");
+            else {
+                form.reset();
+                setStatus("employeeStatus", "Employee login created.", "ok");
+                await loadDashboard();
+            }
+        });
+
+        function clearEmployeeEdit() {
+            editingEmployeeId = null;
+            employeeForm.reset();
+            employeeFormTitle.textContent = "Create Employee Login";
+            employeeForm.elements.employee_password.disabled = false;
+            cancelEmployeeEdit.classList.add("hidden");
+        }
+
+        document.getElementById("peopleList").addEventListener("click", async (event) => {
+            const editButton = event.target.closest("[data-edit-employee]");
+            const deactivateButton = event.target.closest("[data-deactivate-employee]");
+
+            if (editButton) {
+                const person = (summary.employees || []).find((item) => item.id === editButton.dataset.editEmployee);
+                if (!person) return;
+                editingEmployeeId = person.id;
+                fillPerson(employeeForm, person);
+                employeeFormTitle.textContent = "Edit Employee";
+                employeeForm.elements.employee_password.value = "";
+                employeeForm.elements.employee_password.disabled = true;
+                cancelEmployeeEdit.classList.remove("hidden");
+                showPanel("people");
+                return;
+            }
+
+            if (deactivateButton) {
+                const { error } = await supabase
+                    .from("profiles")
+                    .update({ status: "inactive" })
+                    .eq("id", deactivateButton.dataset.deactivateEmployee);
+                if (error) setStatus("employeeStatus", error.message, "error");
+                else await loadDashboard();
+            }
+        });
+
+        cancelEmployeeEdit.addEventListener("click", clearEmployeeEdit);
+
+        panelLinks.forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                showPanel(link.dataset.panelLink);
+            });
+        });
+
+        logoutButton.addEventListener("click", async () => {
+            await supabase.auth.signOut();
+            window.location.href = "/";
+        });
+
+        renderPersonFields(document.querySelector("[data-nodal-fields]"), "nodal");
+        renderPersonFields(document.querySelector("[data-employee-fields]"), "employee");
+        showPanel(location.hash ? location.hash.slice(1) : "overview");
+        loadDashboard();
+    </script>
+</body>
+</html>
