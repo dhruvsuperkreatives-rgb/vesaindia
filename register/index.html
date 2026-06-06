@@ -1,578 +1,1140 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Organisation - AASHAYEIN</title>
+
+    <title>Register Organisation - VESACINDIA</title>
+
     <link rel="icon" type="image/jpeg" href="/favicon.jpeg">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
+
         :root {
+
             --ink: #172033;
+
             --muted: #667085;
+
             --line: #d9e2ec;
+
             --paper: #ffffff;
+
             --wash: #f5f8fb;
+
             --green: #2f8f6b;
+
             --blue: #2f6fed;
+
             --danger: #b42318;
+
         }
+
         * { box-sizing: border-box; }
+
         body {
+
             margin: 0;
+
             font-family: Inter, system-ui, sans-serif;
+
             color: var(--ink);
+
             background: var(--wash);
+
         }
+
         .topbar {
+
             min-height: 68px;
+
             display: flex;
+
             align-items: center;
+
             justify-content: space-between;
+
             gap: 20px;
+
             padding: 0 28px;
+
             background: rgba(255, 255, 255, 0.94);
+
             border-bottom: 1px solid var(--line);
+
             position: sticky;
+
             top: 0;
+
             z-index: 10;
+
         }
+
         .brand, .back {
+
             display: inline-flex;
+
             align-items: center;
+
             gap: 10px;
+
             color: var(--ink);
+
             text-decoration: none;
+
             font-weight: 800;
+
         }
+
         .back {
+
             border: 1px solid var(--line);
+
             border-radius: 8px;
+
             min-height: 40px;
+
             padding: 0 14px;
+
             font-size: 14px;
+
             background: white;
+
         }
+
         main {
+
             max-width: 920px;
+
             margin: 0 auto;
+
             padding: 36px 20px 64px;
+
         }
+
         .intro {
+
             margin-bottom: 24px;
+
         }
+
         h1 {
+
             font-size: clamp(30px, 5vw, 46px);
+
             line-height: 1.05;
+
             margin: 0 0 10px;
+
             letter-spacing: 0;
+
         }
+
         .intro p {
+
             margin: 0;
+
             max-width: 760px;
+
             color: var(--muted);
+
             line-height: 1.7;
+
         }
+
         form {
+
             background: var(--paper);
+
             border: 1px solid var(--line);
+
             border-radius: 8px;
+
             padding: 28px;
+
             box-shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+
         }
+
         fieldset {
+
             border: 0;
+
             margin: 0 0 30px;
+
             padding: 0;
+
         }
+
         legend {
+
             width: 100%;
+
             display: flex;
+
             align-items: center;
+
             gap: 10px;
+
             color: var(--green);
+
             font-weight: 800;
+
             text-transform: uppercase;
+
             letter-spacing: 0.08em;
+
             font-size: 13px;
+
             border-bottom: 1px solid var(--line);
+
             padding-bottom: 12px;
+
             margin-bottom: 18px;
+
         }
+
         .grid {
+
             display: grid;
+
             grid-template-columns: repeat(2, minmax(0, 1fr));
+
             gap: 16px;
+
         }
+
         .full { grid-column: 1 / -1; }
+
         label {
+
             display: block;
+
             font-weight: 700;
+
             font-size: 14px;
+
             margin-bottom: 8px;
+
         }
+
         input, select, textarea {
+
             width: 100%;
+
             min-height: 46px;
+
             border: 1px solid #c9d4e2;
+
             border-radius: 8px;
+
             padding: 11px 12px;
+
             font: inherit;
+
             color: var(--ink);
+
             background: #fbfcfe;
+
             outline: none;
+
         }
+
         textarea {
+
             min-height: 104px;
+
             resize: vertical;
+
         }
+
         input:focus, select:focus, textarea:focus {
+
             border-color: var(--green);
+
             box-shadow: 0 0 0 4px rgba(47, 143, 107, 0.14);
+
             background: white;
+
         }
+
         .hint {
+
             color: var(--muted);
+
             font-size: 12px;
+
             line-height: 1.5;
+
             margin-top: 6px;
+
         }
+
         .commitment {
+
             display: flex;
+
             gap: 12px;
+
             align-items: flex-start;
+
             border: 1px solid var(--line);
+
             border-radius: 8px;
+
             padding: 14px;
+
             background: #fbfcfe;
+
         }
+
         .commitment input {
+
             width: 18px;
+
             min-height: 18px;
+
             margin-top: 2px;
+
             accent-color: var(--green);
+
         }
+
         .commitment label {
+
             margin: 0;
+
             line-height: 1.55;
+
         }
+
         .actions {
+
             display: flex;
+
             align-items: center;
+
             gap: 14px;
+
             flex-wrap: wrap;
+
         }
+
         button {
+
             border: 0;
+
             min-height: 48px;
+
             border-radius: 8px;
+
             padding: 0 18px;
+
             font: inherit;
+
             font-weight: 800;
+
             color: white;
+
             background: var(--green);
+
             cursor: pointer;
+
             display: inline-flex;
+
             align-items: center;
+
             justify-content: center;
+
             gap: 8px;
+
         }
+
         button:disabled {
+
             opacity: 0.65;
+
             cursor: wait;
+
         }
+
         .status {
+
             font-weight: 700;
+
             line-height: 1.5;
+
         }
+
         .status.ok { color: var(--green); }
+
         .status.error { color: var(--danger); }
+
         @media (max-width: 720px) {
+
             .topbar { align-items: flex-start; flex-direction: column; padding: 16px; }
+
             main { padding: 28px 14px 48px; }
+
             form { padding: 18px; }
+
             .grid { grid-template-columns: 1fr; }
+
         }
+
     </style>
+
 </head>
+
 <body>
+
     <header class="topbar">
+
         <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+
             <a class="brand" href="/">
+
                 <img src="/favicon.jpeg" alt="Logo" style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover;">
-                <span>AASHAYEIN</span>
+
+                <span>VESACINDIA</span>
+
             </a>
+
             <!-- Partner & Government Logos -->
+
             <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--line); padding-left: 20px;">
+
                 <img src="/sidebar.jpeg" alt="Sidebar Logo" style="height: 36px; width: 36px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line);">
+
                 <img src="/gov.jpeg" alt="Government Logo" style="height: 36px; object-fit: contain;">
+
             </div>
+
         </div>
+
         <a class="back" href="/"><i class="fa-solid fa-arrow-left"></i> Home</a>
+
     </header>
 
+
+
     <main>
+
         <section class="intro">
+
             <h1>Organisation Registration</h1>
-            <p>Submit the organisation onboarding details and create the Organisation Head login. Product entry opens only after admin approval.</p>
+
+            <p>Submit the organisation onboarding details and create the Nodel officer login. Product entry opens only after admin approval.</p>
+
         </section>
 
+
+
         <form id="registrationForm" novalidate>
+
             <fieldset>
+
                 <legend><i class="fa-solid fa-building"></i> Entry Details</legend>
-                <div class="grid">
-                    <div class="full">
-                        <label for="organization_name">Official name of organisation</label>
-                        <input id="organization_name" name="organization_name" autocomplete="organization" required>
-                    </div>
-                    <div>
-                        <label for="registration_type">Registration type</label>
-                        <select id="registration_type" name="registration_type" required>
-                            <option value="">Select type</option>
-                            <option value="government_state">Government State</option>
-                            <option value="government_central">Government Central</option>
-                            <option value="corporate">Corporate Entity</option>
-                            <option value="educational">Educational Institution</option>
-                            <option value="ngo_civil_group">NGO / Civil Group</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="core_work_location">Core work location</label>
-                        <input id="core_work_location" name="core_work_location" placeholder="Location and state" required>
-                    </div>
-                    <div>
-                        <label for="organization_social_handle">Organisation social handle</label>
-                        <input id="organization_social_handle" name="organization_social_handle" placeholder="@organisation">
-                    </div>
-                    <div>
-                        <label for="company_logo_url">Company logo URL</label>
-                        <input id="company_logo_url" name="company_logo_url" type="url" placeholder="https://...">
-                    </div>
-                </div>
-            </fieldset>
 
-            <fieldset>
-                <legend><i class="fa-solid fa-map-location-dot"></i> Footprint</legend>
                 <div class="grid">
-                    <div>
-                        <label for="implementation_scope">Implementation scope</label>
-                        <select id="implementation_scope" name="implementation_scope" required>
-                            <option value="">Select scope</option>
-                            <option value="single_office">Single office only</option>
-                            <option value="state_wide_mh">State-wide Maharashtra</option>
-                            <option value="pan_india">Pan-India national</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="coverage_type">Coverage type</label>
-                        <select id="coverage_type" name="coverage_type" required>
-                            <option value="">Select coverage</option>
-                            <option value="state_wide">State-wide</option>
-                            <option value="district_wise">District-wise</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="participating_locations">Participating locations</label>
-                        <input id="participating_locations" name="participating_locations" type="number" min="1" step="1" required>
-                    </div>
-                    <div class="full">
-                        <label for="initial_launch_locations">Initial launch location(s)</label>
-                        <input id="initial_launch_locations" name="initial_launch_locations" placeholder="Example: Thane HQ, Pune branch" required>
-                    </div>
-                </div>
-            </fieldset>
 
-            <fieldset>
-                <legend><i class="fa-solid fa-users-gear"></i> Headcount and Structure</legend>
-                <div class="grid">
                     <div>
-                        <label for="estimated_participants">Estimated total participants</label>
-                        <input id="estimated_participants" name="estimated_participants" type="number" min="1" step="1" required>
-                        <div class="hint">Target is calculated as participants x 10 NWPP bags.</div>
-                    </div>
-                    <div class="full">
-                        <label for="primary_departments">Primary departments or wings</label>
-                        <textarea id="primary_departments" name="primary_departments" placeholder="List the primary departments, wings, or groups."></textarea>
-                    </div>
-                </div>
-            </fieldset>
 
-            <fieldset>
-                <legend><i class="fa-solid fa-user-tie"></i> Organisation Head</legend>
-                <div class="grid">
-                    <div>
-                        <label for="head_first_name">First name</label>
-                        <input id="head_first_name" name="head_first_name" autocomplete="given-name" required>
-                    </div>
-                    <div>
-                        <label for="head_middle_name">Middle name</label>
-                        <input id="head_middle_name" name="head_middle_name" autocomplete="additional-name">
-                    </div>
-                    <div>
-                        <label for="head_last_name">Last name</label>
-                        <input id="head_last_name" name="head_last_name" autocomplete="family-name" required>
-                    </div>
-                    <div>
-                        <label for="head_gender">Gender</label>
-                        <select id="head_gender" name="head_gender" required>
-                            <option value="">Select gender</option>
-                            <option value="female">Female</option>
-                            <option value="male">Male</option>
-                            <option value="non_binary">Non-binary</option>
-                            <option value="prefer_not_to_say">Prefer not to say</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="head_age">Age</label>
-                        <input id="head_age" name="head_age" type="number" min="1" max="125" step="1" required>
-                    </div>
-                    <div>
-                        <label for="head_mobile">Mobile number</label>
-                        <input id="head_mobile" name="head_mobile" autocomplete="tel" required>
-                    </div>
-                    <div>
-                        <label for="head_email">Official email</label>
-                        <input id="head_email" name="head_email" type="email" autocomplete="email" required>
-                        <div class="hint">This email becomes the Organisation Head login ID.</div>
-                    </div>
-                    <div>
-                        <label for="head_office_location">Office location</label>
-                        <input id="head_office_location" name="head_office_location" required>
-                    </div>
-                    <div>
-                        <label for="head_social_handle">Social media handle</label>
-                        <input id="head_social_handle" name="head_social_handle" placeholder="@name">
-                    </div>
-                    <div>
-                        <label for="head_photograph_url">Photograph URL</label>
-                        <input id="head_photograph_url" name="head_photograph_url" type="url" placeholder="https://..." required>
-                    </div>
-                    <div class="full">
-                        <label for="head_residential_address">Residential address</label>
-                        <textarea id="head_residential_address" name="head_residential_address" required></textarea>
-                    </div>
-                    <div>
-                        <label for="password">Create password</label>
-                        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
-                    </div>
-                    <div>
-                        <label for="confirm_password">Confirm password</label>
-                        <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required>
-                    </div>
-                    <div class="full">
-                        <label for="notes">Notes</label>
-                        <textarea id="notes" name="notes" placeholder="Any additional context for onboarding."></textarea>
-                    </div>
-                    <div>
                         <label for="contribution_focus">Contribution focus</label>
+
                         <select id="contribution_focus" name="contribution_focus" required>
+
                             <option value="">Select focus</option>
+
                             <option value="mcp_bag">MCP Bag</option>
+
                             <option value="garment">Garment</option>
+
                             <option value="both">Both</option>
+
                         </select>
+
                     </div>
+
+                    <div >
+
+                        <label for="organization_name">Organization name</label>
+
+                        <input id="organization_name" name="organization_name" autocomplete="organization" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="registration_type">Organization type</label>
+
+                        <select id="registration_type" name="registration_type" required>
+
+                            <option value="">Select type</option>
+
+                            <option value="government_state">Government State</option>
+
+                            <option value="government_central">Government Central</option>
+
+                            <option value="corporate">Corporate Entity</option>
+
+                            <option value="educational">Educational Institution</option>
+
+                            <option value="ngo_civil_group">NGO / Civil Group</option>
+
+                            <option value="other">Other</option>
+
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label for="core_work_location">Head office</label>
+
+                        <input id="core_work_location" name="core_work_location" placeholder="Location and state" required>
+
+                    </div>
+
+                   
+
+                    <div>
+
+                        <label for="company_logo_url">Company logo URL</label>
+
+                        <input id="company_logo_url" name="company_logo_url" type="url" placeholder="https://...">
+
+                    </div>
+
                 </div>
+
             </fieldset>
+
+
+
+            <fieldset>
+
+                <legend><i class="fa-solid fa-map-location-dot"></i> Footprint</legend>
+
+                <div class="grid">
+
+                    <div>
+
+                        <label for="implementation_scope">Implementation scope</label>
+
+                        <select id="implementation_scope" name="implementation_scope" required>
+
+                            <option value="">Select scope</option>
+
+                            <option value="single_office">Head office</option>
+
+                            <option value="state_wide_mh"> Offices</option>
+
+                            <option value="pan_india">Within the district</option>
+
+                        </select>
+
+                    </div>
+
+                   
+
+                    <div>
+
+                        <label for="participating_locations">Participating locations</label>
+
+                        <input id="participating_locations" name="participating_locations" type="number" min="1" step="1" required>
+
+                    </div>
+
+                   
+
+                </div>
+
+            </fieldset>
+
+
+
+            <fieldset>
+
+                <legend><i class="fa-solid fa-users-gear"></i> Headcount and Structure</legend>
+
+                <div class="grid">
+
+                    <div>
+
+                        <label for="estimated_participants">Estimated total participants</label>
+
+                        <input id="estimated_participants" name="estimated_participants" type="number" min="1" step="1" required>
+
+                        <div class="hint">Target is calculated as participants x 10 NWPP bags.</div>
+
+                    </div>
+
+                    <div class="full">
+
+                        <label for="primary_departments">Primary departments or wings</label>
+
+                        <textarea id="primary_departments" name="primary_departments" placeholder="List the primary departments, wings, or groups."></textarea>
+
+                    </div>
+
+                </div>
+
+            </fieldset>
+
+
+
+            <fieldset>
+
+                <legend><i class="fa-solid fa-user-tie"></i> Nodel officer</legend>
+
+                <div class="grid">
+
+                    <div>
+
+                        <label for="head_first_name">First name</label>
+
+                        <input id="head_first_name" name="head_first_name" autocomplete="given-name" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_middle_name">Middle name</label>
+
+                        <input id="head_middle_name" name="head_middle_name" autocomplete="additional-name">
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_last_name">Last name</label>
+
+                        <input id="head_last_name" name="head_last_name" autocomplete="family-name" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_gender">Gender</label>
+
+                        <select id="head_gender" name="head_gender" required>
+
+                            <option value="">Select gender</option>
+
+                            <option value="female">Female</option>
+
+                            <option value="male">Male</option>
+
+                            <option value="non_binary">Non-binary</option>
+
+                            <option value="prefer_not_to_say">Prefer not to say</option>
+
+                            <option value="other">Other</option>
+
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_age">Age</label>
+
+                        <input id="head_age" name="head_age" type="number" min="1" max="125" step="1" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_mobile">Mobile number</label>
+
+                        <input id="head_mobile" name="head_mobile" type="tel" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 10-digit number" autocomplete="tel" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_email">Official email</label>
+
+                        <input id="head_email" name="head_email" type="email" autocomplete="email" required>
+
+                        <div class="hint">This email becomes the Nodel officer login ID.</div>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_office_location">Office location</label>
+
+                        <input id="head_office_location" name="head_office_location" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_social_handle">Social media handle</label>
+
+                        <input id="head_social_handle" name="head_social_handle" placeholder="@name">
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_photograph_url">Photograph URL</label>
+
+                        <input id="head_photograph_url" name="head_photograph_url" type="url" placeholder="https://..." required>
+
+                    </div>
+
+                   
+
+                    <div>
+
+                        <label for="password">Create password</label>
+
+                        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="confirm_password">Confirm password</label>
+
+                        <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required>
+
+                    </div>
+
+                    <div class="full">
+
+                        <label for="notes">Notes</label>
+
+                        <textarea id="notes" name="notes" placeholder="Any additional context for onboarding."></textarea>
+
+                    </div>
+
+                   
+
+                    <div>
+
+                        <label for="organization_social_handle">Organisation social handle</label>
+
+                        <input id="organization_social_handle" name="organization_social_handle" placeholder="@organisation">
+
+                    </div>
+
+                </div>
+
+            </fieldset>
+
+
 
             <div class="commitment">
+
                 <input id="accepts_commitments" name="accepts_commitments" type="checkbox" required>
+
                 <label for="accepts_commitments">The organisation understands that departments, employees, NWPP bag entry, and garment entry open only after admin approval.</label>
+
             </div>
+
+
 
             <div class="actions" style="margin-top: 22px;">
+
                 <button id="submitButton" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Registration</button>
+
                 <div id="formStatus" class="status" role="status" aria-live="polite"></div>
+
             </div>
+
         </form>
+
     </main>
 
+
+
     <script type="module">
+
         import { supabase } from "../supabaseClient.js";
 
+
+
         const form = document.getElementById("registrationForm");
+
         const statusEl = document.getElementById("formStatus");
+
         const submitButton = document.getElementById("submitButton");
+
         const pendingRegistrationKey = "aashayein_pending_registration";
 
+
+
         const requiredFields = [
+
             "organization_name",
+
             "registration_type",
+
             "core_work_location",
+
             "implementation_scope",
+
             "coverage_type",
+
             "contribution_focus",
+
             "participating_locations",
+
             "initial_launch_locations",
+
             "estimated_participants",
+
             "head_first_name",
+
             "head_last_name",
+
             "head_gender",
+
             "head_age",
+
             "head_mobile",
+
             "head_email",
+
             "head_residential_address",
+
             "head_office_location",
+
             "head_photograph_url",
+
             "password",
+
             "confirm_password"
+
         ];
 
+
+
         function value(name) {
+
             return form.elements[name].value.trim();
+
         }
+
+
 
         function setStatus(message, type = "") {
+
             statusEl.textContent = message;
+
             statusEl.className = `status ${type}`;
+
         }
+
+
 
         function buildRegistrationPayload(ownerId = null) {
+
             const headFullName = [
+
                 value("head_first_name"),
+
                 value("head_middle_name"),
+
                 value("head_last_name")
+
             ].filter(Boolean).join(" ");
 
+
+
             const rawNotes = value("notes") || null;
+
             const coverage = value("coverage_type");
+
             const focus = value("contribution_focus");
 
+
+
             let focusLabel = "";
+
             if (focus === "mcp_bag") focusLabel = "MCP Bag";
+
             else if (focus === "garment") focusLabel = "Garment";
+
             else if (focus === "both") focusLabel = "Both";
 
+
+
             let prefix = "";
+
             if (coverage) {
+
                 prefix += `[Coverage: ${coverage === "state_wide" ? "State-wide" : "District-wise"}]`;
-            }
-            if (focusLabel) {
-                prefix += `[Focus: ${focusLabel}]`;
+
             }
 
-            const combinedNotes = prefix 
+            if (focusLabel) {
+
+                prefix += `[Focus: ${focusLabel}]`;
+
+            }
+
+
+
+            const combinedNotes = prefix
+
                 ? `${prefix}${rawNotes ? " " + rawNotes : ""}`
+
                 : rawNotes;
 
+
+
             return {
+
                 owner_id: ownerId,
+
                 organization_name: value("organization_name"),
+
                 registration_type: value("registration_type"),
+
                 core_work_location: value("core_work_location"),
+
                 organization_social_handle: value("organization_social_handle") || null,
+
                 company_logo_url: value("company_logo_url") || null,
+
                 implementation_scope: value("implementation_scope"),
+
                 participating_locations: Number(value("participating_locations")),
+
                 initial_launch_locations: value("initial_launch_locations"),
+
                 estimated_participants: Number(value("estimated_participants")),
+
                 primary_departments: value("primary_departments") || null,
+
                 organization_head_first_name: value("head_first_name"),
+
                 organization_head_middle_name: value("head_middle_name") || null,
+
                 organization_head_last_name: value("head_last_name"),
+
                 organization_head_gender: value("head_gender"),
+
                 organization_head_age: Number(value("head_age")),
+
                 organization_head_mobile: value("head_mobile"),
+
                 organization_head_email: value("head_email"),
+
                 organization_head_residential_address: value("head_residential_address"),
+
                 organization_head_office_location: value("head_office_location"),
+
                 organization_head_social_handle: value("head_social_handle") || null,
+
                 organization_head_photograph_url: value("head_photograph_url"),
+
                 nodal_officer_name: headFullName,
+
                 nodal_designation: "Organisation Head",
+
                 nodal_mobile: value("head_mobile"),
+
                 nodal_email: value("head_email"),
+
                 accepts_commitments: true,
+
                 notes: combinedNotes,
+
                 source: "website"
+
             };
+
         }
 
+
+
         form.addEventListener("submit", async (event) => {
+
             event.preventDefault();
 
+
+
             for (const field of requiredFields) {
+
                 if (!value(field)) {
+
                     form.elements[field].focus();
+
                     setStatus("Please complete all required fields.", "error");
+
                     return;
+
                 }
+
             }
 
-            if (!form.elements.accepts_commitments.checked) {
-                form.elements.accepts_commitments.focus();
-                setStatus("Please accept the onboarding commitments.", "error");
+
+              const mobile = value("head_mobile");
+            if (!/^[0-9]{10}$/.test(mobile)) {
+                form.elements.head_mobile.focus();
+                setStatus("Mobile number must be exactly 10 digits.", "error");
                 return;
             }
+            
+            if (!form.elements.accepts_commitments.checked) {
+
+                form.elements.accepts_commitments.focus();
+
+                setStatus("Please accept the onboarding commitments.", "error");
+
+                return;
+
+            }
+
+
 
             if (value("password").length < 8) {
+
                 form.elements.password.focus();
+
                 setStatus("Password must be at least 8 characters.", "error");
+
                 return;
+
             }
+
+
 
             if (value("password") !== value("confirm_password")) {
+
                 form.elements.confirm_password.focus();
+
                 setStatus("Password confirmation does not match.", "error");
+
                 return;
+
             }
 
+
+
             submitButton.disabled = true;
+
             setStatus("Creating organisation login...");
 
+
+
             const email = value("head_email");
+
             const password = value("password");
+
             const payload = buildRegistrationPayload();
+
+
 
             localStorage.setItem(pendingRegistrationKey, JSON.stringify({ email, payload }));
 
+
+
             const { data: authData, error: authError } = await supabase.auth.signUp({
+
                 email,
+
                 password,
+
                 options: {
+
                     data: {
+
                         role: "org_head",
+
                         organization_name: payload.organization_name,
+
                         first_name: payload.organization_head_first_name,
+
                         last_name: payload.organization_head_last_name
+
                     }
+
                 }
+
             });
 
+
+
             if (authError) {
+
                 submitButton.disabled = false;
+
                 localStorage.removeItem(pendingRegistrationKey);
+
                 setStatus(authError.message || "Login account could not be created.", "error");
+
                 return;
+
             }
+
+
 
             const userId = authData.session?.user?.id;
+
             if (!userId) {
+
                 submitButton.disabled = false;
+
                 setStatus("Account created. Please confirm the email, then login to open the dashboard.", "ok");
+
                 return;
+
             }
 
+
+
             const { error: registrationError } = await supabase
+
                 .from("organization_registrations")
+
                 .insert({ ...payload, owner_id: userId });
+
+
 
             submitButton.disabled = false;
 
+
+
             if (registrationError) {
+
                 setStatus(registrationError.message || "Organisation could not be registered.", "error");
+
                 return;
+
             }
 
+
+
             localStorage.removeItem(pendingRegistrationKey);
+
             setStatus("Organisation registered. Opening dashboard...", "ok");
+
             window.location.href = "/dashboard/";
+
         });
+
     </script>
+
 </body>
+
 </html>
+

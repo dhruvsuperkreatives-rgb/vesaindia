@@ -22,9 +22,9 @@ function injectSidebarHTML() {
         <aside class="sidebar flex flex-col justify-between h-full">
             <div>
                 <a href="#" class="logo-wrap">
-                    <img src="/sidebar.jpeg" alt="Aashayein Logo" style="width: 36px; height: 36px; border-radius: 10px; object-fit: cover;">
+                    <img src="/sidebar.jpeg" alt="VESACINDIA Logo" style="width: 36px; height: 36px; border-radius: 10px; object-fit: cover;">
                     <div class="logo-text">
-                        <span class="font-bold text-slate-900">Aashayein</span>
+                        <span class="font-bold text-slate-900">VESACINDIA</span>
                     </div>
                 </a>
                 
