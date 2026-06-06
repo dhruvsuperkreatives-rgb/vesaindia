@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VESACINDIA</title>
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --ink: #172033;
+            --muted: #667085;
+            --line: #d9e2ec;
+            --paper: #ffffff;
+            --wash: #f5f8fb;
+            --green: #2f8f6b;
+            --red: #b42318;
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            font-family: Inter, system-ui, sans-serif;
+            color: var(--ink);
+            background: var(--wash);
+        }
+        .card {
+            width: min(100%, 850px);
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+            display: flex;
+            overflow: hidden;
+        }
+        .form-side {
+            flex: 1.1;
+            padding: 28px;
+        }
+        .image-side {
+            flex: 0.9;
+            display: block;
+            position: relative;
+            background: #f1f5f9;
+        }
+        .image-side img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        @media (max-width: 768px) {
+            .card {
+                width: min(100%, 430px);
+                flex-direction: column;
+            }
+            .image-side {
+                display: none;
+            }
+        }
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            color: var(--ink);
+            text-decoration: none;
+            margin-bottom: 26px;
+        }
+        h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            letter-spacing: 0;
+        }
+        p {
+            margin: 0 0 24px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 16px 0 8px;
+        }
+        input {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid #c9d4e2;
+            border-radius: 8px;
+            padding: 11px 12px;
+            font: inherit;
+            background: #fbfcfe;
+            outline: none;
+        }
+        input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 4px rgba(47, 143, 107, 0.14);
+            background: white;
+        }
+        button, .link-button {
+            width: 100%;
+            min-height: 48px;
+            border: 0;
+            border-radius: 8px;
+            margin-top: 20px;
+            padding: 0 18px;
+            font: inherit;
+            font-weight: 800;
+            color: white;
+            background: var(--green);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .link-button {
+            background: white;
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+        .status {
+            margin-top: 14px;
+            min-height: 22px;
+            color: var(--red);
+            font-weight: 700;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="form-side">
+            <a class="brand" href="/"><img src="/sidebar.jpeg" alt="Logo" style="width: 30px; height: 30px; border-radius: 6px; object-fit: cover;"> VESACINDIA</a>
+            <h1>Login</h1>
+            <p>Use one login for admin, organisation, coordinator, or individual access. The system will open the right dashboard.</p>
+ 
+            <form id="loginForm">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required>
+ 
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+ 
+                <button id="loginButton" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+                <div id="status" class="status" role="status" aria-live="polite"></div>
+            </form>
+ 
+            <a class="link-button" href="/register/"><i class="fa-solid fa-building-circle-check"></i> Organisation Registration</a>
+        </div>
+        <div class="image-side">
+            <img src="/login.jpeg" alt="VESACINDIA Platform Preview">
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from "../supabaseClient.js";
+
+        const form = document.getElementById("loginForm");
+        const statusEl = document.getElementById("status");
+        const loginButton = document.getElementById("loginButton");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            statusEl.textContent = "";
+            loginButton.disabled = true;
+
+            const email = form.elements.email.value.trim();
+            const password = form.elements.password.value;
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            loginButton.disabled = false;
+
+            if (error) {
+                statusEl.textContent = error.message;
+                return;
+            }
+
+            const { data: sessionData } = await supabase.auth.getSession();
+            const userId = sessionData.session?.user?.id;
+
+            if (userId) {
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("role")
+                    .eq("id", userId)
+                    .single();
+
+                if (profile?.role === "admin") {
+                    window.location.href = "/admin/";
+                    return;
+                }
+            }
+
+            window.location.href = "/dashboard/";
+        });
+    </script>
+</body>
+</html>

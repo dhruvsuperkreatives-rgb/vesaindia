@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impact Dashboard - Overview</title>
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#F97316',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        info: '#8b5cf6',
+                        'primary-light': 'rgba(59,130,246,0.1)',
+                        'secondary-light': 'rgba(249,115,22,0.1)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --secondary: #F97316;
+            --primary-light: rgba(59, 130, 246, 0.1);
+            --secondary-light: rgba(249, 115, 22, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            overflow: hidden; 
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        /* Mesh Grid Background */
+        .mesh-bg {
+            background-image: 
+                linear-gradient(var(--primary-light) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-light) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: fixed;
+            inset: 0;
+            opacity: 0.3;
+            z-index: -2;
+            animation: meshMove 20s linear infinite;
+        }
+
+        @keyframes meshMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        /* Gradient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: -1;
+            animation: orbPulse 12s ease-in-out infinite;
+        }
+        .orb-1 { width: 500px; height: 500px; background: var(--primary); top: -200px; right: -100px; animation-delay: 0s; }
+        .orb-2 { width: 400px; height: 400px; background: var(--secondary); bottom: -150px; left: -100px; animation-delay: -4s; }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1) translate(0, 0); }
+            33% { transform: scale(1.1) translate(30px, -20px); }
+            66% { transform: scale(0.9) translate(-20px, 30px); }
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 1.5rem 1.25rem 0.5rem;
+        }
+
+        .nav-menu { padding: 0 0.75rem 1.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link .link-left { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-link i { font-size: 1rem; opacity: 0.7; width: 20px; text-align: center; }
+        .nav-link:hover { background: var(--primary-light); color: var(--primary); }
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .nav-link.active i { opacity: 1; }
+        .badge { background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; }
+        .nav-link.active .badge { background: rgba(255,255,255,0.2); }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .header-title-wrap h1 { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem;}
+        .header-subtitle { font-size: 0.875rem; color: #64748b; display: flex; align-items: center; gap: 0.5rem;}
+        .live-dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px rgba(16, 185, 129, 0.8); animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+        .action-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; border-radius: 0.5rem;
+            font-size: 0.875rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; border: 1px solid #e2e8f0; background: white; color: #475569;
+        }
+        .action-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-donate { background: #10b981; color: white; border: none; }
+        .btn-donate:hover { background: #059669; color: white; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+
+        /* Dashboard Content */
+        .dashboard-container { padding: 2rem; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+
+        /* KPI Mini Charts CSS (Replaces heavy JS for simple sparklines) */
+        .kpi-title { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 1.75rem; font-weight: 800; color: #0f172a; line-height: 1.2;}
+        .kpi-sub { font-size: 0.75rem; color: #94a3b8; margin-bottom: 1rem; }
+        .kpi-growth { font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.25rem; }
+        
+        .sparkline-container { display: flex; align-items: flex-end; gap: 4px; height: 30px; margin-top: 1rem; }
+        .spark-bar { flex: 1; border-radius: 2px 2px 0 0; background-color: currentColor; opacity: 0.8; transition: height 0.5s ease; }
+        .spark-bar:hover { opacity: 1; filter: brightness(1.2); }
+
+        /* Progress Bars */
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem; }
+        .progress-track { width: 100%; background: #e2e8f0; height: 6px; border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+        .progress-fill { height: 100%; border-radius: 4px; }
+
+        /* Table Styles */
+        .data-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .data-table th { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
+        .data-table td { padding: 0.875rem 0; font-size: 0.875rem; color: #1e293b; font-weight: 500; border-bottom: 1px solid #f1f5f9; }
+        
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-expanding { background: #f3e8ff; color: #6b21a8; }
+        .status-pilot { background: #fef9c3; color: #854d0e; }
+        .status-onboarding { background: #e0f2fe; color: #075985; }
+        .status-planned { background: #f1f5f9; color: #475569; }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Background Elements -->
+    <div class="mesh-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Sidebar Navigation -->
+   
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-title-wrap">
+                <h1>Overview</h1>
+                <div class="header-subtitle">
+                    All impact metrics · Maharashtra · FY 2024-25 <span class="live-dot ml-2"></span> Live data
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn"><i class="fas fa-download"></i> Export</button>
+                <select class="action-btn appearance-none bg-white pr-8">
+                    <option>FY 2024-25</option>
+                    <option>FY 2023-24</option>
+                </select>
+                <button class="action-btn btn-donate"><i class="far fa-heart"></i> Donate</button>
+            </div>
+        </header>
+
+        <div class="dashboard-container space-y-6">
+            
+            <!-- KPI Top Grid (5 Columns) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                
+                <!-- Card 1 -->
+                <div class="card text-emerald-500" style="border-top: 3px solid #10b981;">
+                    <div class="kpi-title">SUP Bags Avoided</div>
+                    <div class="kpi-value">2,47,500</div>
+                    <div class="kpi-sub text-slate-500">annually - 3,300 × 100 × 75%</div>
+                    <div class="kpi-growth"><i class="fas fa-arrow-up"></i> +12% this month</div>
+                    <div class="sparkline-container">
+                        <div class="spark-bar" style="height: 30%"></div>
+                        <div class="spark-bar" style="height: 40%"></div>
+                        <div class="spark-bar" style="height: 45%"></div>
+                        <div class="spark-bar" style="height: 60%"></div>
+                        <div class="spark-bar" style="height: 80%"></div>
+                        <div class="spark-bar" style="height: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="card text-cyan-500" style="border-top: 3px solid #06b6d4;">
+                    <div class="kpi-title">Vendors Supported</div>
+                    <div class="kpi-value">3,300</div>
+                    <div class="kpi-sub text-slate-500">street & micro sellers</div>
+                    <div class="kpi-growth"><i class="fas fa-plus"></i> +220 this qtr</div>
+                    <div class="sparkline-container">
+                        <div class="spark-bar" style="height: 40%"></div>
+                        <div class="spark-bar" style="height: 50%"></div>
+                        <div class="spark-bar" style="height: 55%"></div>
+                        <div class="spark-bar" style="height: 70%"></div>
+                        <div class="spark-bar" style="height: 85%"></div>
+                        <div class="spark-bar" style="height: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="card text-amber-500" style="border-top: 3px solid #f59e0b;">
+                    <div class="kpi-title">Vendor Savings</div>
+                    <div class="kpi-value">₹37,125</div>
+                    <div class="kpi-sub text-slate-500">2,47,500 × ₹0.15</div>
+                    <div class="kpi-growth"><i class="fas fa-coins"></i> Annual est.</div>
+                    <div class="sparkline-container">
+                        <div class="spark-bar" style="height: 20%"></div>
+                        <div class="spark-bar" style="height: 30%"></div>
+                        <div class="spark-bar" style="height: 40%"></div>
+                        <div class="spark-bar" style="height: 60%"></div>
+                        <div class="spark-bar" style="height: 75%"></div>
+                        <div class="spark-bar" style="height: 90%"></div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="card text-blue-500" style="border-top: 3px solid #3b82f6;">
+                    <div class="kpi-title">Skilled Workers</div>
+                    <div class="kpi-value">184</div>
+                    <div class="kpi-sub text-slate-500">earning ₹15,000 / mo</div>
+                    <div class="kpi-growth"><i class="fas fa-users"></i> 23 SHGs</div>
+                    <div class="sparkline-container">
+                        <div class="spark-bar" style="height: 30%"></div>
+                        <div class="spark-bar" style="height: 35%"></div>
+                        <div class="spark-bar" style="height: 45%"></div>
+                        <div class="spark-bar" style="height: 60%"></div>
+                        <div class="spark-bar" style="height: 80%"></div>
+                        <div class="spark-bar" style="height: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="card text-purple-500" style="border-top: 3px solid #8b5cf6;">
+                    <div class="kpi-title">CO₂ Avoided</div>
+                    <div class="kpi-value">4.2 t</div>
+                    <div class="kpi-sub text-slate-500">metric tonnes / year</div>
+                    <div class="kpi-growth"><i class="fas fa-chart-line"></i> Growing</div>
+                    <div class="sparkline-container">
+                        <div class="spark-bar" style="height: 10%"></div>
+                        <div class="spark-bar" style="height: 20%"></div>
+                        <div class="spark-bar" style="height: 40%"></div>
+                        <div class="spark-bar" style="height: 55%"></div>
+                        <div class="spark-bar" style="height: 70%"></div>
+                        <div class="spark-bar" style="height: 90%"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Middle Section Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Annual Target Progress -->
+                <div class="card lg:col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-slate-900">Annual target progress</h2>
+                        <span class="text-sm font-semibold text-slate-500">FY 2024–25</span>
+                    </div>
+
+                    <!-- Progress Item 1 -->
+                    <div class="progress-label">
+                        <span>SUP avoidance <span class="text-slate-400 font-normal">(target 5,00,000)</span></span>
+                        <span class="text-emerald-500">49.5%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill bg-emerald-500" style="width: 49.5%;"></div>
+                    </div>
+
+                    <!-- Progress Item 2 -->
+                    <div class="progress-label">
+                        <span>Vendors onboarded <span class="text-slate-400 font-normal">(target 5,000)</span></span>
+                        <span class="text-cyan-500">66%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill bg-cyan-500" style="width: 66%;"></div>
+                    </div>
+
+                    <!-- Progress Item 3 -->
+                    <div class="progress-label">
+                        <span>CO₂ reduction <span class="text-slate-400 font-normal">(target 10t)</span></span>
+                        <span class="text-amber-500">42%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill bg-amber-500" style="width: 42%;"></div>
+                    </div>
+
+                    <!-- Progress Item 4 -->
+                    <div class="progress-label">
+                        <span>Workers engaged <span class="text-slate-400 font-normal">(target 300)</span></span>
+                        <span class="text-blue-500">61%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill bg-blue-500" style="width: 61%;"></div>
+                    </div>
+
+                    <!-- Progress Item 5 -->
+                    <div class="progress-label">
+                        <span>Donor funding <span class="text-slate-400 font-normal">(target ₹10L)</span></span>
+                        <span class="text-purple-500">38%</span>
+                    </div>
+                    <div class="progress-track" style="margin-bottom: 0;">
+                        <div class="progress-fill bg-purple-500" style="width: 38%;"></div>
+                    </div>
+                </div>
+
+                <!-- Geographic Reach Table -->
+                <div class="card">
+                    <h2 class="text-lg font-bold text-slate-900 mb-6">Geographic reach</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Corporation</th>
+                                <th>Vendors</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PMC Pune</td>
+                                <td>1,240</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>PCMC Pimpri</td>
+                                <td>820</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>Nashik MC</td>
+                                <td>540</td>
+                                <td><span class="status-badge status-expanding">Expanding</span></td>
+                            </tr>
+                            <tr>
+                                <td>Aurangabad</td>
+                                <td>380</td>
+                                <td><span class="status-badge status-pilot">Pilot</span></td>
+                            </tr>
+                            <tr>
+                                <td>Solapur MC</td>
+                                <td>200</td>
+                                <td><span class="status-badge status-onboarding">Onboarding</span></td>
+                            </tr>
+                            <tr>
+                                <td style="border-bottom: none;">Kolhapur MC</td>
+                                <td style="border-bottom: none;">120</td>
+                                <td style="border-bottom: none;"><span class="status-badge status-planned">Planned</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            
+        </div>
+    </main>
+<script src="sidebar.js"></script>
+</body>
+</html>

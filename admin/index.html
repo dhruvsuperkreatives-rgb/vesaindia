@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Review - VESACINDIA</title>
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --ink: #172033;
+            --muted: #667085;
+            --line: #d9e2ec;
+            --paper: #ffffff;
+            --wash: #f5f8fb;
+            --green: #2f8f6b;
+            --blue: #2f6fed;
+            --orange: #b85c00;
+            --red: #b42318;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, sans-serif;
+            color: var(--ink);
+            background: var(--wash);
+        }
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+        }
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            border-right: 1px solid var(--line);
+            background: #ffffff;
+            padding: 22px 16px;
+            overflow: auto;
+        }
+        .brand, .side-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 800;
+        }
+        .brand { margin-bottom: 22px; }
+        .side-title {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin: 20px 10px 8px;
+        }
+        .side-nav {
+            display: grid;
+            gap: 6px;
+        }
+        .side-link {
+            min-height: 42px;
+            padding: 0 10px;
+            border-radius: 8px;
+            color: #334155;
+            font-size: 14px;
+        }
+        .side-link.active,
+        .side-link:hover {
+            background: #e8f5ef;
+            color: var(--green);
+        }
+        .main-pane { min-width: 0; }
+        .topbar {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 28px;
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        button, .topbar a {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            min-height: 38px;
+            padding: 0 12px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            background: white;
+            cursor: pointer;
+            color: var(--ink);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        main {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 34px 20px 60px;
+        }
+        h1 {
+            font-size: clamp(30px, 5vw, 48px);
+            line-height: 1.04;
+            margin: 0 0 10px;
+            letter-spacing: 0;
+        }
+        .lead {
+            color: var(--muted);
+            line-height: 1.7;
+            margin: 0 0 24px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        .card, .org-card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+        }
+        .metric-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .metric-value {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--green);
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin: 18px 0;
+            flex-wrap: wrap;
+        }
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter.active {
+            background: var(--green);
+            color: white;
+            border-color: var(--green);
+        }
+        .org-list {
+            display: grid;
+            gap: 14px;
+        }
+        .admin-panel {
+            display: none;
+        }
+        .admin-panel.active {
+            display: block;
+        }
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .module-card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.06);
+        }
+        .module-card i {
+            color: var(--green);
+            margin-bottom: 12px;
+        }
+        .module-card h2 {
+            font-size: 18px;
+            margin: 0 0 8px;
+        }
+        .module-card p {
+            color: var(--muted);
+            line-height: 1.55;
+            margin: 0;
+            font-size: 14px;
+        }
+        .panel-list {
+            display: grid;
+            gap: 10px;
+            margin: 14px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+        .panel-list li {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+            background: #fbfcfe;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .org-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .org-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        .sub {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        .badge {
+            display: inline-flex;
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 800;
+            background: #fff7e6;
+            color: var(--orange);
+            white-space: nowrap;
+        }
+        .badge.approved { background: #e8f5ef; color: var(--green); }
+        .badge.rejected { background: #fff1f0; color: var(--red); }
+        .org-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+            margin: 14px 0;
+        }
+        .mini {
+            border: 1px solid var(--line);
+            background: #fbfcfe;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .mini strong {
+            display: block;
+            font-size: 18px;
+            margin-top: 4px;
+        }
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .approve {
+            background: var(--green);
+            color: white;
+            border-color: var(--green);
+        }
+        .reject {
+            background: white;
+            color: var(--red);
+            border-color: #f1b8b1;
+        }
+        .status {
+            font-weight: 800;
+            margin: 12px 0;
+            line-height: 1.5;
+        }
+        .status.error { color: var(--red); }
+        .hidden { display: none; }
+        @media (max-width: 900px) {
+            .stats, .org-grid, .module-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 640px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+            .topbar, .org-head { align-items: flex-start; flex-direction: column; }
+            .topbar { padding: 16px; }
+            main { padding: 28px 14px 48px; }
+            .stats, .org-grid, .module-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="Admin dashboard modules">
+            <a class="brand" href="/admin/"><img src="/sidebar.jpeg" alt="Logo" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; display: inline-block; vertical-align: middle; margin-right: 8px;"> VESACINDIA Admin</a>
+            <div class="side-title">Admin Workspace</div>
+            <nav class="side-nav">
+                <a class="side-link active" href="#approval" data-admin-panel-link="approval"><i class="fa-solid fa-list-check"></i> Approvals</a>
+                <a class="side-link" href="#nwpp" data-admin-panel-link="nwpp"><i class="fa-solid fa-bag-shopping"></i> NWPP Review</a>
+                <a class="side-link" href="#departments" data-admin-panel-link="departments"><i class="fa-solid fa-user-shield"></i> Nodal Officers</a>
+                <a class="side-link" href="#reports" data-admin-panel-link="reports"><i class="fa-solid fa-file-lines"></i> Reports</a>
+            </nav>
+            <div class="side-title">Future Admin</div>
+            <nav class="side-nav">
+                <a class="side-link" href="#activities" data-admin-panel-link="activities"><i class="fa-solid fa-plus"></i> Activities / Products</a>
+                <a class="side-link" href="#settings" data-admin-panel-link="settings"><i class="fa-solid fa-gear"></i> Settings</a>
+            </nav>
+        </aside>
+        <div class="main-pane">
+            <header class="topbar">
+                <a href="/dashboard/"><i class="fa-solid fa-gauge"></i> Org Dashboard</a>
+                <button id="logoutButton" type="button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </header>
+
+    <main>
+        <section id="adminHeader">
+            <h1>Organisation Approval</h1>
+            <p class="lead">Approve or reject organisation registrations and review submitted NWPP bag and garment activity.</p>
+        </section>
+
+        <section id="loginNotice" class="card hidden">
+            <p class="lead">Please login with an admin account.</p>
+            <a href="/admin/login/">Open admin login</a>
+        </section>
+
+        <section id="adminContent" class="hidden">
+            <div class="stats">
+                <article class="card">
+                    <div class="metric-label">Organisations</div>
+                    <div class="metric-value" id="orgTotal">0</div>
+                </article>
+                <article class="card">
+                    <div class="metric-label">Pending</div>
+                    <div class="metric-value" id="pendingTotal">0</div>
+                </article>
+                <article class="card">
+                    <div class="metric-label">NWPP bags</div>
+                    <div class="metric-value" id="bagsTotal">0</div>
+                </article>
+                <article class="card">
+                    <div class="metric-label">Garments</div>
+                    <div class="metric-value" id="garmentTotal">0</div>
+                </article>
+            </div>
+
+            <section class="admin-panel active" data-admin-panel="approval">
+                <div class="toolbar">
+                    <div class="filters" aria-label="Status filters">
+                        <button class="filter active" type="button" data-filter="all">All</button>
+                        <button class="filter" type="button" data-filter="pending">Pending</button>
+                        <button class="filter" type="button" data-filter="approved">Approved</button>
+                        <button class="filter" type="button" data-filter="rejected">Rejected</button>
+                    </div>
+                    <button id="refreshButton" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+
+                <div id="status" class="status" role="status" aria-live="polite"></div>
+                <section id="orgList" class="org-list"></section>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="nwpp">
+                <div class="module-grid">
+                    <article class="module-card">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <h2>NWPP Contributions</h2>
+                        <p>Review how many NWPP bags each approved or pending organisation has submitted.</p>
+                    </article>
+                    <article class="module-card">
+                        <i class="fa-solid fa-leaf"></i>
+                        <h2>Impact Totals</h2>
+                        <p>Use provisional impact values until the final calculation matrix is provided.</p>
+                    </article>
+                    <article class="module-card">
+                        <i class="fa-solid fa-check-double"></i>
+                        <h2>Verification</h2>
+                        <p>Future workflow can mark contributions as submitted, verified, or rejected.</p>
+                    </article>
+                </div>
+                <ul class="panel-list" id="nwppList"></ul>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="departments">
+                <article class="card">
+                    <h2>Nodal Officers</h2>
+                    <p class="lead">Nodal Officer setup is the next layer: each organisation can create multiple Nodal Officers to coordinate and track employee/member contributions.</p>
+                    <ul class="panel-list">
+                        <li>Nodal Officer coordination roles.</li>
+                        <li>Nodal-wise NWPP targets and submissions.</li>
+                        <li>Future employee/member participation ledger.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="reports">
+                <article class="card">
+                    <h2>Reports</h2>
+                    <p class="lead">Admin report pages will summarize organisation activity, NWPP totals, ESG notes, and SDG alignment.</p>
+                    <ul class="panel-list">
+                        <li>Monthly organisation analytics.</li>
+                        <li>Public-safe approved organisation summary.</li>
+                        <li>Future PDF / Excel export area.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="activities">
+                <article class="card">
+                    <h2>Activities / Products</h2>
+                    <p class="lead">Future admin area for adding more sustainability activities beyond NWPP bags.</p>
+                    <ul class="panel-list">
+                        <li>NWPP bags.</li>
+                        <li>Textile circularity and garment donation.</li>
+                        <li>Future product/activity modules.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="settings">
+                <article class="card">
+                    <h2>Settings</h2>
+                    <p class="lead">Role, approval, formula, and visibility settings will live here in the fuller backend version.</p>
+                    <ul class="panel-list">
+                        <li>Admin and coordinator roles.</li>
+                        <li>Public visibility controls.</li>
+                        <li>Impact calculation matrix once finalized.</li>
+                    </ul>
+                </article>
+            </section>
+        </section>
+    </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from "../supabaseClient.js";
+
+        const loginNotice = document.getElementById("loginNotice");
+        const adminContent = document.getElementById("adminContent");
+        const orgList = document.getElementById("orgList");
+        const statusEl = document.getElementById("status");
+        const logoutButton = document.getElementById("logoutButton");
+        const refreshButton = document.getElementById("refreshButton");
+        const filters = [...document.querySelectorAll(".filter")];
+        const adminHeader = document.getElementById("adminHeader");
+        const panelLinks = [...document.querySelectorAll("[data-admin-panel-link]")];
+        const adminPanels = [...document.querySelectorAll("[data-admin-panel]")];
+        const nwppList = document.getElementById("nwppList");
+        const orgTotal = document.getElementById("orgTotal");
+        const pendingTotal = document.getElementById("pendingTotal");
+        const bagsTotal = document.getElementById("bagsTotal");
+        const garmentTotal = document.getElementById("garmentTotal");
+
+        const supBagsPerNwppBag = 1;
+        const co2KgPerSupBag = 0.033;
+        const plasticKgPerSupBag = 0.005;
+        let organisations = [];
+        let contributions = [];
+        let garments = [];
+        let activeFilter = "all";
+
+        const labels = {
+            government_state: "Government State",
+            government_central: "Government Central",
+            corporate: "Corporate Entity",
+            educational: "Educational Institution",
+            ngo_civil_group: "NGO / Civil Group",
+            other: "Other",
+            single_office: "Single Office",
+            state_wide_mh: "State-wide MH",
+            pan_india: "Pan-India"
+        };
+
+        const panelCopy = {
+            approval: {
+                title: "Organisation Approval",
+                lead: "Approve or reject organisation registrations and review submitted NWPP bag and garment activity."
+            },
+            nwpp: {
+                title: "NWPP Review",
+                lead: "Review organisation NWPP bag submissions and provisional impact calculations."
+            },
+            departments: {
+                title: "Nodal Officers",
+                lead: "Plan Nodal Officer setups, coordinates, and employee/member tracking for each organisation."
+            },
+            reports: {
+                title: "Reports",
+                lead: "View report-ready summaries for ESG, SDG, monthly analytics, and organisation impact."
+            },
+            activities: {
+                title: "Activities / Products",
+                lead: "Future admin controls for adding sustainability products and activity modules."
+            },
+            settings: {
+                title: "Settings",
+                lead: "Admin settings for roles, public visibility, formulas, and platform configuration."
+            }
+        };
+
+        function showPanel(name = "approval") {
+            const selected = panelCopy[name] ? name : "approval";
+            panelLinks.forEach((link) => link.classList.toggle("active", link.dataset.adminPanelLink === selected));
+            adminPanels.forEach((panel) => panel.classList.toggle("active", panel.dataset.adminPanel === selected));
+            adminHeader.querySelector("h1").textContent = panelCopy[selected].title;
+            adminHeader.querySelector(".lead").textContent = panelCopy[selected].lead;
+            history.replaceState(null, "", `#${selected}`);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function numberText(value) {
+            return new Intl.NumberFormat("en-IN").format(Number(value || 0));
+        }
+
+        function formatKg(value) {
+            const rounded = Number(value || 0);
+            if (rounded >= 1000) return `${numberText((rounded / 1000).toFixed(2))} tonnes`;
+            return `${numberText(rounded.toFixed(1))} kg`;
+        }
+
+        function totalsForOrg(orgId) {
+            const orgRows = contributions.filter((item) => item.organization_registration_id === orgId);
+            const bags = orgRows.reduce((sum, item) => sum + Number(item.bags_count || 0), 0);
+            const garmentRows = garments.filter((item) => item.organization_registration_id === orgId);
+            const garmentCount = garmentRows.reduce((sum, item) => sum + Number(item.garment_count || 0), 0);
+            const utilityBags = garmentRows.filter((item) => item.wants_utility_bag).length;
+            const labourPending = garmentRows
+                .filter((item) => item.wants_utility_bag && item.payment_status !== "sent_to_admin")
+                .reduce((sum, item) => sum + Number(item.labour_fee || 0), 0);
+            const sup = bags * supBagsPerNwppBag;
+            return {
+                bags,
+                garments: garmentCount,
+                utilityBags,
+                labourPending,
+                sup,
+                co2: sup * co2KgPerSupBag,
+                plastic: sup * plasticKgPerSupBag
+            };
+        }
+
+        function renderStats() {
+            const allBags = contributions.reduce((sum, item) => sum + Number(item.bags_count || 0), 0);
+            const allGarments = garments.reduce((sum, item) => sum + Number(item.garment_count || 0), 0);
+            orgTotal.textContent = numberText(organisations.length);
+            pendingTotal.textContent = numberText(organisations.filter((item) => item.status === "pending").length);
+            bagsTotal.textContent = numberText(allBags);
+            garmentTotal.textContent = numberText(allGarments);
+        }
+
+        function renderList() {
+            const filtered = activeFilter === "all"
+                ? organisations
+                : organisations.filter((item) => item.status === activeFilter);
+
+            if (!filtered.length) {
+                orgList.innerHTML = '<article class="card"><p class="lead">No organisations found for this filter.</p></article>';
+                return;
+            }
+
+            orgList.innerHTML = filtered.map((org) => {
+                const impact = totalsForOrg(org.id);
+                return `
+                    <article class="org-card">
+                        <div class="org-head">
+                            <div>
+                                <div class="org-name">${escapeHtml(org.organization_name)}</div>
+                                <div class="sub">${escapeHtml(labels[org.registration_type] || org.registration_type)} - ${escapeHtml(org.core_work_location)}</div>
+                                <div class="sub">Nodal: ${escapeHtml(org.nodal_officer_name)} - ${escapeHtml(org.nodal_mobile)} - ${escapeHtml(org.nodal_email)}</div>
+                            </div>
+                            <span class="badge ${escapeHtml(org.status)}">${escapeHtml(org.status)}</span>
+                        </div>
+                        <div class="org-grid">
+                            <div class="mini"><span class="sub">Participants</span><strong>${numberText(org.estimated_participants)}</strong></div>
+                            <div class="mini"><span class="sub">Target bags</span><strong>${numberText(org.target_nwpp_bags)}</strong></div>
+                            <div class="mini"><span class="sub">NWPP bags</span><strong>${numberText(impact.bags)}</strong></div>
+                            <div class="mini"><span class="sub">Garments</span><strong>${numberText(impact.garments)}</strong></div>
+                            <div class="mini"><span class="sub">Utility / fee due</span><strong>${numberText(impact.utilityBags)} / ${numberText(impact.labourPending)}</strong></div>
+                        </div>
+                        <div class="actions">
+                            <button class="approve" type="button" data-action="approved" data-id="${escapeHtml(org.id)}"><i class="fa-solid fa-check"></i> Approve</button>
+                            <button class="reject" type="button" data-action="rejected" data-id="${escapeHtml(org.id)}"><i class="fa-solid fa-xmark"></i> Disapprove</button>
+                        </div>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function renderNwppList() {
+            if (!organisations.length) {
+                nwppList.innerHTML = "<li>No organisation data loaded yet.</li>";
+                return;
+            }
+
+            nwppList.innerHTML = organisations.map((org) => {
+                const impact = totalsForOrg(org.id);
+                return `
+                    <li>
+                        <strong>${escapeHtml(org.organization_name)}</strong><br>
+                        ${numberText(impact.bags)} NWPP bags and ${numberText(impact.garments)} garments submitted.
+                    </li>
+                `;
+            }).join("");
+        }
+
+        function render() {
+            renderStats();
+            renderList();
+            renderNwppList();
+        }
+
+        async function ensureAdmin() {
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData.session) {
+                window.location.href = "/";
+                return false;
+            }
+
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("role")
+                .eq("id", sessionData.session.user.id)
+                .single();
+
+            return profile?.role === "admin";
+        }
+
+        async function loadAdminData() {
+            statusEl.textContent = "Loading admin dashboard...";
+            const isAdmin = await ensureAdmin();
+            if (!isAdmin) {
+                adminContent.classList.add("hidden");
+                loginNotice.classList.remove("hidden");
+                statusEl.textContent = "";
+                return;
+            }
+
+            loginNotice.classList.add("hidden");
+            adminContent.classList.remove("hidden");
+
+            const { data: orgData, error: orgError } = await supabase
+                .from("organization_registrations")
+                .select("id, created_at, status, organization_name, registration_type, core_work_location, implementation_scope, participating_locations, estimated_participants, target_nwpp_bags, nodal_officer_name, nodal_designation, nodal_mobile, nodal_email, organization_social_handle, company_logo_url")
+                .order("created_at", { ascending: false });
+
+            if (orgError) {
+                statusEl.className = "status error";
+                statusEl.textContent = orgError.message;
+                return;
+            }
+
+            const { data: contributionData, error: contributionError } = await supabase
+                .from("nwpp_contributions")
+                .select("id, organization_registration_id, bags_count, status, estimated_sup_bags_avoided");
+
+            const { data: garmentData, error: garmentError } = await supabase
+                .from("garment_contributions")
+                .select("id, organization_registration_id, garment_count, wants_utility_bag, labour_fee, payment_status, status");
+
+            organisations = orgData || [];
+            contributions = contributionError ? [] : (contributionData || []);
+            garments = garmentError ? [] : (garmentData || []);
+            statusEl.className = "status";
+            statusEl.textContent = contributionError || garmentError
+                ? `Organisations loaded. Product tables need attention: ${contributionError?.message || garmentError?.message}`
+                : "";
+            render();
+        }
+
+        async function updateOrgStatus(id, status) {
+            statusEl.textContent = "Updating organisation status...";
+            const { error } = await supabase
+                .from("organization_registrations")
+                .update({ status })
+                .eq("id", id);
+
+            if (error) {
+                statusEl.className = "status error";
+                statusEl.textContent = error.message;
+                return;
+            }
+
+            organisations = organisations.map((item) => item.id === id ? { ...item, status } : item);
+            statusEl.className = "status";
+            statusEl.textContent = `Organisation ${status}.`;
+            render();
+        }
+
+        orgList.addEventListener("click", (event) => {
+            const button = event.target.closest("button[data-action]");
+            if (!button) return;
+            updateOrgStatus(button.dataset.id, button.dataset.action);
+        });
+
+        filters.forEach((button) => {
+            button.addEventListener("click", () => {
+                activeFilter = button.dataset.filter;
+                filters.forEach((item) => item.classList.toggle("active", item === button));
+                renderList();
+            });
+        });
+
+        panelLinks.forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                showPanel(link.dataset.adminPanelLink);
+            });
+        });
+
+        refreshButton.addEventListener("click", loadAdminData);
+
+        logoutButton.addEventListener("click", async () => {
+            await supabase.auth.signOut();
+            window.location.href = "/";
+        });
+
+        showPanel(location.hash ? location.hash.slice(1) : "approval");
+        loadAdminData();
+    </script>
+</body>
+</html>
