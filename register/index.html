@@ -790,13 +790,9 @@
 
             "implementation_scope",
 
-            "coverage_type",
-
             "contribution_focus",
 
             "participating_locations",
-
-            "initial_launch_locations",
 
             "estimated_participants",
 
@@ -812,8 +808,6 @@
 
             "head_email",
 
-            "head_residential_address",
-
             "head_office_location",
 
             "head_photograph_url",
@@ -824,11 +818,33 @@
 
         ];
 
+        const fieldLabels = {
+            "organization_name": "Organization Name",
+            "registration_type": "Organization Type",
+            "core_work_location": "Head Office Location",
+            "implementation_scope": "Implementation Scope",
+            "contribution_focus": "Contribution Focus",
+            "participating_locations": "Participating Locations",
+            "estimated_participants": "Estimated Total Participants",
+            "head_first_name": "Nodel Officer First Name",
+            "head_last_name": "Nodel Officer Last Name",
+            "head_gender": "Nodel Officer Gender",
+            "head_age": "Nodel Officer Age",
+            "head_mobile": "Nodel Officer Mobile Number",
+            "head_email": "Nodel Officer Official Email",
+            "head_office_location": "Nodel Officer Office Location",
+            "head_photograph_url": "Nodel Officer Photograph URL",
+            "password": "Password",
+            "confirm_password": "Confirm Password"
+        };
+
 
 
         function value(name) {
 
-            return form.elements[name].value.trim();
+            const el = form.elements[name];
+
+            return el ? el.value.trim() : "";
 
         }
 
@@ -860,8 +876,6 @@
 
             const rawNotes = value("notes") || null;
 
-            const coverage = value("coverage_type");
-
             const focus = value("contribution_focus");
 
 
@@ -877,12 +891,6 @@
 
 
             let prefix = "";
-
-            if (coverage) {
-
-                prefix += `[Coverage: ${coverage === "state_wide" ? "State-wide" : "District-wise"}]`;
-
-            }
 
             if (focusLabel) {
 
@@ -918,7 +926,7 @@
 
                 participating_locations: Number(value("participating_locations")),
 
-                initial_launch_locations: value("initial_launch_locations"),
+                initial_launch_locations: "",
 
                 estimated_participants: Number(value("estimated_participants")),
 
@@ -938,7 +946,7 @@
 
                 organization_head_email: value("head_email"),
 
-                organization_head_residential_address: value("head_residential_address"),
+                organization_head_residential_address: "",
 
                 organization_head_office_location: value("head_office_location"),
 
@@ -948,7 +956,7 @@
 
                 nodal_officer_name: headFullName,
 
-                nodal_designation: "Organisation Head",
+                nodal_designation: "Nodel officer",
 
                 nodal_mobile: value("head_mobile"),
 
@@ -972,18 +980,20 @@
 
 
 
+            const missingFields = [];
             for (const field of requiredFields) {
-
                 if (!value(field)) {
-
-                    form.elements[field].focus();
-
-                    setStatus("Please complete all required fields.", "error");
-
-                    return;
-
+                    missingFields.push(fieldLabels[field] || field);
                 }
+            }
 
+            if (missingFields.length > 0) {
+                const firstMissing = requiredFields.find(f => !value(f));
+                if (firstMissing && form.elements[firstMissing]) {
+                    form.elements[firstMissing].focus();
+                }
+                setStatus("Please complete the following required field(s): " + missingFields.join(", "), "error");
+                return;
             }
 
 
