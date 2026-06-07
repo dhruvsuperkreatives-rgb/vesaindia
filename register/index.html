@@ -282,6 +282,36 @@
 
         }
 
+        .program-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .program-choice {
+            display: grid;
+            grid-template-columns: 20px 1fr;
+            gap: 10px;
+            align-items: start;
+            margin: 0;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fbfcfe;
+            cursor: pointer;
+        }
+
+        .program-choice input {
+            width: 18px;
+            min-height: 18px;
+            margin-top: 2px;
+            padding: 0;
+            accent-color: var(--green);
+        }
+
+        .program-choice strong, .program-choice small { display: block; }
+        .program-choice small { margin-top: 4px; color: var(--muted); font-weight: 500; line-height: 1.45; }
+
         .commitment {
 
             display: flex;
@@ -391,6 +421,7 @@
             form { padding: 18px; }
 
             .grid { grid-template-columns: 1fr; }
+            .program-options { grid-template-columns: 1fr; }
 
         }
 
@@ -406,7 +437,7 @@
 
             <a class="brand" href="/">
 
-                <img src="/favicon.jpeg" alt="Logo" style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover;">
+                <img src="/sidebar.jpeg" alt="Logo" style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover;">
 
                 <span>VESACINDIA</span>
 
@@ -416,9 +447,7 @@
 
             <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--line); padding-left: 20px;">
 
-                <img src="/sidebar.jpeg" alt="Sidebar Logo" style="height: 36px; width: 36px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line);">
 
-                <img src="/gov.jpeg" alt="Government Logo" style="height: 36px; object-fit: contain;">
 
             </div>
 
@@ -450,22 +479,11 @@
 
                 <div class="grid">
 
-                    <div>
-
-                        <label for="contribution_focus">Contribution focus</label>
-
-                        <select id="contribution_focus" name="contribution_focus" required>
-
-                            <option value="">Select focus</option>
-
-                            <option value="mcp_bag">MCP Bag</option>
-
-                            <option value="garment">Garment</option>
-
-                            <option value="both">Both</option>
-
-                        </select>
-
+                    <div class="full">
+                        <label>What does your organisation want to do?</label>
+                        <div class="program-options" id="programOptions">
+                            <div class="hint">Loading available programs...</div>
+                        </div>
                     </div>
 
                     <div >
@@ -502,9 +520,25 @@
 
                     <div>
 
-                        <label for="core_work_location">Head office</label>
+                        <label for="head_office_state">Head office state</label>
 
-                        <input id="core_work_location" name="core_work_location" placeholder="Location and state" required>
+                        <input id="head_office_state" name="head_office_state" autocomplete="address-level1" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_office_district">Head office district</label>
+
+                        <input id="head_office_district" name="head_office_district" autocomplete="address-level2" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_office_location">Head office location</label>
+
+                        <input id="head_office_location" name="head_office_location" placeholder="Street, area, building, or landmark" required>
 
                     </div>
 
@@ -578,7 +612,7 @@
 
                         <input id="estimated_participants" name="estimated_participants" type="number" min="1" step="1" required>
 
-                        <div class="hint">Target is calculated as participants x 10 NWPP bags.</div>
+                        <div class="hint" id="participantTargetHint">Targets are calculated from the selected program settings.</div>
 
                     </div>
 
@@ -674,11 +708,19 @@
 
                     </div>
 
+                    <div class="full">
+
+                        <label for="head_personal_address">Personal address</label>
+
+                        <textarea id="head_personal_address" name="head_personal_address" autocomplete="street-address" placeholder="Enter personal residential address" required></textarea>
+
+                    </div>
+
                     <div>
 
-                        <label for="head_office_location">Office location</label>
+                        <label for="organization_head_office_location">Officer office location</label>
 
-                        <input id="head_office_location" name="head_office_location" required>
+                        <input id="organization_head_office_location" name="organization_head_office_location" required>
 
                     </div>
 
@@ -786,11 +828,13 @@
 
             "registration_type",
 
-            "core_work_location",
+            "head_office_state",
+
+            "head_office_district",
+
+            "head_office_location",
 
             "implementation_scope",
-
-            "contribution_focus",
 
             "participating_locations",
 
@@ -808,7 +852,9 @@
 
             "head_email",
 
-            "head_office_location",
+            "head_personal_address",
+
+            "organization_head_office_location",
 
             "head_photograph_url",
 
@@ -821,19 +867,24 @@
         const fieldLabels = {
             "organization_name": "Organization Name",
             "registration_type": "Organization Type",
-            "core_work_location": "Head Office Location",
+            "head_office_state": "Head Office State",
+
+            "head_office_district": "Head Office District",
+
+            "head_office_location": "Head Office Location",
             "implementation_scope": "Implementation Scope",
-            "contribution_focus": "Contribution Focus",
             "participating_locations": "Participating Locations",
             "estimated_participants": "Estimated Total Participants",
-            "head_first_name": "Nodel Officer First Name",
-            "head_last_name": "Nodel Officer Last Name",
-            "head_gender": "Nodel Officer Gender",
-            "head_age": "Nodel Officer Age",
-            "head_mobile": "Nodel Officer Mobile Number",
-            "head_email": "Nodel Officer Official Email",
-            "head_office_location": "Nodel Officer Office Location",
-            "head_photograph_url": "Nodel Officer Photograph URL",
+            "head_first_name": "Nodal Officer First Name",
+            "head_last_name": "Nodal Officer Last Name",
+            "head_gender": "Nodal Officer Gender",
+            "head_age": "Nodal Officer Age",
+            "head_mobile": "Nodal Officer Mobile Number",
+            "head_email": "Nodal Officer Official Email",
+            "head_personal_address": "Nodal Officer Personal Address",
+
+            "organization_head_office_location": "Nodal Officer Office Location",
+            "head_photograph_url": "Nodal Officer Photograph URL",
             "password": "Password",
             "confirm_password": "Confirm Password"
         };
@@ -860,6 +911,54 @@
 
 
 
+        let availablePrograms = [];
+
+        function selectedProgramIds() {
+            return [...form.querySelectorAll('input[name="program_ids"]:checked')].map((input) => input.value);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        async function loadPrograms() {
+            const container = document.getElementById("programOptions");
+            const { data, error } = await supabase
+                .from("mission_programs")
+                .select("id, slug, name, description, minimum_quantity, unit_label, target_per_participant")
+                .eq("is_active", true)
+                .eq("show_on_registration", true)
+                .order("sort_order", { ascending: true });
+
+            if (error) {
+                container.innerHTML = `<div class="status error">Programs could not be loaded. Please refresh the page.</div>`;
+                submitButton.disabled = true;
+                return;
+            }
+
+            availablePrograms = data || [];
+            container.innerHTML = availablePrograms.map((program) => `
+                <label class="program-choice">
+                    <input type="checkbox" name="program_ids" value="${program.id}">
+                    <span>
+                        <strong>${escapeHtml(program.name)}</strong>
+                        <small>${escapeHtml(program.description || `Minimum ${program.minimum_quantity} ${program.unit_label}.`)}</small>
+                    </span>
+                </label>
+            `).join("") || `<div class="status error">Registration programs are temporarily unavailable.</div>`;
+
+            const nwpp = availablePrograms.find((program) => program.slug === "nwpp_bag");
+            if (nwpp) {
+                document.getElementById("participantTargetHint").textContent =
+                    `NWPP target: participants x ${Number(nwpp.target_per_participant)} ${nwpp.unit_label}.`;
+            }
+        }
+
         function buildRegistrationPayload(ownerId = null) {
 
             const headFullName = [
@@ -875,18 +974,17 @@
 
 
             const rawNotes = value("notes") || null;
+            const headOfficeParts = [
+                value("head_office_location"),
+                value("head_office_district"),
+                value("head_office_state")
+            ].filter(Boolean);
 
-            const focus = value("contribution_focus");
-
-
-
-            let focusLabel = "";
-
-            if (focus === "mcp_bag") focusLabel = "MCP Bag";
-
-            else if (focus === "garment") focusLabel = "Garment";
-
-            else if (focus === "both") focusLabel = "Both";
+            const selectedIds = selectedProgramIds();
+            const focusLabel = availablePrograms
+                .filter((program) => selectedIds.includes(program.id))
+                .map((program) => program.name)
+                .join(", ");
 
 
 
@@ -916,7 +1014,13 @@
 
                 registration_type: value("registration_type"),
 
-                core_work_location: value("core_work_location"),
+                core_work_location: headOfficeParts.join(", "),
+
+                head_office_state: value("head_office_state"),
+
+                head_office_district: value("head_office_district"),
+
+                head_office_location: value("head_office_location"),
 
                 organization_social_handle: value("organization_social_handle") || null,
 
@@ -946,9 +1050,9 @@
 
                 organization_head_email: value("head_email"),
 
-                organization_head_residential_address: "",
+                organization_head_residential_address: value("head_personal_address"),
 
-                organization_head_office_location: value("head_office_location"),
+                organization_head_office_location: value("organization_head_office_location"),
 
                 organization_head_social_handle: value("head_social_handle") || null,
 
@@ -993,6 +1097,12 @@
                     form.elements[firstMissing].focus();
                 }
                 setStatus("Please complete the following required field(s): " + missingFields.join(", "), "error");
+                return;
+            }
+
+            if (selectedProgramIds().length === 0) {
+                document.getElementById("programOptions").scrollIntoView({ behavior: "smooth", block: "center" });
+                setStatus("Please select at least one program.", "error");
                 return;
             }
 
@@ -1054,7 +1164,8 @@
 
 
 
-            localStorage.setItem(pendingRegistrationKey, JSON.stringify({ email, payload }));
+            const programIds = selectedProgramIds();
+            localStorage.setItem(pendingRegistrationKey, JSON.stringify({ email, payload, programIds }));
 
 
 
@@ -1112,11 +1223,15 @@
 
 
 
-            const { error: registrationError } = await supabase
+            const { data: registration, error: registrationError } = await supabase
 
                 .from("organization_registrations")
 
-                .insert({ ...payload, owner_id: userId });
+                .insert({ ...payload, owner_id: userId })
+
+                .select("id")
+
+                .single();
 
 
 
@@ -1132,6 +1247,18 @@
 
             }
 
+            const { error: programError } = await supabase
+                .from("organization_programs")
+                .insert(programIds.map((programId) => ({
+                    organization_registration_id: registration.id,
+                    program_id: programId
+                })));
+
+            if (programError) {
+                setStatus(programError.message || "Program choices could not be saved.", "error");
+                return;
+            }
+
 
 
             localStorage.removeItem(pendingRegistrationKey);
@@ -1142,9 +1269,10 @@
 
         });
 
+        loadPrograms();
+
     </script>
 
 </body>
 
 </html>
-

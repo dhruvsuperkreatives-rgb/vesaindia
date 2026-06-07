@@ -38,11 +38,8 @@ function requiredString(value: unknown, label: string) {
 function normalizedDetails(input: Record<string, unknown>): MemberDetails {
     const wantsVolunteer = Boolean(input.wants_volunteer);
     const socialHandle = String(input.social_media_handle || "").trim();
+    const photographUrl = String(input.photograph_url || "").trim();
     const age = Number(input.age);
-
-    if (wantsVolunteer && !socialHandle) {
-        throw new Error("Social media handle is required when the person opts in as a volunteer.");
-    }
 
     if (!Number.isInteger(age) || age < 1 || age > 125) {
         throw new Error("Age must be a whole number between 1 and 125.");
@@ -59,7 +56,7 @@ function normalizedDetails(input: Record<string, unknown>): MemberDetails {
     residential_address: requiredString(input.residential_address, "Residential address"),
     office_location: requiredString(input.office_location, "Office location"),
     social_media_handle: socialHandle || undefined,
-    photograph_url: requiredString(input.photograph_url, "Photograph URL"),
+    photograph_url: wantsVolunteer && photographUrl ? photographUrl : undefined,
     wants_volunteer: wantsVolunteer,
   };
 }

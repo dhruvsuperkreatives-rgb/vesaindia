@@ -41,7 +41,15 @@
             background: #ffffff;
             padding: 22px 16px;
             overflow: auto;
+            z-index: 40;
         }
+        .sidebar-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .sidebar-close, .menu-button, .sidebar-backdrop { display: none; }
         .brand, .side-link, .topbar a {
             display: inline-flex;
             align-items: center;
@@ -70,10 +78,49 @@
             color: #334155;
             font-size: 14px;
         }
+        .side-count {
+            margin-left: auto;
+            border-radius: 999px;
+            padding: 2px 7px;
+            background: #eef2f6;
+            color: var(--muted);
+            font-size: 10px;
+        }
         .side-link.active,
         .side-link:hover {
             background: #e8f5ef;
             color: var(--green);
+        }
+        .sidebar-identity {
+            margin-top: 22px;
+            padding: 14px;
+            border: 1px solid #cfe5da;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #f0faf5, #ffffff);
+        }
+        .sidebar-identity .identity-label {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .sidebar-identity strong {
+            display: block;
+            margin-top: 6px;
+            font-size: 15px;
+        }
+        .verification-code {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 9px;
+            border-radius: 7px;
+            padding: 6px 8px;
+            background: #172033;
+            color: white;
+            font: 800 13px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.06em;
         }
         .main-pane { min-width: 0; }
         .topbar {
@@ -88,6 +135,11 @@
             position: sticky;
             top: 0;
             z-index: 10;
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         button, .topbar a {
             border: 1px solid var(--line);
@@ -264,45 +316,292 @@
             min-height: 18px;
             accent-color: var(--green);
         }
+        .people-directory {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .person-card {
+            display: grid;
+            grid-template-columns: 72px minmax(0, 1fr);
+            gap: 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 15px;
+            background: linear-gradient(145deg, #ffffff, #f7fafc);
+            overflow: hidden;
+        }
+        .person-card.volunteer {
+            border-color: #b7ddca;
+            box-shadow: inset 4px 0 0 var(--green);
+        }
+        .person-photo {
+            width: 72px;
+            height: 72px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--line);
+            background: #e8f5ef;
+        }
+        .person-fallback {
+            display: grid;
+            place-items: center;
+            color: var(--green);
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .person-name {
+            margin: 0;
+            font-size: 17px;
+        }
+        .person-meta {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+        .person-social {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+        .person-code-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .copy-code {
+            min-height: 31px;
+            padding: 0 9px;
+            font-size: 11px;
+        }
+        .person-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .code-guide {
+            margin: 0 0 16px;
+            border: 1px solid #cfe5da;
+            border-radius: 10px;
+            padding: 13px 15px;
+            background: #f0faf5;
+            color: #335c4c;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .directory-toolbar {
+            display: grid;
+            grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .directory-toolbar label {
+            margin: 0;
+            color: var(--muted);
+            font-size: 11px;
+        }
+        .directory-toolbar input,
+        .directory-toolbar select {
+            margin-top: 6px;
+            min-height: 40px;
+        }
+        .directory-summary {
+            margin: 0 0 14px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .person-photo-link {
+            width: 72px;
+            height: 72px;
+            display: block;
+        }
+        .person-org {
+            margin-top: 8px;
+            border-radius: 7px;
+            padding: 7px 9px;
+            background: #eef5ff;
+            color: #315a91;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .field-help {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .settings-photo-row {
+            display: grid;
+            grid-template-columns: 88px minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        .settings-photo-preview {
+            width: 88px;
+            height: 88px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            object-fit: cover;
+            background: #e8f5ef;
+        }
+        .settings-photo-empty {
+            display: grid;
+            place-items: center;
+            color: var(--green);
+            font-size: 26px;
+            font-weight: 800;
+        }
+        .panel-intro {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .panel-intro h2 { margin-bottom: 6px; }
+        .panel-intro p { margin: 0; }
+        .departments-layout {
+            grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+        }
+        .department-list {
+            max-height: 720px;
+            overflow: auto;
+            padding-right: 3px;
+        }
+        .department-list li {
+            padding: 15px;
+            background: white;
+        }
+        .department-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
         @media (max-width: 900px) {
-            .stats, .grid, .grid.three { grid-template-columns: 1fr; }
+            .stats, .grid, .grid.three, .people-directory, .directory-toolbar { grid-template-columns: 1fr; }
+            .departments-layout { grid-template-columns: 1fr; }
+            .department-list { max-height: none; }
         }
         @media (max-width: 700px) {
             .app-shell { grid-template-columns: 1fr; }
             .sidebar {
-                position: static;
-                height: auto;
-                border-right: 0;
-                border-bottom: 1px solid var(--line);
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: min(86vw, 320px);
+                height: 100dvh;
+                border-right: 1px solid var(--line);
+                padding: 18px 14px;
+                transform: translateX(-105%);
+                transition: transform 220ms ease;
+                box-shadow: 18px 0 50px rgba(23, 32, 51, 0.2);
             }
-            .topbar { justify-content: flex-start; flex-wrap: wrap; padding: 16px; }
-            main { padding: 28px 14px 48px; }
+            body.menu-open { overflow: hidden; }
+            body.menu-open .sidebar { transform: translateX(0); }
+            .sidebar-close, .menu-button {
+                display: inline-flex;
+                flex: 0 0 auto;
+            }
+            .sidebar-close {
+                width: 40px;
+                padding: 0;
+            }
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 35;
+                border: 0;
+                border-radius: 0;
+                min-height: 0;
+                padding: 0;
+                background: rgba(23, 32, 51, 0.5);
+            }
+            body.menu-open .sidebar-backdrop {
+                display: block;
+            }
+            .brand { margin-bottom: 0; }
+            .side-title { margin-top: 24px; }
+            .topbar {
+                min-height: 62px;
+                justify-content: space-between;
+                flex-wrap: nowrap;
+                padding: 10px 14px;
+            }
+            .topbar-actions { margin-left: auto; }
+            .topbar-actions a { display: none; }
+            main { padding: 24px 14px 48px; }
             .form-grid { grid-template-columns: 1fr; }
+            .panel-intro { align-items: flex-start; flex-direction: column; }
+            .settings-photo-row { grid-template-columns: 72px minmax(0, 1fr); }
+            .settings-photo-preview { width: 72px; height: 72px; }
+            .row { flex-direction: column; }
+            .pill { white-space: normal; }
+            .card { padding: 15px; }
+            h1 { font-size: clamp(28px, 10vw, 38px); }
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+            .stats .card { padding: 14px; }
+            .metric-value { font-size: 25px; }
+        }
+        @media (max-width: 420px) {
+            .stats { grid-template-columns: 1fr; }
+            .person-card { grid-template-columns: 56px minmax(0, 1fr); padding: 12px; }
+            .person-photo, .person-photo-link { width: 56px; height: 56px; }
         }
     </style>
 </head>
 <body>
     <div class="app-shell">
-        <aside class="sidebar" aria-label="Dashboard modules">
-            <a class="brand" href="/dashboard/"><img src="/sidebar.jpeg" alt="Logo" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; display: inline-block; vertical-align: middle; margin-right: 8px;"> VESACINDIA</a>
+        <aside class="sidebar" id="dashboardSidebar" aria-label="Dashboard modules">
+            <div class="sidebar-head">
+                <a class="brand" href="/dashboard/"><img src="/sidebar.jpeg" alt="Logo" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; display: inline-block; vertical-align: middle; margin-right: 8px;"> VESACINDIA</a>
+                <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close navigation">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
             <div class="side-title">Workspace</div>
             <nav class="side-nav">
                 <a class="side-link active" href="#overview" data-panel-link="overview"><i class="fa-solid fa-gauge"></i> Overview</a>
                 <a class="side-link" href="#contribute" data-panel-link="contribute"><i class="fa-solid fa-hand-holding-heart"></i> Contribute</a>
                 <a class="side-link" href="#departments" data-panel-link="departments"><i class="fa-solid fa-user-shield"></i> Nodal Officers</a>
-                <a class="side-link" href="#people" data-panel-link="people"><i class="fa-solid fa-users"></i> People</a>
+                <a class="side-link" href="#people" data-panel-link="people">
+                    <i class="fa-solid fa-address-card"></i> Mission Directory
+                    <span class="side-count" id="missionPeopleCount">0</span>
+                </a>
                 <a class="side-link" href="#balances" data-panel-link="balances"><i class="fa-solid fa-indian-rupee-sign"></i> Balances</a>
+                <a class="side-link" href="#settings" data-panel-link="settings"><i class="fa-solid fa-gear"></i> Settings</a>
             </nav>
-            <div class="side-title">Admin</div>
-            <nav class="side-nav">
-                <a class="side-link" href="/admin/"><i class="fa-solid fa-list-check"></i> Admin Review</a>
-            </nav>
+            <div class="sidebar-identity hidden" id="sidebarIdentity">
+                <span class="identity-label">My mission identity</span>
+                <strong id="sidebarIdentityName">Member</strong>
+                <span class="verification-code" id="sidebarIdentityCode">----------</span>
+            </div>
         </aside>
+        <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
 
         <div class="main-pane">
             <header class="topbar">
-                <a href="/register/"><i class="fa-solid fa-building-circle-check"></i> Register</a>
-                <button id="logoutButton" type="button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                <button class="menu-button" id="menuButton" type="button" aria-controls="dashboardSidebar" aria-expanded="false">
+                    <i class="fa-solid fa-bars"></i> Menu
+                </button>
+                <div class="topbar-actions">
+                    <a href="/register/"><i class="fa-solid fa-building-circle-check"></i> Register</a>
+                    <button id="logoutButton" type="button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </div>
             </header>
 
             <main>
@@ -312,7 +611,7 @@
                 </section>
 
                 <section id="loginNotice" class="card hidden">
-                    <p class="lead">Please login with your organisation, Nodal Officer, employee, or admin account.</p>
+                    <p class="lead">Please login with your organisation, Nodal Officer, or employee account.</p>
                     <a href="/login/">Open login</a>
                 </section>
 
@@ -398,24 +697,35 @@
                                 <h2>Garment Donation</h2>
                                 <label for="garment_count">How many garments?</label>
                                 <input id="garment_count" name="garment_count" type="number" min="1" step="1" value="1" required>
-                                <label class="checkbox" for="wants_utility_bag">
+                                <label class="checkbox" for="wants_utility_bag" id="utilityBagOption">
                                     <input id="wants_utility_bag" name="wants_utility_bag" type="checkbox">
                                     Wants a utility bag after labour fee
                                 </label>
-                                <label for="labour_fee">Labour fee amount</label>
-                                <input id="labour_fee" name="labour_fee" type="number" min="0" step="1" value="0">
+                                <div id="utilityBagFeeFields">
+                                    <label for="labour_fee">Utility bag fee amount</label>
+                                    <input id="labour_fee" name="labour_fee" type="number" min="0" step="0.01" value="0" readonly>
+                                </div>
                                 <label for="garment_notes">Notes</label>
                                 <textarea id="garment_notes" name="garment_notes" placeholder="Optional"></textarea>
                                 <button class="primary" type="submit"><i class="fa-solid fa-shirt"></i> Save Garments</button>
                                 <div class="status" id="garmentStatus" role="status" aria-live="polite"></div>
                             </form>
                         </div>
+                        <div class="grid" id="customProgramForms"></div>
                     </section>
 
                     <section class="dashboard-panel" data-panel="departments">
-                        <div class="grid">
+                        <div class="panel-intro">
+                            <div>
+                                <h2>Nodal Officer Management</h2>
+                                <p class="muted">Create department-level coordinators and monitor their employee and contribution totals.</p>
+                            </div>
+                            <span class="pill" id="departmentCount">0 Nodal Officers</span>
+                        </div>
+                        <div class="grid departments-layout">
                             <form id="departmentForm" class="card hidden">
                                 <h2>Create Nodal Officer</h2>
+                                <p class="muted">This creates a department and a secure login for its Nodal Officer.</p>
                                 <div class="form-grid">
                                     <div>
                                         <label for="department_name">Department name</label>
@@ -440,7 +750,7 @@
                             </form>
                             <article class="card">
                                 <h2>Nodal Officers</h2>
-                                <ul class="list" id="departmentList"></ul>
+                                <ul class="list department-list" id="departmentList"></ul>
                             </article>
                         </div>
                     </section>
@@ -458,9 +768,41 @@
                                 </div>
                                 <div class="status" id="employeeStatus" role="status" aria-live="polite"></div>
                             </form>
-                            <article class="card">
-                                <h2>People</h2>
-                                <ul class="list" id="peopleList"></ul>
+                            <article class="card" style="grid-column: 1 / -1;">
+                                <h2>People In This Mission</h2>
+                                <div class="directory-toolbar">
+                                    <label>
+                                        Search person or code
+                                        <input id="peopleSearch" type="search" placeholder="Name, social handle, or 10-character code">
+                                    </label>
+                                    <label>
+                                        Organisation
+                                        <select id="peopleOrganisationFilter">
+                                            <option value="">All organisations</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Nodal officer / department
+                                        <select id="peopleDepartmentFilter">
+                                            <option value="">All nodal officers</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Volunteer status
+                                        <select id="peopleVolunteerFilter">
+                                            <option value="">Everyone</option>
+                                            <option value="volunteer">Volunteers</option>
+                                            <option value="non_volunteer">Non-volunteers</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <div class="directory-summary" id="peopleDirectorySummary"></div>
+                                <p class="code-guide">
+                                    Verification format: <strong>OOODDDV/0EEE</strong> (10 characters).
+                                    The first three characters identify the organisation, the next three identify the department,
+                                    <strong>V</strong> marks a volunteer (<strong>0</strong> means non-volunteer), and the final three identify the person.
+                                </p>
+                                <div class="people-directory" id="peopleList"></div>
                             </article>
                         </div>
                     </section>
@@ -493,6 +835,73 @@
                             <p class="lead">Balances are grouped step-wise so the department can reconcile collections without adding heavy manual work.</p>
                         </article>
                     </section>
+
+                    <section class="dashboard-panel" data-panel="settings">
+                        <div class="panel-intro">
+                            <div>
+                                <h2>Profile Settings</h2>
+                                <p class="muted">Update the profile details shown in dashboards and the mission directory.</p>
+                            </div>
+                            <span class="pill" id="settingsRole">Member</span>
+                        </div>
+                        <form id="profileSettingsForm" class="card">
+                            <div class="settings-photo-row">
+                                <div id="settingsPhotoPreview" class="settings-photo-preview settings-photo-empty" aria-hidden="true">VM</div>
+                                <div>
+                                    <label for="settings_photograph_url">Profile image URL</label>
+                                    <input id="settings_photograph_url" name="photograph_url" type="url">
+                                    <p class="field-help" id="photoHelp">Only volunteers can add a profile image. Remove the URL to remove the image.</p>
+                                </div>
+                            </div>
+                            <div class="form-grid">
+                                <div>
+                                    <label for="settings_first_name">First name</label>
+                                    <input id="settings_first_name" name="first_name" required>
+                                </div>
+                                <div>
+                                    <label for="settings_middle_name">Middle name</label>
+                                    <input id="settings_middle_name" name="middle_name">
+                                </div>
+                                <div>
+                                    <label for="settings_last_name">Last name</label>
+                                    <input id="settings_last_name" name="last_name" required>
+                                </div>
+                                <div>
+                                    <label for="settings_mobile_number">Mobile number</label>
+                                    <input id="settings_mobile_number" name="mobile_number" type="tel" required>
+                                </div>
+                                <div>
+                                    <label for="settings_email">Email</label>
+                                    <input id="settings_email" name="email" type="email" required>
+                                </div>
+                                <div>
+                                    <label for="settings_office_location">Office location</label>
+                                    <input id="settings_office_location" name="office_location" required>
+                                </div>
+                                <div class="full">
+                                    <label for="settings_social_media_handle">Social media handle</label>
+                                    <input id="settings_social_media_handle" name="social_media_handle" placeholder="@handle or profile URL">
+                                    <p class="field-help">Clear this field to remove the social handle from your profile.</p>
+                                </div>
+                                <div class="full">
+                                    <label for="settings_residential_address">Residential address</label>
+                                    <textarea id="settings_residential_address" name="residential_address" required></textarea>
+                                </div>
+                                <div class="full">
+                                    <label class="checkbox" for="settings_wants_volunteer">
+                                        <input id="settings_wants_volunteer" name="wants_volunteer" type="checkbox">
+                                        Wants to volunteer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <button class="primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+                                <button id="removeProfileImage" class="danger" type="button"><i class="fa-solid fa-trash"></i> Remove Image</button>
+                                <button id="removeSocialHandle" type="button"><i class="fa-solid fa-at"></i> Remove Social</button>
+                            </div>
+                            <div class="status" id="settingsStatus" role="status" aria-live="polite"></div>
+                        </form>
+                    </section>
                 </section>
             </main>
         </div>
@@ -513,7 +922,11 @@
         const departmentForm = document.getElementById("departmentForm");
         const employeeForm = document.getElementById("employeeForm");
         const employeeFormTitle = document.getElementById("employeeFormTitle");
+        const profileSettingsForm = document.getElementById("profileSettingsForm");
         const cancelEmployeeEdit = document.getElementById("cancelEmployeeEdit");
+        const menuButton = document.getElementById("menuButton");
+        const sidebarClose = document.getElementById("sidebarClose");
+        const sidebarBackdrop = document.getElementById("sidebarBackdrop");
 
         const personFields = [
             ["first_name", "First name", "text", true],
@@ -526,12 +939,32 @@
             ["residential_address", "Residential address", "textarea", true],
             ["office_location", "Office location", "text", true],
             ["social_media_handle", "Social media handle", "text", false],
-            ["photograph_url", "Photograph URL", "url", true],
+            ["photograph_url", "Photograph URL", "url", false],
             ["wants_volunteer", "Wants to volunteer", "checkbox", false],
+        ];
+        const profileSettingFields = [
+            "first_name",
+            "middle_name",
+            "last_name",
+            "mobile_number",
+            "email",
+            "office_location",
+            "social_media_handle",
+            "photograph_url",
+            "residential_address",
+            "wants_volunteer"
         ];
 
         let summary = null;
         let editingEmployeeId = null;
+        let programSettings = [];
+        let selectedProgramIds = [];
+        const peopleFilters = {
+            search: "",
+            organizationId: "",
+            departmentId: "",
+            volunteer: ""
+        };
 
         function numberText(value) {
             return new Intl.NumberFormat("en-IN").format(Number(value || 0));
@@ -548,6 +981,35 @@
                 .replaceAll(">", "&gt;")
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#039;");
+        }
+
+        function safeHttpUrl(value) {
+            if (!value) return "";
+            try {
+                const url = new URL(String(value), location.origin);
+                return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+            } catch {
+                return "";
+            }
+        }
+
+        function socialLink(value) {
+            const handle = String(value || "").trim();
+            if (!handle) return "";
+            const directUrl = safeHttpUrl(handle);
+            if (directUrl) return directUrl;
+            if (handle.startsWith("@")) {
+                return `https://www.instagram.com/${encodeURIComponent(handle.slice(1))}`;
+            }
+            return "";
+        }
+
+        function personInitials(person) {
+            return [person.first_name, person.last_name]
+                .filter(Boolean)
+                .map((part) => String(part).charAt(0).toUpperCase())
+                .join("")
+                .slice(0, 2) || "VM";
         }
 
         function setStatus(id, message, type = "") {
@@ -577,6 +1039,11 @@
                 }
                 return `<div><label for="${id}">${label}</label><input id="${id}" name="${name}" type="${type}" ${type === "number" ? "min=\"1\" max=\"125\" step=\"1\"" : ""} ${required ? "required" : ""}></div>`;
             }).join("");
+            const volunteerToggle = container.querySelector('[name="wants_volunteer"]');
+            if (volunteerToggle) {
+                volunteerToggle.addEventListener("change", () => configureVolunteerPhoto(container.closest("form")));
+                configureVolunteerPhoto(container.closest("form"));
+            }
         }
 
         function readPerson(form) {
@@ -587,6 +1054,7 @@
                 data[name] = type === "checkbox" ? field.checked : field.value.trim();
             }
             data.age = Number(data.age);
+            if (!data.wants_volunteer) data.photograph_url = "";
             return data;
         }
 
@@ -597,13 +1065,84 @@
                 if (type === "checkbox") field.checked = Boolean(person[name]);
                 else field.value = person[name] || "";
             }
+            configureVolunteerPhoto(form);
         }
 
-        function showPanel(name = "overview") {
+        function configureVolunteerPhoto(form) {
+            if (!form?.elements?.photograph_url || !form.elements.wants_volunteer) return;
+            const isVolunteer = form.elements.wants_volunteer.checked;
+            const photoField = form.elements.photograph_url;
+            photoField.disabled = !isVolunteer;
+            photoField.required = false;
+            if (!isVolunteer) photoField.value = "";
+        }
+
+        function renderSettings() {
+            if (!summary?.profile || !profileSettingsForm) return;
+            const profile = summary.profile;
+            profileSettingFields.forEach((name) => {
+                const field = profileSettingsForm.elements[name];
+                if (!field) return;
+                if (field.type === "checkbox") field.checked = Boolean(profile[name]);
+                else field.value = profile[name] || "";
+            });
+            document.getElementById("settingsRole").textContent =
+                String(profile.role || "member").replaceAll("_", " ");
+            configureSettingsPhoto();
+        }
+
+        function configureSettingsPhoto() {
+            if (!profileSettingsForm) return;
+            const photoField = profileSettingsForm.elements.photograph_url;
+            const isVolunteer = profileSettingsForm.elements.wants_volunteer.checked;
+            photoField.disabled = !isVolunteer;
+            if (!isVolunteer) photoField.value = "";
+
+            const preview = document.getElementById("settingsPhotoPreview");
+            const photoUrl = isVolunteer ? safeHttpUrl(photoField.value) : "";
+            const initials = personInitials(summary?.profile || {});
+            if (photoUrl) {
+                preview.outerHTML = `<img id="settingsPhotoPreview" class="settings-photo-preview" src="${escapeHtml(photoUrl)}" alt="">`;
+            } else {
+                preview.outerHTML = `<div id="settingsPhotoPreview" class="settings-photo-preview settings-photo-empty" aria-hidden="true">${escapeHtml(initials)}</div>`;
+            }
+            document.getElementById("removeProfileImage").disabled = !isVolunteer || !photoField.value.trim();
+        }
+
+        function readProfileSettings() {
+            const data = {};
+            profileSettingFields.forEach((name) => {
+                const field = profileSettingsForm.elements[name];
+                if (!field) return;
+                data[name] = field.type === "checkbox" ? field.checked : field.value.trim();
+            });
+            if (!data.wants_volunteer) data.photograph_url = "";
+            return data;
+        }
+
+        function syncCurrentProfile(profilePatch) {
+            summary.profile = { ...summary.profile, ...profilePatch };
+            const person = (summary.mission_people || []).find((item) => item.id === summary.profile.id);
+            if (person) Object.assign(person, profilePatch);
+        }
+
+        function closeSidebar() {
+            document.body.classList.remove("menu-open");
+            menuButton.setAttribute("aria-expanded", "false");
+        }
+
+        function openSidebar() {
+            document.body.classList.add("menu-open");
+            menuButton.setAttribute("aria-expanded", "true");
+        }
+
+        function showPanel(name = "overview", updateHistory = true) {
             const selected = panels.some((panel) => panel.dataset.panel === name) ? name : "overview";
             panelLinks.forEach((link) => link.classList.toggle("active", link.dataset.panelLink === selected));
             panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === selected));
-            history.replaceState(null, "", `#${selected}`);
+            if (updateHistory && location.hash !== `#${selected}`) history.pushState(null, "", `#${selected}`);
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
         function renderPublicTotals(target, totals = {}) {
@@ -627,16 +1166,83 @@
 
             if (pending.email && pending.email.toLowerCase() !== user.email.toLowerCase()) return;
 
-            const { error } = await supabase
+            const { data: registration, error } = await supabase
                 .from("organization_registrations")
                 .insert({
                     ...pending.payload,
                     owner_id: user.id,
                     organization_head_email: pending.payload?.organization_head_email || user.email,
                     nodal_email: pending.payload?.nodal_email || user.email
-                });
+                })
+                .select("id")
+                .single();
 
-            if (!error) localStorage.removeItem(pendingRegistrationKey);
+            if (error) return;
+
+            if (pending.programIds?.length) {
+                const { error: programError } = await supabase
+                    .from("organization_programs")
+                    .insert(pending.programIds.map((programId) => ({
+                        organization_registration_id: registration.id,
+                        program_id: programId
+                    })));
+                if (programError) return;
+            }
+
+            localStorage.removeItem(pendingRegistrationKey);
+        }
+
+        function configureContributionForms() {
+            const bySlug = new Map(programSettings.map((program) => [program.slug, program]));
+            const isSelected = (program) => program && selectedProgramIds.includes(program.id);
+            const nwpp = bySlug.get("nwpp_bag");
+            const garment = bySlug.get("garment");
+            const nwppForm = document.getElementById("nwppForm");
+            const garmentForm = document.getElementById("garmentForm");
+
+            nwppForm.classList.toggle("hidden", !isSelected(nwpp));
+            garmentForm.classList.toggle("hidden", !isSelected(garment));
+
+            if (nwpp) {
+                const input = nwppForm.elements.bags_count;
+                input.min = nwpp.minimum_quantity;
+                input.value = Math.max(Number(input.value || 0), Number(nwpp.minimum_quantity));
+                nwppForm.querySelector("h2").textContent = `${nwpp.name} Donation`;
+                nwppForm.querySelector('label[for="bags_count"]').textContent =
+                    `How many ${nwpp.unit_label}? Minimum ${nwpp.minimum_quantity}`;
+            }
+
+            if (garment) {
+                const input = garmentForm.elements.garment_count;
+                input.min = garment.minimum_quantity;
+                input.value = Math.max(Number(input.value || 0), Number(garment.minimum_quantity));
+                garmentForm.querySelector("h2").textContent = `${garment.name} Donation`;
+                garmentForm.querySelector('label[for="garment_count"]').textContent =
+                    `How many ${garment.unit_label}? Minimum ${garment.minimum_quantity}`;
+                document.getElementById("utilityBagOption").classList.toggle("hidden", !garment.utility_bag_available);
+                document.getElementById("utilityBagFeeFields").classList.toggle("hidden", !garment.utility_bag_available);
+                garmentForm.elements.labour_fee.value = Number(garment.utility_bag_fee || 0);
+                if (!garment.utility_bag_available) garmentForm.elements.wants_utility_bag.checked = false;
+            }
+
+            const customPrograms = programSettings.filter((program) => (
+                !["nwpp_bag", "garment"].includes(program.slug) && isSelected(program)
+            ));
+            document.getElementById("customProgramForms").innerHTML = customPrograms.map((program) => `
+                <form class="card" data-program-contribution="${escapeHtml(program.id)}">
+                    <h2>${escapeHtml(program.name)} Contribution</h2>
+                    <p class="muted">${escapeHtml(program.description || "")}</p>
+                    <label for="program_quantity_${escapeHtml(program.id)}">
+                        Quantity in ${escapeHtml(program.unit_label)} (minimum ${numberText(program.minimum_quantity)})
+                    </label>
+                    <input id="program_quantity_${escapeHtml(program.id)}" name="quantity" type="number"
+                        min="${Number(program.minimum_quantity)}" step="1" value="${Number(program.minimum_quantity)}" required>
+                    <label for="program_notes_${escapeHtml(program.id)}">Notes</label>
+                    <textarea id="program_notes_${escapeHtml(program.id)}" name="notes" placeholder="Optional"></textarea>
+                    <button class="primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save ${escapeHtml(program.name)}</button>
+                    <div class="status" role="status" aria-live="polite"></div>
+                </form>
+            `).join("");
         }
 
         function renderPending() {
@@ -683,13 +1289,25 @@
                 ? `<li><strong>${escapeHtml(summary.profile?.first_name)} ${escapeHtml(summary.profile?.last_name || "")}</strong><br><span class="muted">Area/Dept: ${escapeHtml(dept.department_name)} · Location: ${escapeHtml(dept.office_location)}</span></li><li>Employees: <strong>${numberText(deptTotals.employee_count)}</strong></li>`
                 : `<li class="muted">Organisation Head contributions are tracked at organisation level until Nodal Officers are created.</li>`;
 
+            const identity = document.getElementById("sidebarIdentity");
+            const identityName = [summary.profile?.first_name, summary.profile?.last_name].filter(Boolean).join(" ");
+            const identityCode = summary.mission_people?.find((person) => person.id === summary.profile?.id)?.verification_code;
+            identity.classList.toggle("hidden", !identityCode);
+            document.getElementById("sidebarIdentityName").textContent = identityName || "Mission member";
+            document.getElementById("sidebarIdentityCode").textContent = identityCode || "----------";
+
             renderDepartments();
+            configurePeopleFilters();
             renderPeople();
             renderBalances();
+            configureContributionForms();
+            renderSettings();
         }
 
         function renderDepartments() {
             const rows = summary.departments || [];
+            document.getElementById("departmentCount").textContent =
+                `${numberText(rows.length)} Nodal Officer${rows.length === 1 ? "" : "s"}`;
             document.getElementById("departmentList").innerHTML = rows.length ? rows.map((item) => `
                 <li>
                     <div class="row">
@@ -704,26 +1322,125 @@
             `).join("") : `<li class="muted">No Nodal Officers created yet.</li>`;
         }
 
+        function configurePeopleFilters() {
+            const rows = summary.mission_people || [];
+            const organisationSelect = document.getElementById("peopleOrganisationFilter");
+            const departmentSelect = document.getElementById("peopleDepartmentFilter");
+            const organisations = [...new Map(rows.map((person) => [
+                person.organization_id,
+                {
+                    id: person.organization_id,
+                    code: person.organization_code,
+                    name: person.organization_name
+                }
+            ])).values()].filter((item) => item.id);
+            const departments = [...new Map(rows
+                .filter((person) => person.department_id)
+                .filter((person) => !peopleFilters.organizationId || person.organization_id === peopleFilters.organizationId)
+                .map((person) => [
+                    person.department_id,
+                    {
+                        id: person.department_id,
+                        code: person.department_code,
+                        name: person.department_name,
+                        nodalName: person.nodal_name
+                    }
+                ])).values()];
+
+            organisationSelect.innerHTML = `
+                <option value="">All organisations</option>
+                ${organisations.map((item) => `
+                    <option value="${escapeHtml(item.id)}">${escapeHtml(item.code)} · ${escapeHtml(item.name)}</option>
+                `).join("")}
+            `;
+            organisationSelect.value = peopleFilters.organizationId;
+
+            departmentSelect.innerHTML = `
+                <option value="">All nodal officers</option>
+                ${departments.map((item) => `
+                    <option value="${escapeHtml(item.id)}">
+                        ${escapeHtml(item.code)} · ${escapeHtml(item.nodalName || "Unassigned")} · ${escapeHtml(item.name)}
+                    </option>
+                `).join("")}
+            `;
+            departmentSelect.value = departments.some((item) => item.id === peopleFilters.departmentId)
+                ? peopleFilters.departmentId
+                : "";
+            peopleFilters.departmentId = departmentSelect.value;
+        }
+
         function renderPeople() {
-            const rows = summary.employees || [];
+            const rows = summary.mission_people || summary.employees || [];
             const canEdit = summary.profile?.role === "nodal_officer";
-            document.getElementById("peopleList").innerHTML = rows.length ? rows.map((person) => {
+            const search = peopleFilters.search.toLowerCase();
+            const filteredRows = rows.filter((person) => {
+                if (peopleFilters.organizationId && person.organization_id !== peopleFilters.organizationId) return false;
+                if (peopleFilters.departmentId && person.department_id !== peopleFilters.departmentId) return false;
+                if (peopleFilters.volunteer === "volunteer" && !person.wants_volunteer) return false;
+                if (peopleFilters.volunteer === "non_volunteer" && person.wants_volunteer) return false;
+                if (!search) return true;
+                return [
+                    person.first_name,
+                    person.middle_name,
+                    person.last_name,
+                    person.social_media_handle,
+                    person.verification_code,
+                    person.organization_name,
+                    person.department_name,
+                    person.nodal_name
+                ].filter(Boolean).join(" ").toLowerCase().includes(search);
+            });
+
+            document.getElementById("missionPeopleCount").textContent = numberText(rows.length);
+            document.getElementById("peopleDirectorySummary").textContent =
+                `Showing ${numberText(filteredRows.length)} of ${numberText(rows.length)} active mission members`;
+            document.getElementById("peopleList").innerHTML = filteredRows.length ? filteredRows.map((person) => {
                 const name = [person.first_name, person.middle_name, person.last_name].filter(Boolean).join(" ");
-                return `<li>
-                    <div class="row">
-                        <div>
-                            <strong>${escapeHtml(name || person.email)}</strong>
-                            <div class="muted">${escapeHtml(person.role.replaceAll("_", " "))} · ${escapeHtml(person.email || "")} · ${escapeHtml(person.mobile_number || "")}</div>
-                            <div class="muted">${person.wants_volunteer ? "Volunteer: yes" : "Volunteer: no"}</div>
+                const photoUrl = safeHttpUrl(person.photograph_url);
+                const handleUrl = socialLink(person.social_media_handle);
+                const role = String(person.role || "member").replaceAll("_", " ");
+                const department = person.department_name || (person.role === "org_head"
+                    ? "Organisation leadership"
+                    : "Department pending");
+
+                return `<article class="person-card ${person.wants_volunteer ? "volunteer" : ""}">
+                    ${photoUrl
+                        ? `<a class="person-photo-link" href="${escapeHtml(photoUrl)}" target="_blank" rel="noopener noreferrer" title="Open profile image">
+                            <img class="person-photo" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(name || "Mission member")}" loading="lazy">
+                           </a>`
+                        : `<div class="person-photo person-fallback" aria-hidden="true">${escapeHtml(personInitials(person))}</div>`}
+                    <div>
+                        <div class="row">
+                            <div>
+                                <h3 class="person-name">${escapeHtml(name || "Mission member")}</h3>
+                                <div class="person-meta">${escapeHtml(role)} · ${escapeHtml(department)}</div>
+                                <div class="person-meta">${escapeHtml(person.office_location || "Office location not added")}</div>
+                            </div>
+                            <span class="pill ${person.status === "inactive" ? "warn" : ""}">${person.wants_volunteer ? "Volunteer" : escapeHtml(person.status || "active")}</span>
                         </div>
-                        <span class="pill ${person.status === "inactive" ? "warn" : ""}">${escapeHtml(person.status)}</span>
+                        ${person.social_media_handle
+                            ? handleUrl
+                                ? `<a class="person-social" href="${escapeHtml(handleUrl)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${escapeHtml(person.social_media_handle)}</a>`
+                                : `<span class="person-social"><i class="fa-solid fa-at"></i> ${escapeHtml(person.social_media_handle)}</span>`
+                            : `<div class="person-meta">No social handle added</div>`}
+                        <div class="person-org">
+                            <strong>${escapeHtml(person.organization_name || "Organisation")}</strong>
+                            <span> · Org ${escapeHtml(person.organization_code || "---")}</span><br>
+                            <span>${escapeHtml(department)}</span>
+                            ${person.department_code ? ` · Dept ${escapeHtml(person.department_code)}` : ""}
+                            ${person.nodal_name ? `<br>Nodal officer: ${escapeHtml(person.nodal_name)}` : ""}
+                        </div>
+                        <div class="person-code-row">
+                            <span class="verification-code">${escapeHtml(person.verification_code || "Pending")}</span>
+                            ${person.verification_code ? `<button class="copy-code" type="button" data-copy-code="${escapeHtml(person.verification_code)}"><i class="fa-regular fa-copy"></i> Copy</button>` : ""}
+                        </div>
                     </div>
-                    ${canEdit && person.role === "employee" ? `<div class="row" style="margin-top:10px; justify-content:flex-start;">
+                    ${canEdit && person.role === "employee" && person.department_id === summary.profile?.department_id ? `<div class="person-actions">
                         <button type="button" data-edit-employee="${escapeHtml(person.id)}"><i class="fa-solid fa-pen"></i> Edit</button>
                         <button class="danger" type="button" data-deactivate-employee="${escapeHtml(person.id)}"><i class="fa-solid fa-user-slash"></i> Deactivate</button>
                     </div>` : ""}
-                </li>`;
-            }).join("") : `<li class="muted">No people listed yet.</li>`;
+                </article>`;
+            }).join("") : `<div class="muted">No mission members match these filters.</div>`;
         }
 
         function renderBalances() {
@@ -735,9 +1452,8 @@
         }
 
         async function loadDashboard() {
-            const { data: sessionData } = await supabase.auth.getSession();
-            const session = sessionData.session;
-            if (!session) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
                 loginNotice.classList.remove("hidden");
                 pendingPanel.classList.add("hidden");
                 approvedPanel.classList.add("hidden");
@@ -745,7 +1461,18 @@
                 return;
             }
 
-            await completePendingRegistration(session.user);
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("role")
+                .eq("id", user.id)
+                .single();
+
+            if (profile?.role === "admin") {
+                window.location.replace("/admin/");
+                return;
+            }
+
+            await completePendingRegistration(user);
 
             const { data, error } = await supabase.rpc("get_dashboard_summary");
             if (error) {
@@ -754,6 +1481,23 @@
             }
 
             summary = data || {};
+            if (summary.organization?.status === "rejected") {
+                await supabase.auth.signOut();
+                window.location.replace("/login/");
+                return;
+            }
+
+            if (summary.approved) {
+                const [programResult, selectionResult] = await Promise.all([
+                    supabase.from("mission_programs").select("*").eq("is_active", true).order("sort_order"),
+                    supabase.from("organization_programs").select("program_id").eq("organization_registration_id", summary.organization.id)
+                ]);
+                programSettings = programResult.data || [];
+                selectedProgramIds = (selectionResult.data || []).map((item) => item.program_id);
+                const { data: missionPeople, error: directoryError } = await supabase.rpc("get_mission_people");
+                if (!directoryError) summary.mission_people = missionPeople || [];
+            }
+
             loginNotice.classList.add("hidden");
             if (summary.approved) renderApproved();
             else renderPending();
@@ -763,8 +1507,10 @@
             event.preventDefault();
             const form = event.currentTarget;
             const bags = Number(form.elements.bags_count.value);
-            if (!Number.isInteger(bags) || bags < 10) {
-                setStatus("nwppStatus", "Minimum NWPP bag contribution is 10.", "error");
+            const program = programSettings.find((item) => item.slug === "nwpp_bag");
+            const minimum = Number(program?.minimum_quantity || 1);
+            if (!Number.isInteger(bags) || bags < minimum) {
+                setStatus("nwppStatus", `Minimum NWPP bag contribution is ${minimum}.`, "error");
                 return;
             }
 
@@ -790,8 +1536,10 @@
             const form = event.currentTarget;
             const count = Number(form.elements.garment_count.value);
             const wantsUtility = form.elements.wants_utility_bag.checked;
-            if (!Number.isInteger(count) || count < 1) {
-                setStatus("garmentStatus", "Minimum garment contribution is 1.", "error");
+            const program = programSettings.find((item) => item.slug === "garment");
+            const minimum = Number(program?.minimum_quantity || 1);
+            if (!Number.isInteger(count) || count < minimum) {
+                setStatus("garmentStatus", `Minimum garment contribution is ${minimum}.`, "error");
                 return;
             }
 
@@ -813,6 +1561,35 @@
                 setStatus("garmentStatus", "Garment contribution saved.", "ok");
                 await loadDashboard();
             }
+        });
+
+        document.getElementById("customProgramForms").addEventListener("submit", async (event) => {
+            const form = event.target.closest("[data-program-contribution]");
+            if (!form) return;
+            event.preventDefault();
+            const program = programSettings.find((item) => item.id === form.dataset.programContribution);
+            const quantity = Number(form.elements.quantity.value);
+            const status = form.querySelector(".status");
+            if (!Number.isInteger(quantity) || quantity < Number(program?.minimum_quantity || 1)) {
+                status.textContent = `Minimum ${program?.name || "program"} contribution is ${program?.minimum_quantity || 1}.`;
+                status.className = "status error";
+                return;
+            }
+
+            status.textContent = "Saving...";
+            status.className = "status";
+            const { data: sessionData } = await supabase.auth.getSession();
+            const { error } = await supabase.from("program_contributions").insert({
+                organization_registration_id: summary.organization.id,
+                program_id: program.id,
+                department_id: summary.profile.role === "org_head" ? null : summary.profile.department_id,
+                user_id: sessionData.session.user.id,
+                quantity,
+                notes: form.elements.notes.value.trim() || null
+            });
+
+            status.textContent = error ? error.message : `${program.name} contribution saved.`;
+            status.className = `status ${error ? "error" : "ok"}`;
         });
 
         departmentForm.addEventListener("submit", async (event) => {
@@ -892,6 +1669,15 @@
         document.getElementById("peopleList").addEventListener("click", async (event) => {
             const editButton = event.target.closest("[data-edit-employee]");
             const deactivateButton = event.target.closest("[data-deactivate-employee]");
+            const copyButton = event.target.closest("[data-copy-code]");
+
+            if (copyButton) {
+                await navigator.clipboard.writeText(copyButton.dataset.copyCode);
+                const original = copyButton.innerHTML;
+                copyButton.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+                setTimeout(() => { copyButton.innerHTML = original; }, 1400);
+                return;
+            }
 
             if (editButton) {
                 const person = (summary.employees || []).find((item) => item.id === editButton.dataset.editEmployee);
@@ -916,6 +1702,68 @@
             }
         });
 
+        document.getElementById("peopleSearch").addEventListener("input", (event) => {
+            peopleFilters.search = event.target.value.trim();
+            renderPeople();
+        });
+
+        document.getElementById("peopleOrganisationFilter").addEventListener("change", (event) => {
+            peopleFilters.organizationId = event.target.value;
+            peopleFilters.departmentId = "";
+            configurePeopleFilters();
+            renderPeople();
+        });
+
+        document.getElementById("peopleDepartmentFilter").addEventListener("change", (event) => {
+            peopleFilters.departmentId = event.target.value;
+            renderPeople();
+        });
+
+        document.getElementById("peopleVolunteerFilter").addEventListener("change", (event) => {
+            peopleFilters.volunteer = event.target.value;
+            renderPeople();
+        });
+
+        profileSettingsForm.elements.wants_volunteer.addEventListener("change", configureSettingsPhoto);
+        profileSettingsForm.elements.photograph_url.addEventListener("input", configureSettingsPhoto);
+
+        document.getElementById("removeProfileImage").addEventListener("click", () => {
+            profileSettingsForm.elements.photograph_url.value = "";
+            configureSettingsPhoto();
+            setStatus("settingsStatus", "Image will be removed when you save.");
+        });
+
+        document.getElementById("removeSocialHandle").addEventListener("click", () => {
+            profileSettingsForm.elements.social_media_handle.value = "";
+            setStatus("settingsStatus", "Social handle will be removed when you save.");
+        });
+
+        profileSettingsForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const profilePatch = readProfileSettings();
+            if (profilePatch.photograph_url && !safeHttpUrl(profilePatch.photograph_url)) {
+                setStatus("settingsStatus", "Use a valid http or https image URL.", "error");
+                return;
+            }
+
+            setStatus("settingsStatus", "Saving profile...");
+            const { error } = await supabase
+                .from("profiles")
+                .update(profilePatch)
+                .eq("id", summary.profile.id);
+
+            if (error) {
+                setStatus("settingsStatus", error.message, "error");
+                return;
+            }
+
+            syncCurrentProfile(profilePatch);
+            configureSettingsPhoto();
+            renderPeople();
+            renderSettings();
+            setStatus("settingsStatus", "Profile updated.", "ok");
+        });
+
         cancelEmployeeEdit.addEventListener("click", clearEmployeeEdit);
 
         panelLinks.forEach((link) => {
@@ -923,6 +1771,24 @@
                 event.preventDefault();
                 showPanel(link.dataset.panelLink);
             });
+        });
+        menuButton.addEventListener("click", () => {
+            if (document.body.classList.contains("menu-open")) closeSidebar();
+            else openSidebar();
+        });
+        sidebarClose.addEventListener("click", closeSidebar);
+        sidebarBackdrop.addEventListener("click", closeSidebar);
+        window.addEventListener("hashchange", () => {
+            showPanel(location.hash ? location.hash.slice(1) : "overview", false);
+        });
+        window.addEventListener("popstate", () => {
+            showPanel(location.hash ? location.hash.slice(1) : "overview", false);
+        });
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 700) closeSidebar();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") closeSidebar();
         });
 
         logoutButton.addEventListener("click", async () => {
@@ -932,7 +1798,7 @@
 
         renderPersonFields(document.querySelector("[data-nodal-fields]"), "nodal");
         renderPersonFields(document.querySelector("[data-employee-fields]"), "employee");
-        showPanel(location.hash ? location.hash.slice(1) : "overview");
+        showPanel(location.hash ? location.hash.slice(1) : "overview", false);
         loadDashboard();
     </script>
 </body>

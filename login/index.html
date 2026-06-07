@@ -47,12 +47,15 @@
             flex: 0.9;
             display: block;
             position: relative;
-            background: #f1f5f9;
+            background: #ffffff;
+            padding: 24px;
         }
         .image-side img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            object-position: center;
+            display: block;
         }
         @media (max-width: 768px) {
             .card {
@@ -156,7 +159,7 @@
             <a class="link-button" href="/register/"><i class="fa-solid fa-building-circle-check"></i> Organisation Registration</a>
         </div>
         <div class="image-side">
-            <img src="/login.jpeg" alt="VESACINDIA Platform Preview">
+            <img src="/favicon.jpeg" alt="VESACINDIA Platform Preview">
         </div>
     </main>
 
