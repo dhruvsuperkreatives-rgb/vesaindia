@@ -583,6 +583,7 @@
                     <span class="side-count" id="missionPeopleCount">0</span>
                 </a>
                 <a class="side-link" href="#balances" data-panel-link="balances"><i class="fa-solid fa-indian-rupee-sign"></i> Balances</a>
+                <a class="side-link" href="#impact" data-panel-link="impact"><i class="fa-solid fa-leaf"></i> Impact</a>
                 <a class="side-link" href="#settings" data-panel-link="settings"><i class="fa-solid fa-gear"></i> Settings</a>
             </nav>
             <div class="sidebar-identity hidden" id="sidebarIdentity">
@@ -836,6 +837,20 @@
                         </article>
                     </section>
 
+                    <section class="dashboard-panel" data-panel="impact">
+                        <div class="panel-intro">
+                            <div>
+                                <h2>Organisation Impact</h2>
+                                <p class="muted">Environmental footprint and positive community benefits achieved by our organisation.</p>
+                            </div>
+                            <label class="search-box" style="width: min(280px, 100%); display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; background: white;">
+                                <i class="fa-solid fa-magnifying-glass" style="color: var(--muted); font-size: 13px;"></i>
+                                <input id="orgImpactSearch" type="search" placeholder="Search departments..." style="border: 0; outline: 0; background: transparent; min-height: 38px; padding: 0; font-size: 13px;">
+                            </label>
+                        </div>
+                        <div id="orgImpactContent"></div>
+                    </section>
+
                     <section class="dashboard-panel" data-panel="settings">
                         <div class="panel-intro">
                             <div>
@@ -909,6 +924,7 @@
 
     <script type="module">
         import { supabase } from "../supabaseClient.js";
+        import { renderOrgImpact } from "./orgImpact.js";
 
         const pendingRegistrationKey = "aashayein_pending_registration";
         const panelLinks = [...document.querySelectorAll("[data-panel-link]")];
@@ -1302,6 +1318,14 @@
             renderBalances();
             configureContributionForms();
             renderSettings();
+            renderOrgImpactPage();
+        }
+
+        function renderOrgImpactPage() {
+            const container = document.getElementById("orgImpactContent");
+            if (!container) return;
+            const search = document.getElementById("orgImpactSearch")?.value || "";
+            renderOrgImpact(container, summary, search);
         }
 
         function renderDepartments() {
@@ -1763,6 +1787,8 @@
             renderSettings();
             setStatus("settingsStatus", "Profile updated.", "ok");
         });
+
+        document.getElementById("orgImpactSearch").addEventListener("input", renderOrgImpactPage);
 
         cancelEmployeeEdit.addEventListener("click", clearEmployeeEdit);
 

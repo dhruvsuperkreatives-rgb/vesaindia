@@ -12,6 +12,7 @@ import { renderApprovals } from "./approvals.js";
 import { renderOrganisations } from "./organisations.js";
 import { renderReports } from "./reports.js";
 import { renderSettings } from "./settings.js";
+import { renderImpact } from "./impact.js";
 import { populatePeopleFilters, renderPeople } from "./people.js";
 
 const pageTitles = {
@@ -20,7 +21,8 @@ const pageTitles = {
     organisations: "Organisations",
     people: "Mission People",
     reports: "Reports",
-    settings: "Settings"
+    settings: "Settings",
+    impact: "Impact"
 };
 
 const elements = {
@@ -34,10 +36,12 @@ const elements = {
     people: document.getElementById("peopleContent"),
     reports: document.getElementById("reportsContent"),
     settings: document.getElementById("settingsContent"),
+    impact: document.getElementById("impactContent"),
     notice: document.getElementById("globalNotice"),
     pendingCount: document.getElementById("pendingNavCount"),
     peopleCount: document.getElementById("peopleNavCount"),
     search: document.getElementById("organisationSearch"),
+    impactSearch: document.getElementById("impactSearch"),
     dialog: document.getElementById("editOrganisationDialog"),
     editForm: document.getElementById("editOrganisationForm"),
     programDialog: document.getElementById("editProgramDialog"),
@@ -111,6 +115,7 @@ function renderAll() {
     );
     renderReports(elements.reports, model, reportFilters);
     renderSettings(elements.settings, model.programs);
+    renderImpact(elements.impact, model, elements.impactSearch.value);
     elements.pendingCount.textContent = model.organisations.filter((org) => org.status === "pending").length;
     elements.peopleCount.textContent = model.missionPeople.length;
 }
@@ -232,6 +237,10 @@ document.addEventListener("click", (event) => {
 
 elements.search.addEventListener("input", () => {
     renderOrganisations(elements.organisations, model, elements.search.value);
+});
+
+elements.impactSearch.addEventListener("input", () => {
+    renderImpact(elements.impact, model, elements.impactSearch.value);
 });
 
 document.getElementById("adminPeopleSearch").addEventListener("input", (event) => {
