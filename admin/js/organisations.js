@@ -73,6 +73,9 @@ export function renderOrganisations(container, model, search = "") {
                             <i class="fa-solid fa-ban"></i> Revoke access
                         </button>
                     ` : ""}
+                    <button class="danger-button" type="button" data-delete-organisation="${escapeHtml(org.id)}">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
                 </div>
             </article>
         `;

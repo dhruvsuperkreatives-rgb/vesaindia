@@ -29,12 +29,24 @@ export function buildAdminModel(raw) {
         departmentsByOrg.set(id, (departmentsByOrg.get(id) || 0) + 1);
     }
 
+    const diariesByOrg = new Map();
+    const diaryProgram = raw.programs?.find((p) => p.slug === "diary");
+    if (diaryProgram && raw.programContributions) {
+        for (const item of raw.programContributions) {
+            if (item.program_id === diaryProgram.id) {
+                const id = item.organization_registration_id;
+                diariesByOrg.set(id, (diariesByOrg.get(id) || 0) + Number(item.quantity || 0));
+            }
+        }
+    }
+
     const organisations = raw.organisations.map((org) => {
         const people = peopleByOrg.get(org.id) || { nodal: 0, employees: 0 };
         return {
             ...org,
             nwppAchieved: contributionsByOrg.get(org.id) || 0,
             garmentsAchieved: garmentsByOrg.get(org.id) || 0,
+            diariesAchieved: diariesByOrg.get(org.id) || 0,
             nodalCount: Math.max(people.nodal, departmentsByOrg.get(org.id) || 0),
             employeeCount: people.employees
         };

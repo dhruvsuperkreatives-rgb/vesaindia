@@ -30,7 +30,7 @@ export async function loadAdminData() {
 
     if (organisationsResult.error) throw organisationsResult.error;
 
-    const [nwpp, garments, profiles, departments, programs, missionPeople] = await Promise.all([
+    const [nwpp, garments, profiles, departments, programs, missionPeople, programContributions] = await Promise.all([
         optionalQuery("NWPP contributions", supabase
             .from("nwpp_contributions")
             .select("id, created_at, organization_registration_id, bags_count, status")),
@@ -48,7 +48,10 @@ export async function loadAdminData() {
             .select("*")
             .order("sort_order", { ascending: true })
             .order("name", { ascending: true })),
-        optionalQuery("Mission people", supabase.rpc("get_mission_people"))
+        optionalQuery("Mission people", supabase.rpc("get_mission_people")),
+        optionalQuery("Program contributions", supabase
+            .from("program_contributions")
+            .select("id, created_at, organization_registration_id, program_id, quantity, status"))
     ]);
 
     return {
@@ -59,7 +62,8 @@ export async function loadAdminData() {
         departments: departments.data,
         programs: programs.data,
         missionPeople: missionPeople.data,
-        warnings: [nwpp.warning, garments.warning, profiles.warning, departments.warning, programs.warning, missionPeople.warning].filter(Boolean)
+        programContributions: programContributions.data,
+        warnings: [nwpp.warning, garments.warning, profiles.warning, departments.warning, programs.warning, missionPeople.warning, programContributions.warning].filter(Boolean)
     };
 }
 
@@ -110,6 +114,14 @@ export async function updateOrganisation(id, changes) {
 
     if (error) throw error;
     return data;
+}
+
+export async function deleteOrganisation(id) {
+    const { error } = await supabase
+        .from("organization_registrations")
+        .delete()
+        .eq("id", id);
+    if (error) throw error;
 }
 
 export async function signOut() {

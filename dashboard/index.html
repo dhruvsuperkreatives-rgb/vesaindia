@@ -1325,7 +1325,7 @@
             const container = document.getElementById("orgImpactContent");
             if (!container) return;
             const search = document.getElementById("orgImpactSearch")?.value || "";
-            renderOrgImpact(container, summary, search);
+            renderOrgImpact(container, summary, search, programSettings);
         }
 
         function renderDepartments() {
@@ -1512,12 +1512,14 @@
             }
 
             if (summary.approved) {
-                const [programResult, selectionResult] = await Promise.all([
+                const [programResult, selectionResult, contribResult] = await Promise.all([
                     supabase.from("mission_programs").select("*").eq("is_active", true).order("sort_order"),
-                    supabase.from("organization_programs").select("program_id").eq("organization_registration_id", summary.organization.id)
+                    supabase.from("organization_programs").select("program_id").eq("organization_registration_id", summary.organization.id),
+                    supabase.from("program_contributions").select("program_id, quantity, department_id").eq("organization_registration_id", summary.organization.id)
                 ]);
                 programSettings = programResult.data || [];
                 selectedProgramIds = (selectionResult.data || []).map((item) => item.program_id);
+                summary.program_contributions = contribResult.data || [];
                 const { data: missionPeople, error: directoryError } = await supabase.rpc("get_mission_people");
                 if (!directoryError) summary.mission_people = missionPeople || [];
             }

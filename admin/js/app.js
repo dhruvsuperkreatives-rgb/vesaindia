@@ -4,7 +4,8 @@ import {
     saveProgram,
     setProgramActive,
     signOut,
-    updateOrganisation
+    updateOrganisation,
+    deleteOrganisation
 } from "./api.js";
 import { buildAdminModel, replaceOrganisation, replaceProgram } from "./data.js";
 import { renderHome } from "./home.js";
@@ -56,6 +57,7 @@ let model = buildAdminModel({
     departments: [],
     programs: [],
     missionPeople: [],
+    programContributions: [],
     warnings: []
 });
 let reportFilters = { grouping: "day", start: "", organizationId: "" };
@@ -146,6 +148,18 @@ async function changeStatus(id, status) {
     }
 }
 
+async function deleteOrganisationAction(id) {
+    if (!window.confirm("Are you sure you want to permanently delete this organisation and all its associated data? This action cannot be undone.")) return;
+    showNotice("Deleting organisation...");
+    try {
+        await deleteOrganisation(id);
+        await refreshData();
+        showNotice("Organisation deleted successfully.");
+    } catch (error) {
+        showNotice(error.message || "Organisation could not be deleted.", "error");
+    }
+}
+
 function openEditDialog(id) {
     const org = model.organisations.find((item) => item.id === id);
     if (!org) return;
@@ -217,6 +231,12 @@ document.addEventListener("click", (event) => {
 
     const editButton = event.target.closest("[data-edit-organisation]");
     if (editButton) openEditDialog(editButton.dataset.editOrganisation);
+
+    const deleteButton = event.target.closest("[data-delete-organisation]");
+    if (deleteButton) {
+        deleteOrganisationAction(deleteButton.dataset.deleteOrganisation);
+        return;
+    }
 
     const editProgramButton = event.target.closest("[data-edit-program]");
     if (editProgramButton) openProgramDialog(editProgramButton.dataset.editProgram);
