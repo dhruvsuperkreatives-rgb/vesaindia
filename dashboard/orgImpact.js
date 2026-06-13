@@ -461,6 +461,49 @@ export function renderOrgImpact(container, summary, search = "", programSettings
             </div>
         </div>
 
+        <!-- Organisation Visual Analytics Grid (2x2) -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 24px; margin-bottom: 24px;">
+            <!-- Pie Chart: Contribution Categories (NWPP vs Garments vs Diaries) -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--ink); font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-chart-pie" style="color: var(--blue);"></i> Contribution Categories Distribution
+                </h3>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="orgCategoryPieChart"></canvas>
+                </div>
+            </article>
+
+            <!-- Radar Chart: Ecological Footprint Comparison -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--ink); font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-chart-simple" style="color: var(--green);"></i> Ecological Footprint Metrics
+                </h3>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="orgFootprintRadarChart"></canvas>
+                </div>
+            </article>
+
+            <!-- Bar Chart: Contribution comparison across the top 5 departments -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--ink); font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-building" style="color: #a0522d;"></i> Top 5 Departments Comparison
+                </h3>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="orgDeptBarChart"></canvas>
+                </div>
+            </article>
+
+            <!-- Line Chart: Chronological Trend Line -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--ink); font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-chart-line" style="color: var(--green);"></i> Chronological Trend Line
+                </h3>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="orgTrendLineChart"></canvas>
+                </div>
+            </article>
+        </div>
+
          <!-- Leaderboards / Top Performers Section -->
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 24px; margin-bottom: 24px;">
             <!-- Top Departments -->
@@ -602,6 +645,232 @@ export function renderOrgImpact(container, summary, search = "", programSettings
             ` : `<div style="color: var(--muted); padding: 16px 0; text-align: center;">No nodal departments found matching search term.</div>`}
         </div>
     `;
+
+    setTimeout(() => {
+        // 1. Pie Chart
+        const pieCtx = document.getElementById("orgCategoryPieChart")?.getContext("2d");
+        if (pieCtx) {
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['NWPP Bags', 'Garments', 'Diaries'],
+                    datasets: [{
+                        data: [totalNWPP, totalGarments, totalDiaries],
+                        backgroundColor: ['#2f8f6b', '#2f6fed', '#a0522d'],
+                        borderWidth: 1.5,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Radar Chart
+        const radarCtx = document.getElementById("orgFootprintRadarChart")?.getContext("2d");
+        if (radarCtx) {
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['SUP Bags (x100)', 'Plastic (kg)', 'Water (L / 10)', 'Energy (kWh)', 'CO2 (kg)'],
+                    datasets: [
+                        {
+                            label: 'NWPP Bags',
+                            data: [totalNWPP, plasticPrevented, waterSaved / 10, energySaved, co2Reduced],
+                            backgroundColor: 'rgba(47, 143, 107, 0.15)',
+                            borderColor: '#2f8f6b',
+                            pointBackgroundColor: '#2f8f6b',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Garments',
+                            data: [0, garmentWasteDiverted, garmentWaterPreserved / 10, garmentEnergyPreserved, garmentCo2Extended],
+                            backgroundColor: 'rgba(47, 111, 237, 0.15)',
+                            borderColor: '#2f6fed',
+                            pointBackgroundColor: '#2f6fed',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Diaries',
+                            data: [0, 0, diaryWaterSaved / 10, diaryEnergySaved, diaryCo2Avoided],
+                            backgroundColor: 'rgba(160, 82, 45, 0.15)',
+                            borderColor: '#a0522d',
+                            pointBackgroundColor: '#a0522d',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            ticks: { font: { size: 8 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. Bar Chart
+        const barCtx = document.getElementById("orgDeptBarChart")?.getContext("2d");
+        if (barCtx) {
+            const topDeptsData = [...departments].map(dept => {
+                const bags = Number(dept.nwpp_bags || 0);
+                const garments = Number(dept.garments || 0);
+                const diaries = Number(diariesByDept.get(dept.id) || 0);
+                return {
+                    name: dept.department_name || "Unassigned",
+                    bags,
+                    garments,
+                    diaries
+                };
+            })
+            .sort((a, b) => (b.bags + b.garments + b.diaries) - (a.bags + a.garments + a.diaries))
+            .slice(0, 5);
+
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: topDeptsData.map(d => d.name),
+                    datasets: [
+                        {
+                            label: 'NWPP Bags',
+                            data: topDeptsData.map(d => d.bags),
+                            backgroundColor: '#2f8f6b'
+                        },
+                        {
+                            label: 'Garments',
+                            data: topDeptsData.map(d => d.garments),
+                            backgroundColor: '#2f6fed'
+                        },
+                        {
+                            label: 'Diaries',
+                            data: topDeptsData.map(d => d.diaries),
+                            backgroundColor: '#a0522d'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
+                        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 9 } } }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. Line Chart
+        const lineCtx = document.getElementById("orgTrendLineChart")?.getContext("2d");
+        if (lineCtx) {
+            const datesMap = new Map();
+            const addTrend = (dateStr, qty, type) => {
+                if (!dateStr) return;
+                const date = new Date(dateStr);
+                if (Number.isNaN(date.getTime())) return;
+                const key = new Intl.DateTimeFormat("en-IN", { month: "short", year: "numeric" }).format(date);
+                const timestamp = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+                if (!datesMap.has(key)) {
+                    datesMap.set(key, { key, timestamp, nwpp: 0, garments: 0, diaries: 0 });
+                }
+                datesMap.get(key)[type] += qty;
+            };
+
+            (summary.nwpp_contributions || []).forEach(c => addTrend(c.created_at, Number(c.bags_count || 0), 'nwpp'));
+            (summary.garment_contributions || []).forEach(c => addTrend(c.created_at, Number(c.garment_count || 0), 'garments'));
+            (summary.program_contributions || [])
+                .filter(item => item.program_id === diaryProgramId)
+                .forEach(c => addTrend(c.created_at, Number(c.quantity || 0), 'diaries'));
+
+            const trendData = [...datesMap.values()].sort((a, b) => a.timestamp - b.timestamp);
+
+            new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: trendData.map(t => t.key),
+                    datasets: [
+                        {
+                            label: 'NWPP Bags',
+                            data: trendData.map(t => t.nwpp),
+                            borderColor: '#2f8f6b',
+                            backgroundColor: 'rgba(47, 143, 107, 0.05)',
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Garments',
+                            data: trendData.map(t => t.garments),
+                            borderColor: '#2f6fed',
+                            backgroundColor: 'rgba(47, 111, 237, 0.05)',
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Diaries',
+                            data: trendData.map(t => t.diaries),
+                            borderColor: '#a0522d',
+                            backgroundColor: 'rgba(160, 82, 45, 0.05)',
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { font: { size: 9 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+    }, 0);
 
     // Delegated container click registration
     if (!container.dataset.listenerBound) {

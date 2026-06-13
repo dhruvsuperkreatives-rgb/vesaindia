@@ -102,6 +102,7 @@ function showRoute(route = currentRoute()) {
     elements.routeLinks.forEach((link) => link.classList.toggle("active", link.dataset.route === selected));
     if (!location.hash) history.replaceState(null, "", `#${selected}`);
     closeMenu();
+    renderAll();
 }
 
 function renderAll() {
@@ -218,7 +219,6 @@ document.addEventListener("click", (event) => {
         }
         location.hash = `${routeName}?organisation=${encodeURIComponent(organizationId)}`;
         applyRouteFilters(routeName);
-        renderAll();
         showRoute(routeName);
         return;
     }
@@ -369,7 +369,6 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
 window.addEventListener("hashchange", () => {
     const route = currentRoute();
     applyRouteFilters(route);
-    renderAll();
     showRoute(route);
 });
 

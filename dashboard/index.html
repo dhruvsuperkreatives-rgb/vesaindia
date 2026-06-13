@@ -680,6 +680,32 @@
                                 <ul class="list" id="departmentSnapshot"></ul>
                             </article>
                         </div>
+                        <div class="grid" style="margin-top: 24px;">
+                            <article class="card" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <h3 style="margin-top:0; margin-bottom:16px; font-size:14px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                    <i class="fa-solid fa-chart-pie" style="color: var(--blue);"></i> Organisation Head vs Nodal Officers Share
+                                </h3>
+                                <div style="position: relative; height: 180px; width: 100%;">
+                                    <canvas id="overviewSharePieChart"></canvas>
+                                </div>
+                            </article>
+                            <article class="card" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <h3 style="margin-top:0; margin-bottom:16px; font-size:14px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                    <i class="fa-solid fa-chart-bar" style="color: var(--green);"></i> Department Contributions Comparison
+                                </h3>
+                                <div style="position: relative; height: 180px; width: 100%;">
+                                    <canvas id="overviewDeptsBarChart"></canvas>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="card" style="margin-top: 24px; padding: 20px;">
+                            <h3 style="margin-top:0; margin-bottom:16px; font-size:14px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <i class="fa-solid fa-leaf" style="color: var(--green);"></i> Organisation Ecological Impact Breakdown
+                            </h3>
+                            <div style="position: relative; height: 260px; width: 100%;">
+                                <canvas id="overviewEcologicalImpactChart"></canvas>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="dashboard-panel" data-panel="contribute">
@@ -922,6 +948,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { supabase } from "../supabaseClient.js";
         import { renderOrgImpact } from "./orgImpact.js";
@@ -1178,6 +1205,11 @@
             if (updateHistory && location.hash !== `#${selected}`) history.pushState(null, "", `#${selected}`);
             closeSidebar();
             window.scrollTo({ top: 0, behavior: "smooth" });
+            if (selected === "impact") {
+                renderOrgImpactPage();
+            } else if (selected === "overview") {
+                renderOverviewCharts();
+            }
         }
 
         function renderPublicTotals(target, totals = {}) {
@@ -1338,6 +1370,7 @@
             configureContributionForms();
             renderSettings();
             renderOrgImpactPage();
+            renderOverviewCharts();
         }
 
         function renderOrgImpactPage() {
@@ -1345,6 +1378,151 @@
             if (!container) return;
             const search = document.getElementById("orgImpactSearch")?.value || "";
             renderOrgImpact(container, summary, search, programSettings);
+        }
+
+        function renderOverviewCharts() {
+            if (!summary) return;
+            const orgTotals = summary.org_totals || {};
+            const departments = summary.departments || [];
+
+            // 1. Share of direct Org Head vs all Nodal Officers / Departments
+            const allDeptsBags = departments.reduce((sum, d) => sum + Number(d.nwpp_bags || 0), 0);
+            const allDeptsGarments = departments.reduce((sum, d) => sum + Number(d.garments || 0), 0);
+            const totalBags = Number(orgTotals.nwpp_bags || 0);
+            const totalGarments = Number(orgTotals.garments || 0);
+            
+            const orgHeadBags = Math.max(0, totalBags - allDeptsBags);
+            const orgHeadGarments = Math.max(0, totalGarments - allDeptsGarments);
+            
+            const headTotal = orgHeadBags + orgHeadGarments;
+            const nodalTotal = allDeptsBags + allDeptsGarments;
+
+            const shareCtx = document.getElementById("overviewSharePieChart")?.getContext("2d");
+            if (shareCtx) {
+                new Chart(shareCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Organisation Head (Direct)', 'Nodal Officers (Departments)'],
+                        datasets: [{
+                            data: [headTotal, nodalTotal],
+                            backgroundColor: ['#2f6fed', '#2f8f6b'],
+                            borderWidth: 1.5,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Department Contributions Bar Chart
+            const barCtx = document.getElementById("overviewDeptsBarChart")?.getContext("2d");
+            if (barCtx) {
+                const deptsData = [...departments]
+                    .sort((a, b) => (Number(b.nwpp_bags || 0) + Number(b.garments || 0)) - (Number(a.nwpp_bags || 0) + Number(a.garments || 0)))
+                    .slice(0, 5);
+
+                new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: deptsData.map(d => d.department_name || "Unassigned"),
+                        datasets: [
+                            {
+                                label: 'NWPP Bags',
+                                data: deptsData.map(d => Number(d.nwpp_bags || 0)),
+                                backgroundColor: '#2f8f6b'
+                            },
+                            {
+                                label: 'Garments',
+                                data: deptsData.map(d => Number(d.garments || 0)),
+                                backgroundColor: '#2f6fed'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
+                            y: { stacked: true, beginAtZero: true, ticks: { font: { size: 9 } } }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. Ecological Impact Breakdown Chart
+            const ecoCtx = document.getElementById("overviewEcologicalImpactChart")?.getContext("2d");
+            if (ecoCtx) {
+                const diaryProgram = (programSettings || []).find((p) => p.slug === "diary");
+                const totalDiaries = diaryProgram
+                    ? (summary.program_contributions || [])
+                        .filter((item) => item.program_id === diaryProgram.id)
+                        .reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+                    : 0;
+
+                const plasticPrevented = (totalBags * 0.25) + (totalGarments * 0.7);
+                const crudeOilSaved = totalBags * 0.44;
+                const waterSaved = (totalBags * 45) + (totalGarments * 7500) + (totalDiaries * 40.5);
+                const energySaved = (totalBags * 3.75) + (totalGarments * 25) + (totalDiaries * 3);
+                const co2Reduced = (totalBags * 1.5) + (totalGarments * 25) + (totalDiaries * 1.35);
+
+                new Chart(ecoCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            'Plastic Prevented (kg)',
+                            'Crude Oil Saved (kg)',
+                            'Water Saved (L)',
+                            'Energy Saved (kWh)',
+                            'CO₂ Reduced (kg)'
+                        ],
+                        datasets: [{
+                            label: 'Ecological Metrics',
+                            data: [
+                                Number(plasticPrevented.toFixed(1)),
+                                Number(crudeOilSaved.toFixed(1)),
+                                Number(waterSaved.toFixed(1)),
+                                Number(energySaved.toFixed(1)),
+                                Number(co2Reduced.toFixed(1))
+                            ],
+                            backgroundColor: [
+                                '#10b981', // Plastic
+                                '#d97706', // Crude Oil
+                                '#3b82f6', // Water
+                                '#f59e0b', // Energy
+                                '#8b5cf6'  // CO2
+                            ],
+                            borderRadius: 6,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' } } },
+                            y: { beginAtZero: true, ticks: { font: { size: 9 } } }
+                        }
+                    }
+                });
+            }
         }
 
         function renderDepartments() {

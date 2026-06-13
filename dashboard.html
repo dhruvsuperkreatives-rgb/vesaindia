@@ -295,10 +295,10 @@
                 <!-- Card 1 -->
                 <div class="card text-emerald-500" style="border-top: 3px solid #10b981;">
                     <div class="kpi-title">SUP Bags Avoided</div>
-                    <div class="kpi-value">2,47,500</div>
-                    <div class="kpi-sub text-slate-500">annually - 3,300 × 100 × 75%</div>
+                    <div class="kpi-value" id="kpiBags">0</div>
+                    <div class="kpi-sub text-slate-500" id="kpiBagsSub">annually - 3,300 × 100 × 75%</div>
                     <div class="kpi-growth"><i class="fas fa-arrow-up"></i> +12% this month</div>
-                    <div class="sparkline-container">
+                    <div class="sparkline-container" id="sparklineBags">
                         <div class="spark-bar" style="height: 30%"></div>
                         <div class="spark-bar" style="height: 40%"></div>
                         <div class="spark-bar" style="height: 45%"></div>
@@ -311,10 +311,10 @@
                 <!-- Card 2 -->
                 <div class="card text-cyan-500" style="border-top: 3px solid #06b6d4;">
                     <div class="kpi-title">Vendors Supported</div>
-                    <div class="kpi-value">3,300</div>
-                    <div class="kpi-sub text-slate-500">street & micro sellers</div>
-                    <div class="kpi-growth"><i class="fas fa-plus"></i> +220 this qtr</div>
-                    <div class="sparkline-container">
+                    <div class="kpi-value" id="kpiVendors">0</div>
+                    <div class="kpi-sub text-slate-500">active locations</div>
+                    <div class="kpi-growth"><i class="fas fa-plus"></i> +10% this qtr</div>
+                    <div class="sparkline-container" id="sparklineVendors">
                         <div class="spark-bar" style="height: 40%"></div>
                         <div class="spark-bar" style="height: 50%"></div>
                         <div class="spark-bar" style="height: 55%"></div>
@@ -327,10 +327,10 @@
                 <!-- Card 3 -->
                 <div class="card text-amber-500" style="border-top: 3px solid #f59e0b;">
                     <div class="kpi-title">Vendor Savings</div>
-                    <div class="kpi-value">₹37,125</div>
-                    <div class="kpi-sub text-slate-500">2,47,500 × ₹0.15</div>
+                    <div class="kpi-value" id="kpiSavings">₹0</div>
+                    <div class="kpi-sub text-slate-500" id="kpiSavingsSub">Bags × ₹0.15</div>
                     <div class="kpi-growth"><i class="fas fa-coins"></i> Annual est.</div>
-                    <div class="sparkline-container">
+                    <div class="sparkline-container" id="sparklineSavings">
                         <div class="spark-bar" style="height: 20%"></div>
                         <div class="spark-bar" style="height: 30%"></div>
                         <div class="spark-bar" style="height: 40%"></div>
@@ -343,10 +343,10 @@
                 <!-- Card 4 -->
                 <div class="card text-blue-500" style="border-top: 3px solid #3b82f6;">
                     <div class="kpi-title">Skilled Workers</div>
-                    <div class="kpi-value">184</div>
-                    <div class="kpi-sub text-slate-500">earning ₹15,000 / mo</div>
-                    <div class="kpi-growth"><i class="fas fa-users"></i> 23 SHGs</div>
-                    <div class="sparkline-container">
+                    <div class="kpi-value" id="kpiWorkers">0</div>
+                    <div class="kpi-sub text-slate-500">engaged in mission</div>
+                    <div class="kpi-growth"><i class="fas fa-users"></i> Active staff</div>
+                    <div class="sparkline-container" id="sparklineWorkers">
                         <div class="spark-bar" style="height: 30%"></div>
                         <div class="spark-bar" style="height: 35%"></div>
                         <div class="spark-bar" style="height: 45%"></div>
@@ -359,10 +359,10 @@
                 <!-- Card 5 -->
                 <div class="card text-purple-500" style="border-top: 3px solid #8b5cf6;">
                     <div class="kpi-title">CO₂ Avoided</div>
-                    <div class="kpi-value">4.2 t</div>
+                    <div class="kpi-value" id="kpiCO2">0 t</div>
                     <div class="kpi-sub text-slate-500">metric tonnes / year</div>
                     <div class="kpi-growth"><i class="fas fa-chart-line"></i> Growing</div>
-                    <div class="sparkline-container">
+                    <div class="sparkline-container" id="sparklineCO2">
                         <div class="spark-bar" style="height: 10%"></div>
                         <div class="spark-bar" style="height: 20%"></div>
                         <div class="spark-bar" style="height: 40%"></div>
@@ -372,6 +372,29 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Interactive Analytics Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1: Contribution Trend (Line Chart) -->
+                <div class="card" style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);">
+                    <h2 class="text-lg font-bold text-slate-900 mb-4" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Contribution Trends
+                    </h2>
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="contributionTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Organisation Contributions (Bar Chart) -->
+                <div class="card" style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);">
+                    <h2 class="text-lg font-bold text-slate-900 mb-4" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-chart-bar" style="color: var(--secondary);"></i> Top Performing Organisations
+                    </h2>
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="topOrgsChart"></canvas>
+                    </div>
+                </div>
             </div>
 
             <!-- Middle Section Grid -->
@@ -386,47 +409,47 @@
 
                     <!-- Progress Item 1 -->
                     <div class="progress-label">
-                        <span>SUP avoidance <span class="text-slate-400 font-normal">(target 5,00,000)</span></span>
-                        <span class="text-emerald-500">49.5%</span>
+                        <span>SUP avoidance <span class="text-slate-400 font-normal">(target 50,000)</span></span>
+                        <span class="text-emerald-500" id="progressPctSUP">0%</span>
                     </div>
                     <div class="progress-track">
-                        <div class="progress-fill bg-emerald-500" style="width: 49.5%;"></div>
+                        <div class="progress-fill bg-emerald-500" id="progressFillSUP" style="width: 0%;"></div>
                     </div>
 
                     <!-- Progress Item 2 -->
                     <div class="progress-label">
                         <span>Vendors onboarded <span class="text-slate-400 font-normal">(target 5,000)</span></span>
-                        <span class="text-cyan-500">66%</span>
+                        <span class="text-cyan-500" id="progressPctVendors">0%</span>
                     </div>
                     <div class="progress-track">
-                        <div class="progress-fill bg-cyan-500" style="width: 66%;"></div>
+                        <div class="progress-fill bg-cyan-500" id="progressFillVendors" style="width: 0%;"></div>
                     </div>
 
                     <!-- Progress Item 3 -->
                     <div class="progress-label">
                         <span>CO₂ reduction <span class="text-slate-400 font-normal">(target 10t)</span></span>
-                        <span class="text-amber-500">42%</span>
+                        <span class="text-amber-500" id="progressPctCO2">0%</span>
                     </div>
                     <div class="progress-track">
-                        <div class="progress-fill bg-amber-500" style="width: 42%;"></div>
+                        <div class="progress-fill bg-amber-500" id="progressFillCO2" style="width: 0%;"></div>
                     </div>
 
                     <!-- Progress Item 4 -->
                     <div class="progress-label">
                         <span>Workers engaged <span class="text-slate-400 font-normal">(target 300)</span></span>
-                        <span class="text-blue-500">61%</span>
+                        <span class="text-blue-500" id="progressPctWorkers">0%</span>
                     </div>
                     <div class="progress-track">
-                        <div class="progress-fill bg-blue-500" style="width: 61%;"></div>
+                        <div class="progress-fill bg-blue-500" id="progressFillWorkers" style="width: 0%;"></div>
                     </div>
 
                     <!-- Progress Item 5 -->
                     <div class="progress-label">
-                        <span>Donor funding <span class="text-slate-400 font-normal">(target ₹10L)</span></span>
-                        <span class="text-purple-500">38%</span>
+                        <span>Registered organisations <span class="text-slate-400 font-normal">(target 10)</span></span>
+                        <span class="text-purple-500" id="progressPctOrgs">0%</span>
                     </div>
                     <div class="progress-track" style="margin-bottom: 0;">
-                        <div class="progress-fill bg-purple-500" style="width: 38%;"></div>
+                        <div class="progress-fill bg-purple-500" id="progressFillOrgs" style="width: 0%;"></div>
                     </div>
                 </div>
 
@@ -436,41 +459,14 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Corporation</th>
-                                <th>Vendors</th>
+                                <th>Organisation</th>
+                                <th>Location</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="geographicReachBody">
                             <tr>
-                                <td>PMC Pune</td>
-                                <td>1,240</td>
-                                <td><span class="status-badge status-active">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td>PCMC Pimpri</td>
-                                <td>820</td>
-                                <td><span class="status-badge status-active">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td>Nashik MC</td>
-                                <td>540</td>
-                                <td><span class="status-badge status-expanding">Expanding</span></td>
-                            </tr>
-                            <tr>
-                                <td>Aurangabad</td>
-                                <td>380</td>
-                                <td><span class="status-badge status-pilot">Pilot</span></td>
-                            </tr>
-                            <tr>
-                                <td>Solapur MC</td>
-                                <td>200</td>
-                                <td><span class="status-badge status-onboarding">Onboarding</span></td>
-                            </tr>
-                            <tr>
-                                <td style="border-bottom: none;">Kolhapur MC</td>
-                                <td style="border-bottom: none;">120</td>
-                                <td style="border-bottom: none;"><span class="status-badge status-planned">Planned</span></td>
+                                <td colspan="3" class="text-center text-slate-400 py-4">Loading data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -480,6 +476,8 @@
             
         </div>
     </main>
-<script src="sidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="sidebar.js"></script>
+    <script type="module" src="dashboard.js"></script>
 </body>
 </html>

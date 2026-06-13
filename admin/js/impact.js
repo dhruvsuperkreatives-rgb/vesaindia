@@ -365,22 +365,9 @@ export function renderImpact(container, model, search = "") {
         <!-- Visual Charts Section -->
         <div class="content-grid" style="margin-top: 24px;">
             <article class="card" style="padding: 20px;">
-                <h3 style="margin-top: 0; margin-bottom: 18px; color: var(--ink); font-size: 16px;">Top Performing Organisations (Bags)</h3>
-                <div class="bar-chart-container" style="display: flex; flex-direction: column; gap: 14px;">
-                    ${topOrgs.length ? topOrgs.map(org => {
-                        const pct = Math.round((org.nwppAchieved / maxAchieved) * 100);
-                        return `
-                            <div>
-                                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px;">
-                                    <span style="font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 70%;">${escapeHtml(org.organization_name)}</span>
-                                    <span style="color: var(--green); font-weight: 700;">${numberText(org.nwppAchieved)} bags</span>
-                                </div>
-                                <div style="height: 10px; background: #e8edf3; border-radius: 999px; overflow: hidden;">
-                                    <div style="height: 100%; width: ${pct}%; background: var(--green); border-radius: 999px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-                                </div>
-                            </div>
-                        `;
-                    }).join("") : '<div style="color: var(--muted); font-size: 13px;">No data available</div>'}
+                <h3 style="margin-top: 0; margin-bottom: 18px; color: var(--ink); font-size: 16px;">Top Performing Organisations Comparison</h3>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="topOrgsHorizontalBar"></canvas>
                 </div>
             </article>
 
@@ -400,6 +387,37 @@ export function renderImpact(container, model, search = "") {
                             ${numberText(totalNWPP)} of ${numberText(totalTarget)} target bags achieved
                         </div>
                     </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- Ecological Radar Comparison Chart -->
+        <article class="card" style="padding: 24px; margin-top: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
+            <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--ink); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-chart-pie" style="color: var(--blue); font-size: 18px;"></i> Ecological Radar Comparison (Top 3 Organisations)
+            </h3>
+            <div style="position: relative; height: 280px; width: 100%;">
+                <canvas id="impactRadarChart"></canvas>
+            </div>
+        </article>
+
+        <!-- New Detailed Impact Analytics Row -->
+        <div class="content-grid" style="margin-top: 24px;">
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
+                <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--ink); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-seedling" style="color: var(--green); font-size: 18px;"></i> Cumulative Environmental Savings (Monthly)
+                </h3>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="impactSavingsTrendChart"></canvas>
+                </div>
+            </article>
+
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
+                <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--ink); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-bolt" style="color: var(--orange); font-size: 18px;"></i> Resource Footprint Breakdown (Water & Energy)
+                </h3>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="resourceFootprintPolarChart"></canvas>
                 </div>
             </article>
         </div>
@@ -650,4 +668,205 @@ export function renderImpact(container, model, search = "") {
             }
         });
     }
+
+    // Initialize Radar Chart
+    setTimeout(() => {
+        // Horizontal Bar Chart: Top Organisations bags vs garments
+        const topOrgsHorizontalCtx = document.getElementById("topOrgsHorizontalBar")?.getContext("2d");
+        if (topOrgsHorizontalCtx) {
+            new Chart(topOrgsHorizontalCtx, {
+                type: 'bar',
+                data: {
+                    labels: topOrgs.map(org => org.organization_name),
+                    datasets: [
+                        {
+                            label: 'NWPP Bags',
+                            data: topOrgs.map(org => org.nwppAchieved || 0),
+                            backgroundColor: '#2f8f6b'
+                        },
+                        {
+                            label: 'Garments',
+                            data: topOrgs.map(org => org.garmentsAchieved || 0),
+                            backgroundColor: '#2f6fed'
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    scales: {
+                        x: { stacked: true, beginAtZero: true },
+                        y: { stacked: true, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        const radarOrgs = [...organisations]
+            .sort((a, b) => ((b.nwppAchieved || 0) + (b.garmentsAchieved || 0) + (b.diariesAchieved || 0)) - ((a.nwppAchieved || 0) + (a.garmentsAchieved || 0) + (a.diariesAchieved || 0)))
+            .slice(0, 3);
+
+        const radarCtx = document.getElementById("impactRadarChart")?.getContext("2d");
+        if (radarCtx && radarOrgs.length > 0) {
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['NWPP Bags', 'Garments Donated', 'Diaries Contributed', 'Trees Preserved x10'],
+                    datasets: radarOrgs.map((org, index) => {
+                        const colors = [
+                            { border: '#2f8f6b', bg: 'rgba(47, 143, 107, 0.15)' },
+                            { border: '#2f6fed', bg: 'rgba(47, 111, 237, 0.15)' },
+                            { border: '#a0522d', bg: 'rgba(160, 82, 45, 0.15)' }
+                        ];
+                        const c = colors[index % colors.length];
+                        const orgBags = org.nwppAchieved || 0;
+                        const orgGarments = org.garmentsAchieved || 0;
+                        const orgDiaries = org.diariesAchieved || 0;
+                        const combinedTrees = (orgBags * MULTIPLIERS.trees) + (orgGarments * GARMENT_MULTIPLIERS.trees) + (orgDiaries * DIARY_MULTIPLIERS.trees);
+
+                        return {
+                            label: org.organization_name,
+                            data: [orgBags, orgGarments, orgDiaries, Math.round(combinedTrees * 10)],
+                            borderColor: c.border,
+                            backgroundColor: c.bg,
+                            borderWidth: 2.5,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: c.border,
+                            pointBorderWidth: 1.5
+                        };
+                    })
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11, weight: 'bold' }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            ticks: { font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Environmental Savings Trend Chart
+        const envSavingsCtx = document.getElementById("impactSavingsTrendChart")?.getContext("2d");
+        if (envSavingsCtx) {
+            const chronologicalContributions = [
+                ...(model.contributions || []).map(c => ({ date: c.created_at.split("T")[0], val: c.bags_count, type: 'bags' })),
+                ...(model.garments || []).map(g => ({ date: g.created_at.split("T")[0], val: g.garment_count, type: 'garments' }))
+            ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            let cumulativeCO2 = 0;
+            let cumulativeTrees = 0;
+            const savingsData = [];
+
+            chronologicalContributions.forEach(item => {
+                const bagsVal = item.type === 'bags' ? item.val : 0;
+                const garmentVal = item.type === 'garments' ? item.val : 0;
+                
+                cumulativeCO2 += (bagsVal * MULTIPLIERS.co2Kg) + (garmentVal * GARMENT_MULTIPLIERS.co2Kg);
+                cumulativeTrees += (bagsVal * MULTIPLIERS.trees) + (garmentVal * GARMENT_MULTIPLIERS.trees);
+
+                savingsData.push({
+                    date: new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short" }).format(new Date(item.date)),
+                    co2: cumulativeCO2,
+                    trees: cumulativeTrees
+                });
+            });
+
+            if (savingsData.length === 0) {
+                savingsData.push({ date: 'Start', co2: 0, trees: 0 });
+            }
+
+            new Chart(envSavingsCtx, {
+                type: 'line',
+                data: {
+                    labels: savingsData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'CO2 Avoided (kg)',
+                            data: savingsData.map(d => d.co2),
+                            borderColor: '#e11d48',
+                            backgroundColor: 'rgba(225, 29, 72, 0.05)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2.5
+                        },
+                        {
+                            label: 'Tree Equivalent',
+                            data: savingsData.map(d => d.trees),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2.5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10 } }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Resource Footprint Breakdown (Water & Energy) Polar Chart
+        const resourcePolarCtx = document.getElementById("resourceFootprintPolarChart")?.getContext("2d");
+        if (resourcePolarCtx) {
+            new Chart(resourcePolarCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['NWPP Water Saved', 'NWPP Energy Saved', 'Garment Water Preserved', 'Garment Energy Preserved', 'Diary Water Saved', 'Diary Energy Saved'],
+                    datasets: [{
+                        data: [
+                            waterSaved,
+                            energySaved,
+                            garmentWaterPreserved,
+                            garmentEnergyPreserved,
+                            diaryWaterSaved,
+                            diaryEnergySaved
+                        ],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(245, 158, 11, 0.6)',
+                            'rgba(37, 99, 235, 0.6)',
+                            'rgba(217, 119, 6, 0.6)',
+                            'rgba(96, 165, 250, 0.6)',
+                            'rgba(251, 191, 36, 0.6)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+    }, 0);
 }
