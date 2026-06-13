@@ -797,6 +797,14 @@
                             </form>
                             <article class="card" style="grid-column: 1 / -1;">
                                 <h2>People In This Mission</h2>
+                                <div id="specialLinkContainer" class="hidden" style="margin-bottom: 20px; padding: 16px; border: 1px dashed var(--line); border-radius: 8px; background: var(--wash);">
+                                    <h3 style="font-size: 16px; margin: 0 0 8px; color: var(--ink); font-weight: 700;">Employee Registration Link</h3>
+                                    <p class="muted" style="margin: 0 0 12px; font-size: 13px;">Share this special link with employees of your department to let them self-register:</p>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <input type="text" id="generatedLinkInput" readonly style="flex: 1; min-width: 200px; min-height: 40px; padding: 8px 12px;" placeholder="Generating link...">
+                                        <button type="button" id="copyLinkBtn" style="min-height: 40px; padding: 0 16px; background: var(--blue);"><i class="fa-regular fa-copy"></i> Copy Link</button>
+                                    </div>
+                                </div>
                                 <div class="directory-toolbar">
                                     <label>
                                         Search person or code
@@ -1341,6 +1349,22 @@
             departmentForm.classList.toggle("hidden", role !== "org_head");
             employeeForm.classList.toggle("hidden", role !== "nodal_officer");
 
+            if (role === "nodal_officer") {
+                const specialLinkContainer = document.getElementById("specialLinkContainer");
+                if (specialLinkContainer) {
+                    specialLinkContainer.classList.remove("hidden");
+                    const orgId = summary.profile.organization_registration_id;
+                    const deptId = summary.profile.department_id;
+                    const regUrl = `https://vesacindia.com/register/employee.html?org_id=${orgId}&dept_id=${deptId}`;
+                    document.getElementById("generatedLinkInput").value = regUrl;
+                }
+            } else {
+                const specialLinkContainer = document.getElementById("specialLinkContainer");
+                if (specialLinkContainer) {
+                    specialLinkContainer.classList.add("hidden");
+                }
+            }
+
             document.getElementById("orgNwpp").textContent = numberText(orgTotals.nwpp_bags);
             document.getElementById("orgGarments").textContent = numberText(orgTotals.garments);
             document.getElementById("deptNwpp").textContent = numberText(deptTotals.nwpp_bags);
@@ -1591,7 +1615,22 @@
         }
 
         function renderPeople() {
-            const rows = summary.mission_people || summary.employees || [];
+            let rows = [];
+            if (summary.profile?.role === "nodal_officer") {
+                const otherDeptPeople = (summary.mission_people || []).filter(
+                    p => p.department_id !== summary.profile.department_id
+                );
+                const myDeptPeople = (summary.employees || []).map(p => ({
+                    ...p,
+                    organization_name: summary.organization.organization_name,
+                    organization_id: summary.organization.id,
+                    department_name: summary.department?.department_name,
+                    department_code: summary.departments?.find(d => d.id === p.department_id)?.department_code
+                }));
+                rows = [...myDeptPeople, ...otherDeptPeople];
+            } else {
+                rows = summary.mission_people || summary.employees || [];
+            }
             const canEdit = summary.profile?.role === "nodal_officer";
             const search = peopleFilters.search.toLowerCase();
             const filteredRows = rows.filter((person) => {
@@ -1657,6 +1696,7 @@
                         </div>
                     </div>
                     ${canEdit && person.role === "employee" && person.department_id === summary.profile?.department_id ? `<div class="person-actions">
+                        ${person.status === "pending" ? `<button class="success" type="button" data-approve-employee="${escapeHtml(person.id)}" style="background: var(--green); margin-right: 8px;"><i class="fa-solid fa-user-check"></i> Approve</button>` : ""}
                         <button type="button" data-edit-employee="${escapeHtml(person.id)}"><i class="fa-solid fa-pen"></i> Edit</button>
                         <button class="danger" type="button" data-deactivate-employee="${escapeHtml(person.id)}"><i class="fa-solid fa-user-slash"></i> Deactivate</button>
                     </div>` : ""}
@@ -1732,8 +1772,25 @@
             }
 
             loginNotice.classList.add("hidden");
-            if (summary.approved) renderApproved();
-            else renderPending();
+            if (summary.profile?.status === "pending") {
+                pageTitle.textContent = "Account Pending Approval";
+                pageLead.textContent = "Your registration is complete! Your account is currently pending activation by your Nodal Officer. You will be able to log in and access the dashboard once approved.";
+                pendingPanel.classList.remove("hidden");
+                approvedPanel.classList.add("hidden");
+                document.getElementById("pendingStatus").textContent = "pending_activation";
+                renderPublicTotals("public", summary.public_totals || {});
+            } else if (summary.profile?.status === "inactive") {
+                pageTitle.textContent = "Account Deactivated";
+                pageLead.textContent = "Your account is currently inactive. Please contact your Nodal Officer.";
+                pendingPanel.classList.remove("hidden");
+                approvedPanel.classList.add("hidden");
+                document.getElementById("pendingStatus").textContent = "inactive";
+                renderPublicTotals("public", summary.public_totals || {});
+            } else if (summary.approved) {
+                renderApproved();
+            } else {
+                renderPending();
+            }
         }
 
         document.getElementById("nwppForm").addEventListener("submit", async (event) => {
@@ -1954,6 +2011,20 @@
                 return;
             }
 
+            const approveButton = event.target.closest("[data-approve-employee]");
+            if (approveButton) {
+                const { error } = await supabase
+                    .from("profiles")
+                    .update({ status: "active" })
+                    .eq("id", approveButton.dataset.approveEmployee);
+                if (error) {
+                    alert(error.message);
+                } else {
+                    await loadDashboard();
+                }
+                return;
+            }
+
             if (editButton) {
                 const person = (summary.employees || []).find((item) => item.id === editButton.dataset.editEmployee);
                 if (!person) return;
@@ -1997,6 +2068,17 @@
         document.getElementById("peopleVolunteerFilter").addEventListener("change", (event) => {
             peopleFilters.volunteer = event.target.value;
             renderPeople();
+        });
+
+        document.getElementById("copyLinkBtn")?.addEventListener("click", async () => {
+            const input = document.getElementById("generatedLinkInput");
+            if (input) {
+                await navigator.clipboard.writeText(input.value);
+                const btn = document.getElementById("copyLinkBtn");
+                const original = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+                setTimeout(() => { btn.innerHTML = original; }, 1400);
+            }
         });
 
         profileSettingsForm.elements.wants_volunteer.addEventListener("change", configureSettingsPhoto);

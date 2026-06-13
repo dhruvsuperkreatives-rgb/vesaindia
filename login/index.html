@@ -170,6 +170,13 @@
         const statusEl = document.getElementById("status");
         const loginButton = document.getElementById("loginButton");
 
+        // Show registration status if redirected from employee registration
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("registered") === "1") {
+            statusEl.textContent = "Registration successful! Account is pending approval by your Nodal Officer.";
+            statusEl.style.color = "var(--green)";
+        }
+
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
             statusEl.textContent = "";

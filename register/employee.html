@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Registration - VESACINDIA</title>
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --ink: #172033;
+            --muted: #667085;
+            --line: #d9e2ec;
+            --paper: #ffffff;
+            --wash: #f5f8fb;
+            --green: #2f8f6b;
+            --blue: #2f6fed;
+            --danger: #b42318;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, sans-serif;
+            color: var(--ink);
+            background: var(--wash);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 28px;
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand, .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 800;
+        }
+
+        .back {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            min-height: 40px;
+            padding: 0 14px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .back:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .intro {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(28px, 4vw, 38px);
+            margin: 0 0 12px;
+            font-weight: 800;
+        }
+
+        .intro p {
+            margin: 0 auto;
+            max-width: 600px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .details-card {
+            background: #ebf5f0;
+            border: 1px solid #cce8db;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .details-card h3 {
+            margin: 0;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--green);
+            font-weight: 800;
+        }
+
+        .details-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .details-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .details-item span {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .details-item strong {
+            font-size: 16px;
+            color: var(--ink);
+        }
+
+        form {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.06);
+        }
+
+        fieldset {
+            border: 0;
+            margin: 0 0 32px;
+            padding: 0;
+        }
+
+        legend {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--green);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 13px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid #c9d4e2;
+            border-radius: 8px;
+            padding: 11px 12px;
+            font: inherit;
+            color: var(--ink);
+            background: #fbfcfe;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 4px rgba(47, 143, 107, 0.14);
+            background: white;
+        }
+
+        input:disabled, select:disabled, textarea:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 6px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            min-height: 20px;
+            margin: 0;
+            accent-color: var(--green);
+            cursor: pointer;
+        }
+
+        .checkbox-container label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 16px;
+            border-top: 1px solid var(--line);
+            padding-top: 24px;
+        }
+
+        button {
+            border: 0;
+            min-height: 48px;
+            border-radius: 8px;
+            padding: 0 24px;
+            font: inherit;
+            font-weight: 800;
+            color: white;
+            background: var(--green);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.65;
+            cursor: wait;
+            transform: none;
+        }
+
+        .status {
+            font-weight: 700;
+            line-height: 1.5;
+            margin-top: 16px;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.ok {
+            display: block;
+            color: var(--green);
+            background: #e6f6f0;
+            border: 1px solid #bcead6;
+        }
+
+        .status.error {
+            display: block;
+            color: var(--danger);
+            background: #fdf2f2;
+            border: 1px solid #fecdca;
+        }
+
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 16px 40px rgba(23, 32, 51, 0.06);
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border-left-color: var(--green);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 20px 12px 48px;
+            }
+
+            form {
+                padding: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="topbar">
+        <a class="brand" href="/">
+            <img src="/sidebar.jpeg" alt="Logo" style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover;">
+            <span>VESACINDIA</span>
+        </a>
+        <a class="back" href="/login/"><i class="fa-solid fa-arrow-left"></i> Login</a>
+    </header>
+
+    <main>
+        <div id="loader" class="loading-screen">
+            <div class="spinner"></div>
+            <h2>Verifying Registration Link...</h2>
+            <p style="color: var(--muted); margin-top: 8px;">Please wait while we fetch the organization details.</p>
+        </div>
+
+        <div id="errorView" class="loading-screen" style="display: none;">
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 48px; color: var(--danger); margin-bottom: 20px;"></i>
+            <h2 id="errorTitle">Invalid Registration Link</h2>
+            <p id="errorDesc" style="color: var(--muted); margin-top: 8px; max-width: 500px;">The link you clicked is invalid or has expired. Please request a new registration link from your department Nodal Officer.</p>
+        </div>
+
+        <div id="registrationContent" style="display: none;">
+            <section class="intro">
+                <h1>Employee Registration</h1>
+                <p>Create your account to join the VESACINDIA mission. Once you register, your department Nodal Officer must approve your account before you can log in.</p>
+            </section>
+
+            <div class="details-card">
+                <h3>Target Placement</h3>
+                <div class="details-row">
+                    <div class="details-item">
+                        <span>Organisation</span>
+                        <strong id="displayOrg">Loading...</strong>
+                    </div>
+                    <div class="details-item">
+                        <span>Department/Office</span>
+                        <strong id="displayDept">Loading...</strong>
+                    </div>
+                </div>
+            </div>
+
+            <form id="employeeRegisterForm" autocomplete="on">
+                <fieldset>
+                    <legend><i class="fa-solid fa-user-lock"></i> Account Credentials</legend>
+                    <div class="grid">
+                        <div>
+                            <label for="email">Official Email Address</label>
+                            <input type="email" id="email" name="email" autocomplete="username" required>
+                            <div class="hint">This will be your login ID.</div>
+                        </div>
+                        <div>
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" minlength="8" autocomplete="new-password" placeholder="Min 8 characters" required>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fa-solid fa-address-card"></i> Personal Information</legend>
+                    <div class="grid">
+                        <div>
+                            <label for="first_name">First Name</label>
+                            <input type="text" id="first_name" name="first_name" required>
+                        </div>
+                        <div>
+                            <label for="middle_name">Middle Name (Optional)</label>
+                            <input type="text" id="middle_name" name="middle_name">
+                        </div>
+                        <div>
+                            <label for="last_name">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" required>
+                        </div>
+                        <div>
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select gender</option>
+                                <option value="female">Female</option>
+                                <option value="male">Male</option>
+                                <option value="non_binary">Non-binary</option>
+                                <option value="prefer_not_to_say">Prefer not to say</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="age">Age</label>
+                            <input type="number" id="age" name="age" min="18" max="100" required>
+                        </div>
+                        <div>
+                            <label for="mobile_number">Mobile Number</label>
+                            <input type="tel" id="mobile_number" name="mobile_number" maxlength="10" placeholder="10-digit mobile" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                        </div>
+                        <div class="full">
+                            <label for="residential_address">Residential Address</label>
+                            <textarea id="residential_address" name="residential_address" required placeholder="Enter your residential address"></textarea>
+                        </div>
+                        <div class="full">
+                            <label for="office_location">Office Location</label>
+                            <input type="text" id="office_location" name="office_location" required placeholder="e.g. Building A, Floor 3">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fa-solid fa-hands-helping"></i> Extra Settings</legend>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="wants_volunteer" name="wants_volunteer">
+                        <label for="wants_volunteer">I want to volunteer for additional mission initiatives</label>
+                    </div>
+
+                    <div id="volunteerFields" style="display: none; margin-top: 20px;" class="grid">
+                        <div>
+                            <label for="social_media_handle">Social Media Handle (Optional)</label>
+                            <input type="text" id="social_media_handle" name="social_media_handle" placeholder="@username">
+                        </div>
+                        <div>
+                            <label for="photograph_url">Profile Photograph URL (Optional)</label>
+                            <input type="url" id="photograph_url" name="photograph_url" placeholder="https://...">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="actions">
+                    <div id="statusMessage" class="status"></div>
+                    <button type="submit" id="submitBtn"><i class="fa-solid fa-user-plus"></i> Register Account</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from "../supabaseClient.js";
+
+        // Parse query params
+        const params = new URLSearchParams(window.location.search);
+        const orgId = params.get("org_id");
+        const deptId = params.get("dept_id");
+
+        const loader = document.getElementById("loader");
+        const errorView = document.getElementById("errorView");
+        const registrationContent = document.getElementById("registrationContent");
+
+        let validatedOrg = null;
+        let validatedDept = null;
+
+        // Verify Org & Dept exist and are active/approved
+        async function initPage() {
+            if (!orgId || !deptId) {
+                showError("Invalid link format", "The registration link is missing organization or department parameters.");
+                return;
+            }
+
+            try {
+                // Fetch Org Details
+                const { data: org, error: orgError } = await supabase
+                    .from("organization_registrations")
+                    .select("id, organization_name, status")
+                    .eq("id", orgId)
+                    .single();
+
+                if (orgError || !org) {
+                    showError("Organization not found", "The organization specified in this registration link does not exist.");
+                    return;
+                }
+
+                if (org.status !== "approved") {
+                    showError("Organization not approved", "This organization is not approved yet. Self-registration is disabled.");
+                    return;
+                }
+
+                // Fetch Dept Details
+                const { data: dept, error: deptError } = await supabase
+                    .from("org_departments")
+                    .select("id, department_name")
+                    .eq("id", deptId)
+                    .eq("organization_registration_id", orgId)
+                    .single();
+
+                if (deptError || !dept) {
+                    showError("Department not found", "The department specified in this registration link does not exist or does not belong to the organization.");
+                    return;
+                }
+
+                validatedOrg = org;
+                validatedDept = dept;
+
+                // Show form & pre-fill
+                document.getElementById("displayOrg").textContent = org.organization_name;
+                document.getElementById("displayDept").textContent = dept.department_name;
+
+                loader.style.display = "none";
+                registrationContent.style.display = "block";
+            } catch (err) {
+                showError("Verification Error", err.message || "An unexpected error occurred during verification.");
+            }
+        }
+
+        function showError(title, desc) {
+            document.getElementById("errorTitle").textContent = title;
+            document.getElementById("errorDesc").textContent = desc;
+            loader.style.display = "none";
+            errorView.style.display = "flex";
+        }
+
+        // Toggle volunteer fields
+        const wantsVolunteerCheckbox = document.getElementById("wants_volunteer");
+        const volunteerFields = document.getElementById("volunteerFields");
+        wantsVolunteerCheckbox.addEventListener("change", () => {
+            const isChecked = wantsVolunteerCheckbox.checked;
+            volunteerFields.style.display = isChecked ? "grid" : "none";
+            if (!isChecked) {
+                document.getElementById("social_media_handle").value = "";
+                document.getElementById("photograph_url").value = "";
+            }
+        });
+
+        // Form Submit
+        const form = document.getElementById("employeeRegisterForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const statusMessage = document.getElementById("statusMessage");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            statusMessage.style.display = "none";
+            statusMessage.className = "status";
+            submitBtn.disabled = true;
+
+            const email = form.elements.email.value.trim().toLowerCase();
+            const password = form.elements.password.value;
+            const firstName = form.elements.first_name.value.trim();
+            const middleName = form.elements.middle_name.value.trim() || null;
+            const lastName = form.elements.last_name.value.trim();
+            const gender = form.elements.gender.value;
+            const age = parseInt(form.elements.age.value, 10);
+            const mobileNumber = form.elements.mobile_number.value.trim();
+            const residentialAddress = form.elements.residential_address.value.trim();
+            const officeLocation = form.elements.office_location.value.trim();
+            const wantsVolunteer = wantsVolunteerCheckbox.checked;
+            const socialMediaHandle = form.elements.social_media_handle.value.trim() || null;
+            const photographUrl = form.elements.photograph_url.value.trim() || null;
+
+            try {
+                // 1. Sign up the user in Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            role: "employee",
+                            first_name: firstName,
+                            last_name: lastName
+                        }
+                    }
+                });
+
+                if (authError) {
+                    throw authError;
+                }
+
+                // 2. Call the complete_employee_self_registration RPC function
+                const { error: rpcError } = await supabase.rpc("complete_employee_self_registration", {
+                    p_first_name: firstName,
+                    p_middle_name: middleName,
+                    p_last_name: lastName,
+                    p_gender: gender,
+                    p_age: age,
+                    p_mobile_number: mobileNumber,
+                    p_residential_address: residentialAddress,
+                    p_office_location: officeLocation,
+                    p_wants_volunteer: wantsVolunteer,
+                    p_social_media_handle: socialMediaHandle,
+                    p_photograph_url: photographUrl,
+                    p_organization_id: orgId,
+                    p_department_id: deptId
+                });
+
+                if (rpcError) {
+                    throw rpcError;
+                }
+
+                // 3. Log out immediately so the user session is cleared (they are currently status='pending' anyway)
+                await supabase.auth.signOut();
+
+                statusMessage.textContent = "Registration successful! Your account is pending approval by your Nodal Officer.";
+                statusMessage.className = "status ok";
+                form.reset();
+                volunteerFields.style.display = "none";
+
+                // Redirect to login after 3 seconds
+                setTimeout(() => {
+                    window.location.href = "/login/?registered=1";
+                }, 3000);
+
+            } catch (err) {
+                statusMessage.textContent = err.message || "An error occurred during registration.";
+                statusMessage.className = "status error";
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Start page verification
+        initPage();
+    </script>
+</body>
+</html>
