@@ -584,12 +584,10 @@
             const photographUrl = form.elements.photograph_url.value.trim() || null;
 
             try {
-                console.log("Before signOut, active session:", await supabase.auth.getSession());
-                // Sign out any active session (e.g. logged in Nodal Officer) first
+                // 1. Sign out any existing session (e.g. Nodal Officer browsing from same browser)
                 await supabase.auth.signOut();
-                console.log("After signOut, active session:", await supabase.auth.getSession());
 
-                // 1. Sign up the user in Supabase Auth
+                // 2. Sign up the new employee in Supabase Auth
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email,
                     password,
@@ -606,13 +604,18 @@
                     throw authError;
                 }
 
-                console.log("signUp returned authData:", authData);
-                if (authData?.session) {
-                    await supabase.auth.setSession(authData.session);
-                    console.log("After setting session explicitly, session:", await supabase.auth.getSession());
+                // 3. Explicitly sign in with the new credentials to guarantee
+                //    the Supabase client holds the correct session token
+                const { error: signInError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (signInError) {
+                    throw new Error("Account created but login failed: " + signInError.message);
                 }
 
-                // 2. Call the complete_employee_self_registration RPC function
+                // 4. Now call the RPC — auth.uid() will correctly resolve to the new guest user
                 const { error: rpcError } = await supabase.rpc("complete_employee_self_registration", {
                     p_first_name: firstName,
                     p_middle_name: middleName,
@@ -632,11 +635,12 @@
                     throw rpcError;
                 }
 
-                // 3. Log out immediately so the user session is cleared (they are currently status='pending' anyway)
+                // 5. Log out — the employee is pending approval so they can't use the dashboard yet
                 await supabase.auth.signOut();
 
                 statusMessage.textContent = "Registration successful! Your account is pending approval by your Nodal Officer.";
                 statusMessage.className = "status ok";
+                statusMessage.style.display = "block";
                 form.reset();
                 volunteerFields.style.display = "none";
 
@@ -648,6 +652,7 @@
             } catch (err) {
                 statusMessage.textContent = err.message || "An error occurred during registration.";
                 statusMessage.className = "status error";
+                statusMessage.style.display = "block";
                 submitBtn.disabled = false;
             }
         });
