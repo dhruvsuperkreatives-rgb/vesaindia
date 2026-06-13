@@ -465,19 +465,19 @@
 
                 <fieldset>
                     <legend><i class="fa-solid fa-hands-helping"></i> Extra Settings</legend>
-                    <div class="checkbox-container">
+                    <div class="checkbox-container" style="margin-bottom: 20px;">
                         <input type="checkbox" id="wants_volunteer" name="wants_volunteer">
                         <label for="wants_volunteer">I want to volunteer for additional mission initiatives</label>
                     </div>
 
-                    <div id="volunteerFields" style="display: none; margin-top: 20px;" class="grid">
-                        <div>
-                            <label for="social_media_handle">Social Media Handle (Optional)</label>
-                            <input type="text" id="social_media_handle" name="social_media_handle" placeholder="@username">
-                        </div>
+                    <div class="grid">
                         <div>
                             <label for="photograph_url">Profile Photograph URL (Optional)</label>
                             <input type="url" id="photograph_url" name="photograph_url" placeholder="https://...">
+                        </div>
+                        <div id="volunteerFields" style="display: none;">
+                            <label for="social_media_handle">Social Media Handle (Optional)</label>
+                            <input type="text" id="social_media_handle" name="social_media_handle" placeholder="@username" style="width: 100%;">
                         </div>
                     </div>
                 </fieldset>
@@ -553,10 +553,9 @@
         const volunteerFields = document.getElementById("volunteerFields");
         wantsVolunteerCheckbox.addEventListener("change", () => {
             const isChecked = wantsVolunteerCheckbox.checked;
-            volunteerFields.style.display = isChecked ? "grid" : "none";
+            volunteerFields.style.display = isChecked ? "block" : "none";
             if (!isChecked) {
                 document.getElementById("social_media_handle").value = "";
-                document.getElementById("photograph_url").value = "";
             }
         });
 

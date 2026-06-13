@@ -247,6 +247,9 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 0 12px;
         }
+        .form-grid.three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
         .full { grid-column: 1 / -1; }
         .primary {
             background: var(--green);
@@ -545,7 +548,7 @@
             .topbar-actions { margin-left: auto; }
             .topbar-actions a { display: none; }
             main { padding: 24px 14px 48px; }
-            .form-grid { grid-template-columns: 1fr; }
+            .form-grid, .form-grid.three { grid-template-columns: 1fr; }
             .panel-intro { align-items: flex-start; flex-direction: column; }
             .settings-photo-row { grid-template-columns: 72px minmax(0, 1fr); }
             .settings-photo-preview { width: 72px; height: 72px; }
@@ -766,12 +769,22 @@
                                         <label for="planned_employee_count">Total employees planned</label>
                                         <input id="planned_employee_count" name="planned_employee_count" type="number" min="0" step="1" value="0">
                                     </div>
+                                </div>
+                                <div class="form-grid" data-nodal-fields></div>
+                                <div class="form-grid three">
+                                    <div>
+                                        <label for="nodal_email">Official Email</label>
+                                        <input id="nodal_email" name="email" type="email" placeholder="email@address.com" required>
+                                    </div>
                                     <div>
                                         <label for="nodal_password">Nodal password</label>
                                         <input id="nodal_password" name="nodal_password" type="password" minlength="8" required>
                                     </div>
+                                    <div>
+                                        <label for="nodal_confirm_password">Confirm password</label>
+                                        <input id="nodal_confirm_password" name="nodal_confirm_password" type="password" minlength="8" required>
+                                    </div>
                                 </div>
-                                <div class="form-grid" data-nodal-fields></div>
                                 <button class="primary" type="submit"><i class="fa-solid fa-user-plus"></i> Create Nodal Officer</button>
                                 <div class="status" id="departmentStatus" role="status" aria-live="polite"></div>
                             </form>
@@ -1071,6 +1084,7 @@
 
         function renderPersonFields(container, prefix) {
             container.innerHTML = personFields.map(([name, label, type, required]) => {
+                if (prefix === "nodal" && name === "email") return "";
                 const id = `${prefix}_${name}`;
                 if (type === "select") {
                     return `<div><label for="${id}">${label}</label><select id="${id}" name="${name}" ${required ? "required" : ""}>
@@ -1108,7 +1122,6 @@
                 data[name] = type === "checkbox" ? field.checked : field.value.trim();
             }
             data.age = Number(data.age);
-            if (!data.wants_volunteer) data.photograph_url = "";
             return data;
         }
 
@@ -1128,8 +1141,7 @@
             
             const photoField = form.elements.photograph_url;
             if (photoField) {
-                photoField.disabled = !isVolunteer;
-                if (!isVolunteer) photoField.value = "";
+                photoField.disabled = false;
             }
 
             const socialField = form.elements.social_media_handle;
@@ -1159,18 +1171,17 @@
             if (!profileSettingsForm) return;
             const photoField = profileSettingsForm.elements.photograph_url;
             const isVolunteer = profileSettingsForm.elements.wants_volunteer.checked;
-            photoField.disabled = !isVolunteer;
-            if (!isVolunteer) photoField.value = "";
+            photoField.disabled = false;
 
             const preview = document.getElementById("settingsPhotoPreview");
-            const photoUrl = isVolunteer ? safeHttpUrl(photoField.value) : "";
+            const photoUrl = safeHttpUrl(photoField.value);
             const initials = personInitials(summary?.profile || {});
             if (photoUrl) {
                 preview.outerHTML = `<img id="settingsPhotoPreview" class="settings-photo-preview" src="${escapeHtml(photoUrl)}" alt="">`;
             } else {
                 preview.outerHTML = `<div id="settingsPhotoPreview" class="settings-photo-preview settings-photo-empty" aria-hidden="true">${escapeHtml(initials)}</div>`;
             }
-            document.getElementById("removeProfileImage").disabled = !isVolunteer || !photoField.value.trim();
+            document.getElementById("removeProfileImage").disabled = !photoField.value.trim();
 
             const socialField = profileSettingsForm.elements.social_media_handle;
             if (socialField) {
@@ -1186,7 +1197,6 @@
                 if (!field) return;
                 data[name] = field.type === "checkbox" ? field.checked : field.value.trim();
             });
-            if (!data.wants_volunteer) data.photograph_url = "";
             return data;
         }
 
@@ -1568,7 +1578,10 @@
         }
 
         function configurePeopleFilters() {
-            const rows = summary.mission_people || [];
+            const myOrgId = summary.organization?.id;
+            const rows = (summary.mission_people || []).filter(
+                p => p.organization_id === myOrgId
+            );
             const organisationSelect = document.getElementById("peopleOrganisationFilter");
             const departmentSelect = document.getElementById("peopleDepartmentFilter");
             const organisations = [...new Map(rows.map((person) => [
@@ -1615,9 +1628,14 @@
         }
 
         function renderPeople() {
+            const myOrgId = summary.organization?.id;
+            const orgPeople = (summary.mission_people || []).filter(
+                p => p.organization_id === myOrgId
+            );
+
             let rows = [];
             if (summary.profile?.role === "nodal_officer") {
-                const otherDeptPeople = (summary.mission_people || []).filter(
+                const otherDeptPeople = orgPeople.filter(
                     p => p.department_id !== summary.profile.department_id
                 );
                 const myDeptPeople = (summary.employees || []).map(p => ({
@@ -1627,9 +1645,14 @@
                     department_name: summary.department?.department_name,
                     department_code: summary.departments?.find(d => d.id === p.department_id)?.department_code
                 }));
-                rows = [...myDeptPeople, ...otherDeptPeople];
+                const myOwnProfile = orgPeople.find(p => p.id === summary.profile.id);
+                if (myOwnProfile) {
+                    rows = [myOwnProfile, ...myDeptPeople, ...otherDeptPeople];
+                } else {
+                    rows = [...myDeptPeople, ...otherDeptPeople];
+                }
             } else {
-                rows = summary.mission_people || summary.employees || [];
+                rows = orgPeople;
             }
             const canEdit = summary.profile?.role === "nodal_officer";
             const search = peopleFilters.search.toLowerCase();
@@ -1919,6 +1942,11 @@
             const nodal = readPerson(form);
             if (!/^[0-9]{10}$/.test(nodal.mobile_number)) {
                 setStatus("departmentStatus", "Nodal Officer mobile number must be exactly 10 digits.", "error");
+                return;
+            }
+
+            if (form.elements.nodal_password.value !== form.elements.nodal_confirm_password.value) {
+                setStatus("departmentStatus", "Passwords do not match.", "error");
                 return;
             }
 

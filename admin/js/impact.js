@@ -29,12 +29,26 @@ const DIARY_MULTIPLIERS = {
 };
 
 let activeTab = "nwpp";
+let currentModel = null;
+
+let topOrgsChart = null;
+let radarChart = null;
+let savingsChart = null;
+let polarChart = null;
 
 export function renderImpact(container, model, search = "") {
+    currentModel = model;
     const organisations = model.organisations || [];
     const totalOrgs = organisations.length;
     const totalNWPP = organisations.reduce((sum, org) => sum + (org.nwppAchieved || 0), 0);
-    const totalTarget = organisations.reduce((sum, org) => sum + (org.target_nwpp_bags || 0), 0);
+    
+    const nwppProgram = model.programs?.find((p) => p.slug === "nwpp_bag");
+    const nwppTargetPer = nwppProgram ? Number(nwppProgram.target_per_participant || 0) : 10;
+    const totalTarget = organisations.reduce((sum, org) => {
+        const participantCount = Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
+        return sum + (participantCount * nwppTargetPer);
+    }, 0);
+
     const totalGarments = organisations.reduce((sum, org) => sum + (org.garmentsAchieved || 0), 0);
     const totalDiaries = organisations.reduce((sum, org) => sum + (org.diariesAchieved || 0), 0);
 
@@ -74,11 +88,48 @@ export function renderImpact(container, model, search = "") {
         .slice(0, 5);
     const maxAchieved = Math.max(...topOrgs.map(o => o.nwppAchieved || 0), 1);
 
-    // Donut chart calculation
-    const overallPct = totalTarget > 0 ? Math.round((totalNWPP / totalTarget) * 100) : 0;
+    // Donut chart calculation based on active tab
+    const garmentProgram = model.programs?.find((p) => p.slug === "garment");
+    const garmentTargetPer = garmentProgram && Number(garmentProgram.target_per_participant) > 0 
+        ? Number(garmentProgram.target_per_participant) 
+        : 1;
+    const totalGarmentTarget = organisations.reduce((sum, org) => {
+        const participantCount = Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
+        return sum + (participantCount * garmentTargetPer);
+    }, 0);
+
+    const diaryProgram = model.programs?.find((p) => p.slug === "diary");
+    const diaryTargetPer = diaryProgram && Number(diaryProgram.target_per_participant) > 0 
+        ? Number(diaryProgram.target_per_participant) 
+        : 1;
+    const totalDiaryTarget = organisations.reduce((sum, org) => {
+        const participantCount = Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
+        return sum + (participantCount * diaryTargetPer);
+    }, 0);
+
+    let currentAchieved = totalNWPP;
+    let currentTarget = totalTarget;
+    let activeColor = "var(--green)";
+    let unitLabel = "target bags";
+
+    if (activeTab === "garments") {
+        currentAchieved = totalGarments;
+        currentTarget = totalGarmentTarget;
+        activeColor = "var(--blue)";
+        unitLabel = "target garments";
+    } else if (activeTab === "diaries") {
+        currentAchieved = totalDiaries;
+        currentTarget = totalDiaryTarget;
+        activeColor = "#a0522d";
+        unitLabel = "target diaries";
+    }
+
+    const overallPct = currentTarget > 0 ? Math.round((currentAchieved / currentTarget) * 100) : 0;
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (Math.min(100, overallPct) / 100) * circumference;
+
+    const totalConfirmedParticipants = model.missionPeople ? model.missionPeople.length : 0;
 
     // Active tab styles
     const nwppStyle = activeTab === "nwpp" ? "border: 2px solid var(--green); box-shadow: 0 4px 20px rgba(47, 143, 107, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
@@ -87,11 +138,16 @@ export function renderImpact(container, model, search = "") {
 
     container.innerHTML = `
         <!-- Top Summary Cards -->
-        <div class="stats-grid" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+        <div class="stats-grid" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
             <article class="stat-card" style="transition: all 0.2s ease;">
                 <div class="stat-label">Total Organisations</div>
                 <div class="stat-value">${numberText(totalOrgs)}</div>
                 <div class="stat-detail">Registered and active</div>
+            </article>
+            <article class="stat-card" style="transition: all 0.2s ease;">
+                <div class="stat-label">Total Participants</div>
+                <div class="stat-value" style="color: var(--blue);">${numberText(totalConfirmedParticipants)}</div>
+                <div class="stat-detail">Confirmed and active</div>
             </article>
             <article class="stat-card" data-tab="nwpp" style="${nwppStyle} transition: all 0.2s ease;">
                 <div class="stat-label">Total NWPP Bags</div>
@@ -371,20 +427,20 @@ export function renderImpact(container, model, search = "") {
                 </div>
             </article>
 
-            <article class="card" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+             <article class="card" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
                 <h3 style="margin-top: 0; margin-bottom: 14px; color: var(--ink); font-size: 16px;">Overall Program Goal</h3>
                 <div style="display: flex; align-items: center; justify-content: center; gap: 24px; padding: 10px 0; flex-wrap: wrap;">
                     <svg width="120" height="120" viewBox="0 0 120 120" style="transform: rotate(-90deg); flex-shrink: 0;">
                         <circle cx="60" cy="60" r="50" fill="transparent" stroke="#e8edf3" stroke-width="12"></circle>
-                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="var(--green)" stroke-width="12"
+                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="${activeColor}" stroke-width="12"
                             stroke-dasharray="${circumference}" stroke-dashoffset="${strokeDashoffset}"
                             stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease;"></circle>
                     </svg>
                     <div>
-                        <div style="font-size: 32px; font-weight: 800; color: var(--green);">${overallPct}%</div>
+                        <div style="font-size: 32px; font-weight: 800; color: ${activeColor};">${overallPct}%</div>
                         <div style="font-size: 13px; font-weight: 750; color: var(--ink); margin-top: 2px;">Target Achieved</div>
                         <div style="font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4;">
-                            ${numberText(totalNWPP)} of ${numberText(totalTarget)} target bags achieved
+                            ${numberText(currentAchieved)} of ${numberText(currentTarget)} ${unitLabel} achieved
                         </div>
                     </div>
                 </div>
@@ -664,7 +720,7 @@ export function renderImpact(container, model, search = "") {
             if (tabCard) {
                 activeTab = tabCard.dataset.tab;
                 const searchVal = document.getElementById("impactSearch")?.value || "";
-                renderImpact(container, model, searchVal);
+                renderImpact(container, currentModel, searchVal);
             }
         });
     }
@@ -674,7 +730,8 @@ export function renderImpact(container, model, search = "") {
         // Horizontal Bar Chart: Top Organisations bags vs garments
         const topOrgsHorizontalCtx = document.getElementById("topOrgsHorizontalBar")?.getContext("2d");
         if (topOrgsHorizontalCtx) {
-            new Chart(topOrgsHorizontalCtx, {
+            if (topOrgsChart) topOrgsChart.destroy();
+            topOrgsChart = new Chart(topOrgsHorizontalCtx, {
                 type: 'bar',
                 data: {
                     labels: topOrgs.map(org => org.organization_name),
@@ -712,7 +769,8 @@ export function renderImpact(container, model, search = "") {
 
         const radarCtx = document.getElementById("impactRadarChart")?.getContext("2d");
         if (radarCtx && radarOrgs.length > 0) {
-            new Chart(radarCtx, {
+            if (radarChart) radarChart.destroy();
+            radarChart = new Chart(radarCtx, {
                 type: 'radar',
                 data: {
                     labels: ['NWPP Bags', 'Garments Donated', 'Diaries Contributed', 'Trees Preserved x10'],
@@ -794,7 +852,8 @@ export function renderImpact(container, model, search = "") {
                 savingsData.push({ date: 'Start', co2: 0, trees: 0 });
             }
 
-            new Chart(envSavingsCtx, {
+            if (savingsChart) savingsChart.destroy();
+            savingsChart = new Chart(envSavingsCtx, {
                 type: 'line',
                 data: {
                     labels: savingsData.map(d => d.date),
@@ -836,7 +895,8 @@ export function renderImpact(container, model, search = "") {
         // Resource Footprint Breakdown (Water & Energy) Polar Chart
         const resourcePolarCtx = document.getElementById("resourceFootprintPolarChart")?.getContext("2d");
         if (resourcePolarCtx) {
-            new Chart(resourcePolarCtx, {
+            if (polarChart) polarChart.destroy();
+            polarChart = new Chart(resourcePolarCtx, {
                 type: 'polarArea',
                 data: {
                     labels: ['NWPP Water Saved', 'NWPP Energy Saved', 'Garment Water Preserved', 'Garment Energy Preserved', 'Diary Water Saved', 'Diary Energy Saved'],

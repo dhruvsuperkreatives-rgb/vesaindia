@@ -26,9 +26,7 @@ export function renderApprovals(container, model) {
                 </div>
                 <span class="badge">Pending</span>
             </div>
-            <div class="org-metrics">
-                <div class="mini-stat"><span>Participants</span><strong>${numberText(org.estimated_participants)}</strong></div>
-                <div class="mini-stat"><span>NWPP target</span><strong>${numberText(org.target_nwpp_bags)}</strong></div>
+            <div class="org-metrics" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
                 <div class="mini-stat"><span>Contact</span><strong>${escapeHtml(org.nodal_officer_name || "-")}</strong></div>
                 <div class="mini-stat"><span>Scope</span><strong>${escapeHtml(org.implementation_scope || "-")}</strong></div>
             </div>
