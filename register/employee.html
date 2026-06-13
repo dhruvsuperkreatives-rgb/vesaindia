@@ -457,12 +457,8 @@
                             <input type="tel" id="mobile_number" name="mobile_number" maxlength="10" placeholder="10-digit mobile" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
                         </div>
                         <div class="full">
-                            <label for="residential_address">Residential Address</label>
-                            <textarea id="residential_address" name="residential_address" required placeholder="Enter your residential address"></textarea>
-                        </div>
-                        <div class="full">
                             <label for="office_location">Office Location</label>
-                            <input type="text" id="office_location" name="office_location" required placeholder="e.g. Building A, Floor 3">
+                            <input type="text" id="office_location" name="office_location" placeholder="e.g. Building A, Floor 3">
                         </div>
                     </div>
                 </fieldset>
@@ -537,7 +533,7 @@
                 // Fetch Dept Details
                 const { data: dept, error: deptError } = await supabase
                     .from("org_departments")
-                    .select("id, department_name")
+                    .select("id, department_name, office_location")
                     .eq("id", deptId)
                     .eq("organization_registration_id", orgId)
                     .single();
@@ -553,6 +549,7 @@
                 // Show form & pre-fill
                 document.getElementById("displayOrg").textContent = org.organization_name;
                 document.getElementById("displayDept").textContent = dept.department_name;
+                document.getElementById("office_location").value = dept.office_location || "";
 
                 loader.style.display = "none";
                 registrationContent.style.display = "block";
@@ -599,8 +596,7 @@
             const gender = form.elements.gender.value;
             const age = parseInt(form.elements.age.value, 10);
             const mobileNumber = form.elements.mobile_number.value.trim();
-            const residentialAddress = form.elements.residential_address.value.trim();
-            const officeLocation = form.elements.office_location.value.trim();
+            const officeLocation = form.elements.office_location.value.trim() || null;
             const wantsVolunteer = wantsVolunteerCheckbox.checked;
             const socialMediaHandle = form.elements.social_media_handle.value.trim() || null;
             const photographUrl = form.elements.photograph_url.value.trim() || null;
@@ -631,7 +627,6 @@
                     p_gender: gender,
                     p_age: age,
                     p_mobile_number: mobileNumber,
-                    p_residential_address: residentialAddress,
                     p_office_location: officeLocation,
                     p_wants_volunteer: wantsVolunteer,
                     p_social_media_handle: socialMediaHandle,

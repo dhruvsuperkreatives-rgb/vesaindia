@@ -5,7 +5,6 @@ create or replace function public.complete_employee_self_registration(
   p_gender text,
   p_age integer,
   p_mobile_number text,
-  p_residential_address text,
   p_office_location text,
   p_wants_volunteer boolean,
   p_social_media_handle text,
@@ -21,6 +20,7 @@ as $$
 declare
   current_user_id uuid := auth.uid();
   current_role text;
+  v_office_location text;
 begin
   if current_user_id is null then
     raise exception 'Not authenticated';
@@ -43,12 +43,17 @@ begin
     raise exception 'Invalid or unapproved organization.';
   end if;
 
-  if not exists (
-    select 1
+  -- Get department office location if p_office_location is empty or null
+  if p_office_location is null or trim(p_office_location) = '' then
+    select office_location into v_office_location
     from public.org_departments
-    where id = p_department_id and organization_registration_id = p_organization_id
-  ) then
-    raise exception 'Department does not belong to the organization.';
+    where id = p_department_id and organization_registration_id = p_organization_id;
+
+    if v_office_location is null then
+      raise exception 'Department does not belong to the organization or office location is missing.';
+    end if;
+  else
+    v_office_location := trim(p_office_location);
   end if;
 
   -- Update profile
@@ -62,8 +67,8 @@ begin
     gender = p_gender,
     age = p_age,
     mobile_number = p_mobile_number,
-    residential_address = p_residential_address,
-    office_location = p_office_location,
+    residential_address = null,
+    office_location = v_office_location,
     wants_volunteer = p_wants_volunteer,
     social_media_handle = p_social_media_handle,
     photograph_url = p_photograph_url,
@@ -73,8 +78,8 @@ begin
 end;
 $$;
 
-revoke all on function public.complete_employee_self_registration(text, text, text, text, integer, text, text, text, boolean, text, text, uuid, uuid) from public, anon;
-grant execute on function public.complete_employee_self_registration(text, text, text, text, integer, text, text, text, boolean, text, text, uuid, uuid) to authenticated;
+revoke all on function public.complete_employee_self_registration(text, text, text, text, integer, text, text, boolean, text, text, uuid, uuid) from public, anon;
+grant execute on function public.complete_employee_self_registration(text, text, text, text, integer, text, text, boolean, text, text, uuid, uuid) to authenticated;
 
 
 create or replace function public.get_dashboard_summary()
