@@ -1571,17 +1571,48 @@
 
             setStatus("nwppStatus", "Saving...");
             const { data: sessionData } = await supabase.auth.getSession();
-            const { error } = await supabase.from("nwpp_contributions").insert({
-                organization_registration_id: summary.organization.id,
-                department_id: summary.profile.role === "org_head" ? null : summary.profile.department_id,
-                user_id: sessionData.session.user.id,
-                bags_count: bags,
-                notes: form.elements.nwpp_notes.value.trim() || null
-            });
+            const userId = sessionData.session.user.id;
+            const orgId = summary.organization.id;
+
+            const { data: existing, error: fetchError } = await supabase
+                .from("nwpp_contributions")
+                .select("id, bags_count")
+                .eq("organization_registration_id", orgId)
+                .eq("user_id", userId)
+                .maybeSingle();
+
+            if (fetchError) {
+                setStatus("nwppStatus", fetchError.message, "error");
+                return;
+            }
+
+            let query;
+            if (existing) {
+                query = supabase
+                    .from("nwpp_contributions")
+                    .update({
+                        bags_count: Number(existing.bags_count || 0) + bags,
+                        notes: form.elements.nwpp_notes.value.trim() || null,
+                        status: "submitted"
+                    })
+                    .eq("id", existing.id);
+            } else {
+                query = supabase
+                    .from("nwpp_contributions")
+                    .insert({
+                        organization_registration_id: orgId,
+                        department_id: summary.profile.role === "org_head" ? null : summary.profile.department_id,
+                        user_id: userId,
+                        bags_count: bags,
+                        notes: form.elements.nwpp_notes.value.trim() || null
+                    });
+            }
+
+            const { error } = await query;
 
             if (error) setStatus("nwppStatus", error.message, "error");
             else {
-                setStatus("nwppStatus", "NWPP contribution saved.", "ok");
+                setStatus("nwppStatus", existing ? "NWPP contribution updated (added to previous)." : "NWPP contribution saved.", "ok");
                 await loadDashboard();
             }
         });
