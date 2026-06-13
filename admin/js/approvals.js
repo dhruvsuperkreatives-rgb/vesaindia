@@ -39,6 +39,9 @@ export function renderApprovals(container, model) {
                 <button class="danger-button" type="button" data-org-status="rejected" data-org-id="${escapeHtml(org.id)}">
                     <i class="fa-solid fa-xmark"></i> Reject
                 </button>
+                <a class="secondary-button" href="organisation-details.html?id=${escapeHtml(org.id)}" style="text-decoration: none;">
+                    <i class="fa-solid fa-eye"></i> View Details
+                </a>
             </div>
         </article>
     `).join("")}</div>`;

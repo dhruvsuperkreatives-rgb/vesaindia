@@ -113,6 +113,9 @@ export function renderOrganisations(container, model, search = "") {
                     <button class="secondary-button" type="button" data-org-view="people" data-org-id="${escapeHtml(org.id)}">
                         <i class="fa-solid fa-users"></i> Employees &amp; status
                     </button>
+                    <a class="secondary-button" href="organisation-details.html?id=${escapeHtml(org.id)}" style="text-decoration: none;">
+                        <i class="fa-solid fa-eye"></i> View Details
+                    </a>
                     <button class="secondary-button" type="button" data-edit-organisation="${escapeHtml(org.id)}">
                         <i class="fa-solid fa-pen"></i> Edit
                     </button>

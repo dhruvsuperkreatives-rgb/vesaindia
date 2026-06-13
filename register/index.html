@@ -816,13 +816,7 @@
 
                     </div>
 
-                    <!-- <div>
 
-                        <label for="organization_head_office_location">Officer office location</label>
-
-                        <input id="organization_head_office_location" name="organization_head_office_location" required>
-
-                    </div> -->
 
                     <!-- <div>
 
@@ -966,8 +960,6 @@
             "head_personal_address",
 
             "head_personal_pincode",
-
-            "organization_head_office_location",
 
             "head_photograph_url",
 
@@ -1309,7 +1301,7 @@
 
                 organization_head_residential_address: [value("head_personal_address"), value("head_personal_pincode")].filter(Boolean).join(", Pin Code: "),
 
-                organization_head_office_location: value("organization_head_office_location"),
+                organization_head_office_location: combinedLocation,
 
                 organization_head_social_handle: value("head_social_handle") || null,
 

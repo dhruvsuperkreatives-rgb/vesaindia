@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organisation Details - VESACINDIA Admin</title>
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg">
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Main Style -->
+    <link rel="stylesheet" href="/admin/admin.css">
+
+    <style>
+        .details-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-section-title {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--green);
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-group {
+            margin-bottom: 16px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 750;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ink);
+            word-break: break-word;
+        }
+
+        .org-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .org-detail-logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--green);
+            background: var(--green-soft);
+            overflow: hidden;
+        }
+
+        .org-detail-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .org-detail-title {
+            flex: 1;
+        }
+
+        .org-detail-title h2 {
+            margin: 0 0 6px;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .photo-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            object-fit: cover;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            .org-detail-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-shell">
+        <aside class="sidebar" id="sidebar" aria-label="Admin navigation">
+            <div class="sidebar-head">
+                <a class="brand" href="/admin/#home">
+                    <img src="/sidebar.jpeg" alt="VESACINDIA logo">
+                    <span>VESACINDIA <small>Admin</small></span>
+                </a>
+                <button class="icon-button sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <nav class="side-nav">
+                <a class="side-link" href="/admin/#home">
+                    <i class="fa-solid fa-house"></i><span>Home</span>
+                </a>
+                <a class="side-link" href="/admin/#approvals">
+                    <i class="fa-solid fa-circle-check"></i><span>Approvals</span>
+                    <span class="nav-count" id="pendingNavCount">0</span>
+                </a>
+                <a class="side-link active" href="/admin/#organisations">
+                    <i class="fa-solid fa-building"></i><span>Organisations</span>
+                </a>
+                <a class="side-link" href="/admin/#people">
+                    <i class="fa-solid fa-address-card"></i><span>Mission People</span>
+                    <span class="nav-count people-count" id="peopleNavCount">0</span>
+                </a>
+                <a class="side-link" href="/admin/#reports">
+                    <i class="fa-solid fa-chart-column"></i><span>Reports</span>
+                </a>
+                <a class="side-link" href="/admin/#impact">
+                    <i class="fa-solid fa-leaf"></i><span>Impact</span>
+                </a>
+                <a class="side-link" href="/admin/#settings">
+                    <i class="fa-solid fa-sliders"></i><span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-foot">
+                <div class="admin-identity">
+                    <span class="avatar"><i class="fa-solid fa-user-shield"></i></span>
+                    <span><strong>Administrator</strong><small id="adminEmail">Checking session...</small></span>
+                </div>
+                <button class="logout-button" id="logoutButton" type="button">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <button class="sidebar-overlay" id="sidebarOverlay" type="button" aria-label="Close menu"></button>
+
+        <div class="main-pane">
+            <header class="topbar">
+                <button class="icon-button menu-button" id="menuButton" type="button" aria-label="Open menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="back-nav">
+                    <a class="secondary-button" href="/admin/#organisations">
+                        <i class="fa-solid fa-arrow-left"></i><span>Back to Organisations</span>
+                    </a>
+                </div>
+                <div>
+                    <div class="eyebrow">VESACINDIA Admin</div>
+                    <h1>Registration details</h1>
+                </div>
+            </header>
+
+            <main>
+                <div class="details-wrapper">
+                    <!-- Loader -->
+                    <div id="loader" class="empty-state">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <h3>Loading details...</h3>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="errorView" class="notice error hidden"></div>
+
+                    <!-- Details Content -->
+                    <div id="detailsContent" class="hidden">
+                        <div class="org-detail-header">
+                            <div id="orgLogo" class="org-detail-logo"></div>
+                            <div class="org-detail-title">
+                                <h2 id="orgName">Loading...</h2>
+                                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                    <span class="badge" id="orgStatus">pending</span>
+                                    <span class="org-meta" id="orgCode">Code: ---</span>
+                                    <span class="org-meta" id="orgSource">Source: ---</span>
+                                    <span class="org-meta" id="orgCreated">Registered on: ---</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="details-grid">
+                                
+                                <!-- General Info -->
+                                <div class="full-width">
+                                    <h3 class="detail-section-title"><i class="fa-solid fa-building"></i> Organisation General Info</h3>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Organization type</span>
+                                    <div class="info-value" id="infoType">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Core work location / Address</span>
+                                    <div class="info-value" id="infoLocation">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Website / Social handle</span>
+                                    <div class="info-value" id="infoSocial">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Scope of implementation</span>
+                                    <div class="info-value" id="infoScope">---</div>
+                                </div>
+
+                                <!-- Scope and Target Metrics -->
+                                <div class="full-width" style="margin-top: 16px;">
+                                    <h3 class="detail-section-title"><i class="fa-solid fa-chart-bar"></i> Footprint & Target metrics</h3>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Participating Locations</span>
+                                    <div class="info-value" id="infoLocationsCount">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Initial Launch Locations</span>
+                                    <div class="info-value" id="infoLaunchLocations">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Estimated total participants</span>
+                                    <div class="info-value" id="infoParticipants">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Target NWPP bags</span>
+                                    <div class="info-value" id="infoTargetNWPP">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Primary departments count</span>
+                                    <div class="info-value" id="infoDepartments">---</div>
+                                </div>
+
+                                <!-- Chief Nodal Officer Info -->
+                                <div class="full-width" style="margin-top: 16px;">
+                                    <h3 class="detail-section-title"><i class="fa-solid fa-user-shield"></i> Chief Nodal Officer Details</h3>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Full Name</span>
+                                    <div class="info-value" id="infoNodalName">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Designation</span>
+                                    <div class="info-value" id="infoNodalDesignation">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Contact number</span>
+                                    <div class="info-value" id="infoNodalMobile">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Official Email</span>
+                                    <div class="info-value" id="infoNodalEmail">---</div>
+                                </div>
+
+                                <!-- Org Head Onboarding Info -->
+                                <div class="full-width" style="margin-top: 16px;">
+                                    <h3 class="detail-section-title"><i class="fa-solid fa-user-tie"></i> Organisation Head Profile Details</h3>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Full Name</span>
+                                    <div class="info-value" id="infoHeadName">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Gender & Age</span>
+                                    <div class="info-value" id="infoHeadGenderAge">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Contact number</span>
+                                    <div class="info-value" id="infoHeadMobile">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Official Email</span>
+                                    <div class="info-value" id="infoHeadEmail">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Office Location</span>
+                                    <div class="info-value" id="infoHeadOffice">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Residential address</span>
+                                    <div class="info-value" id="infoHeadResidential">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Volunteer preferences</span>
+                                    <div class="info-value" id="infoHeadVolunteer">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Social Media Handle</span>
+                                    <div class="info-value" id="infoHeadSocial">---</div>
+                                </div>
+                                <div class="info-group full-width" id="headPhotoGroup" style="display: none;">
+                                    <span class="info-label">Profile image</span>
+                                    <img id="infoHeadPhoto" class="photo-preview" src="" alt="Profile Image">
+                                </div>
+
+                                <!-- Extra Info / Notes -->
+                                <div class="full-width" style="margin-top: 16px;">
+                                    <h3 class="detail-section-title"><i class="fa-solid fa-note-sticky"></i> Extra details & commitments</h3>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Accepts commitments?</span>
+                                    <div class="info-value" id="infoCommitments">---</div>
+                                </div>
+                                <div class="info-group">
+                                    <span class="info-label">Owner User ID</span>
+                                    <div class="info-value" id="infoOwnerId">---</div>
+                                </div>
+                                <div class="info-group full-width">
+                                    <span class="info-label">Additional notes / Remarks</span>
+                                    <div class="info-value" id="infoNotes" style="white-space: pre-wrap; font-style: italic;">---</div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from "../supabaseClient.js";
+        import { ensureAdmin, signOut } from "./js/api.js";
+
+        const loader = document.getElementById("loader");
+        const errorView = document.getElementById("errorView");
+        const detailsContent = document.getElementById("detailsContent");
+
+        // Parse ID parameter
+        const params = new URLSearchParams(window.location.search);
+        const orgId = params.get("id");
+
+        // Sidebar interactions
+        const closeMenu = () => document.body.classList.remove("menu-open");
+        document.getElementById("menuButton").addEventListener("click", () => document.body.classList.add("menu-open"));
+        document.getElementById("sidebarClose").addEventListener("click", closeMenu);
+        document.getElementById("sidebarOverlay").addEventListener("click", closeMenu);
+        document.getElementById("logoutButton").addEventListener("click", async () => {
+            await signOut();
+            window.location.replace("/login/");
+        });
+
+        async function loadSidebarCounts() {
+            try {
+                const { count: pendingCount, error: pendingError } = await supabase
+                    .from("organization_registrations")
+                    .select("*", { count: "exact", head: true })
+                    .eq("status", "pending");
+                if (!pendingError && pendingCount !== null) {
+                    document.getElementById("pendingNavCount").textContent = pendingCount;
+                }
+                const { data: peopleData, error: peopleError } = await supabase.rpc("get_mission_people");
+                if (!peopleError && peopleData) {
+                    document.getElementById("peopleNavCount").textContent = peopleData.length;
+                }
+            } catch (e) {
+                console.error("Failed to load sidebar counts", e);
+            }
+        }
+
+        async function initDetails() {
+            // 1. Verify admin session
+            const { user, redirect } = await ensureAdmin();
+            if (redirect) {
+                window.location.replace(redirect);
+                return;
+            }
+
+            // Display admin email
+            document.getElementById("adminEmail").textContent = user.email || "Admin account";
+            
+            // Load sidebar counts
+            loadSidebarCounts();
+
+            if (!orgId) {
+                showError("No organization ID specified in the URL.");
+                return;
+            }
+
+            try {
+                // 2. Fetch organisation registration details
+                const { data: org, error } = await supabase
+                    .from("organization_registrations")
+                    .select("*")
+                    .eq("id", orgId)
+                    .single();
+
+                if (error || !org) {
+                    showError(error?.message || "Organisation registration details could not be found.");
+                    return;
+                }
+
+                // 3. Populate DOM fields
+                populateFields(org);
+
+                loader.style.display = "none";
+                detailsContent.classList.remove("hidden");
+            } catch (err) {
+                showError(err.message || "An unexpected error occurred.");
+            }
+        }
+
+        function populateFields(org) {
+            // Header
+            document.getElementById("orgName").textContent = org.organization_name;
+            
+            const statusEl = document.getElementById("orgStatus");
+            statusEl.textContent = org.status;
+            statusEl.className = `badge ${org.status}`;
+
+            document.getElementById("orgCode").textContent = `Code: ${org.organization_code || "---"}`;
+            document.getElementById("orgSource").textContent = `Source: ${org.source || "---"}`;
+            document.getElementById("orgCreated").textContent = `Registered on: ${new Date(org.created_at).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' })}`;
+
+            // Logo
+            const logoContainer = document.getElementById("orgLogo");
+            if (org.company_logo_url) {
+                logoContainer.innerHTML = `<img src="${org.company_logo_url}" alt="Logo">`;
+            } else {
+                logoContainer.textContent = org.organization_name.charAt(0).toUpperCase();
+            }
+
+            // General Info
+            document.getElementById("infoType").textContent = formatType(org.registration_type);
+            document.getElementById("infoLocation").innerHTML = `
+                State: <strong>${org.head_office_state || "---"}</strong><br>
+                District: <strong>${org.head_office_district || "---"}</strong><br>
+                Core location: <strong>${org.core_work_location || "---"}</strong><br>
+                Address: <strong>${org.head_office_location || "---"}</strong>
+            `;
+
+            const socialEl = document.getElementById("infoSocial");
+            if (org.organization_social_handle) {
+                socialEl.innerHTML = `<a href="${formatUrl(org.organization_social_handle)}" target="_blank">${org.organization_social_handle}</a>`;
+            } else {
+                socialEl.textContent = "Not provided";
+            }
+
+            document.getElementById("infoScope").textContent = formatScope(org.implementation_scope);
+
+            // Footprint
+            document.getElementById("infoLocationsCount").textContent = org.participating_locations ? `${org.participating_locations} location(s)` : "---";
+            document.getElementById("infoLaunchLocations").textContent = org.initial_launch_locations || "---";
+            document.getElementById("infoParticipants").textContent = org.estimated_participants ? `${org.estimated_participants} estimated participants` : "---";
+            document.getElementById("infoTargetNWPP").textContent = org.target_nwpp_bags ? `${org.target_nwpp_bags} bags` : "---";
+            document.getElementById("infoDepartments").textContent = org.primary_departments || "---";
+
+            // Chief Nodal details
+            document.getElementById("infoNodalName").innerHTML = `<strong>${org.nodal_officer_name || "---"}</strong>`;
+            document.getElementById("infoNodalDesignation").textContent = org.nodal_designation || "---";
+            document.getElementById("infoNodalMobile").textContent = org.nodal_mobile || "---";
+            document.getElementById("infoNodalEmail").textContent = org.nodal_email || "---";
+
+            // Org Head details
+            const headName = [org.organization_head_first_name, org.organization_head_middle_name, org.organization_head_last_name].filter(Boolean).join(" ");
+            document.getElementById("infoHeadName").innerHTML = `<strong>${headName || "---"}</strong>`;
+            document.getElementById("infoHeadGenderAge").textContent = `${org.organization_head_gender || "---"} · ${org.organization_head_age ? org.organization_head_age + ' yrs' : '---'}`;
+            document.getElementById("infoHeadMobile").textContent = org.organization_head_mobile || "---";
+            document.getElementById("infoHeadEmail").textContent = org.organization_head_email || "---";
+            document.getElementById("infoHeadOffice").textContent = org.organization_head_office_location || "---";
+            document.getElementById("infoHeadResidential").textContent = org.organization_head_residential_address || "---";
+            document.getElementById("infoHeadVolunteer").textContent = org.wants_volunteer ? "Wants to volunteer" : "Does not want to volunteer";
+            document.getElementById("infoHeadSocial").textContent = org.organization_head_social_handle || "---";
+
+            if (org.organization_head_photograph_url) {
+                document.getElementById("headPhotoGroup").style.display = "block";
+                document.getElementById("infoHeadPhoto").src = org.organization_head_photograph_url;
+            }
+
+            // Commitments & Notes
+            document.getElementById("infoCommitments").textContent = org.accepts_commitments ? "Accepted" : "Not Accepted";
+            document.getElementById("infoOwnerId").textContent = org.owner_id || "No owner attached";
+            document.getElementById("infoNotes").textContent = org.notes || "No additional notes.";
+        }
+
+        function formatType(type) {
+            const map = {
+                government_state: "Government State",
+                government_central: "Government Central",
+                corporate: "Corporate Entity",
+                educational: "Educational Institution",
+                ngo_civil_group: "NGO / Civil Group",
+                other: "Other"
+            };
+            return map[type] || type || "---";
+        }
+
+        function formatScope(scope) {
+            const map = {
+                single_office: "Single Office / Head office",
+                state_wide_mh: "Offices State-wide",
+                pan_india: "Pan-India / Within District"
+            };
+            return map[scope] || scope || "---";
+        }
+
+        function formatUrl(url) {
+            if (!url) return "#";
+            if (url.startsWith("http://") || url.startsWith("https://")) return url;
+            return `https://${url}`;
+        }
+
+        function showError(msg) {
+            errorView.textContent = msg;
+            errorView.classList.remove("hidden");
+            loader.style.display = "none";
+        }
+
+        initDetails();
+    </script>
+</body>
+</html>
