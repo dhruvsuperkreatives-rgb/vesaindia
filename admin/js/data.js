@@ -4,16 +4,25 @@ export function buildAdminModel(raw) {
     const peopleByOrg = new Map();
     const departmentsByOrg = new Map();
 
-    const nwppUsersByOrg = new Map();
-    const garmentsUsersByOrg = new Map();
-    const diariesUsersByOrg = new Map();
+    const userRoles = new Map((raw.profiles || []).map((p) => [p.id, p.role]));
+    const getBreakdownObj = () => ({
+        employee: new Set(),
+        nodal_officer: new Set(),
+        org_head: new Set()
+    });
+
+    const nwppBreakdownByOrg = new Map();
+    const garmentsBreakdownByOrg = new Map();
+    const diariesBreakdownByOrg = new Map();
 
     for (const item of raw.contributions) {
         const id = item.organization_registration_id;
         contributionsByOrg.set(id, (contributionsByOrg.get(id) || 0) + Number(item.bags_count || 0));
         if (item.user_id) {
-            if (!nwppUsersByOrg.has(id)) nwppUsersByOrg.set(id, new Set());
-            nwppUsersByOrg.get(id).add(item.user_id);
+            if (!nwppBreakdownByOrg.has(id)) nwppBreakdownByOrg.set(id, getBreakdownObj());
+            const role = userRoles.get(item.user_id) || "employee";
+            const roleKey = role === "admin" ? "org_head" : (role === "nodal_officer" || role === "org_head" || role === "employee" ? role : "employee");
+            nwppBreakdownByOrg.get(id)[roleKey].add(item.user_id);
         }
     }
 
@@ -21,8 +30,10 @@ export function buildAdminModel(raw) {
         const id = item.organization_registration_id;
         garmentsByOrg.set(id, (garmentsByOrg.get(id) || 0) + Number(item.garment_count || 0));
         if (item.user_id) {
-            if (!garmentsUsersByOrg.has(id)) garmentsUsersByOrg.set(id, new Set());
-            garmentsUsersByOrg.get(id).add(item.user_id);
+            if (!garmentsBreakdownByOrg.has(id)) garmentsBreakdownByOrg.set(id, getBreakdownObj());
+            const role = userRoles.get(item.user_id) || "employee";
+            const roleKey = role === "admin" ? "org_head" : (role === "nodal_officer" || role === "org_head" || role === "employee" ? role : "employee");
+            garmentsBreakdownByOrg.get(id)[roleKey].add(item.user_id);
         }
     }
 
@@ -49,8 +60,10 @@ export function buildAdminModel(raw) {
                 const id = item.organization_registration_id;
                 diariesByOrg.set(id, (diariesByOrg.get(id) || 0) + Number(item.quantity || 0));
                 if (item.user_id) {
-                    if (!diariesUsersByOrg.has(id)) diariesUsersByOrg.set(id, new Set());
-                    diariesUsersByOrg.get(id).add(item.user_id);
+                    if (!diariesBreakdownByOrg.has(id)) diariesBreakdownByOrg.set(id, getBreakdownObj());
+                    const role = userRoles.get(item.user_id) || "employee";
+                    const roleKey = role === "admin" ? "org_head" : (role === "nodal_officer" || role === "org_head" || role === "employee" ? role : "employee");
+                    diariesBreakdownByOrg.get(id)[roleKey].add(item.user_id);
                 }
             }
         }
@@ -58,14 +71,17 @@ export function buildAdminModel(raw) {
 
     const organisations = raw.organisations.map((org) => {
         const people = peopleByOrg.get(org.id) || { nodal: 0, employees: 0 };
+        const nwB = nwppBreakdownByOrg.get(org.id) || getBreakdownObj();
+        const garB = garmentsBreakdownByOrg.get(org.id) || getBreakdownObj();
+        const diaB = diariesBreakdownByOrg.get(org.id) || getBreakdownObj();
         return {
             ...org,
             nwppAchieved: contributionsByOrg.get(org.id) || 0,
             garmentsAchieved: garmentsByOrg.get(org.id) || 0,
             diariesAchieved: diariesByOrg.get(org.id) || 0,
-            nwppEmployees: nwppUsersByOrg.get(org.id)?.size || 0,
-            garmentsEmployees: garmentsUsersByOrg.get(org.id)?.size || 0,
-            diariesEmployees: diariesUsersByOrg.get(org.id)?.size || 0,
+            nwppBreakdown: { employee: nwB.employee.size, nodal: nwB.nodal_officer.size, head: nwB.org_head.size },
+            garmentsBreakdown: { employee: garB.employee.size, nodal: garB.nodal_officer.size, head: garB.org_head.size },
+            diariesBreakdown: { employee: diaB.employee.size, nodal: diaB.nodal_officer.size, head: diaB.org_head.size },
             nodalCount: Math.max(people.nodal, departmentsByOrg.get(org.id) || 0),
             employeeCount: people.employees
         };

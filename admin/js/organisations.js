@@ -22,6 +22,21 @@ function orgUrlMarkup(org) {
         : escapeHtml(value);
 }
 
+function formatParticipantBreakdown(breakdown) {
+    const parts = [];
+    if (breakdown.employee > 0) {
+        parts.push(`${breakdown.employee} employee${breakdown.employee > 1 ? 's' : ''}`);
+    }
+    if (breakdown.nodal > 0) {
+        parts.push(`${breakdown.nodal} nodal officer${breakdown.nodal > 1 ? 's' : ''}`);
+    }
+    if (breakdown.head > 0) {
+        parts.push(`${breakdown.head} org head${breakdown.head > 1 ? 's' : ''}`);
+    }
+    if (parts.length === 0) return "0 employees participated";
+    return parts.join(", ") + " participated";
+}
+
 export function renderOrganisations(container, model, search = "") {
     const term = search.trim().toLowerCase();
     const organisations = model.organisations.filter((org) => (
@@ -78,17 +93,17 @@ export function renderOrganisations(container, model, search = "") {
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
                         <div style="font-size: 11px; font-weight: 750; color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">NWPP Bags</div>
                         <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.nwppAchieved)} / ${numberText(targetNWPP)}</div>
-                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${numberText(org.nwppEmployees)} employees participated</div>
+                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${formatParticipantBreakdown(org.nwppBreakdown)}</div>
                     </div>
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
                         <div style="font-size: 11px; font-weight: 750; color: var(--blue); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Garments</div>
                         <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.garmentsAchieved)} / ${numberText(targetGarments)}</div>
-                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${numberText(org.garmentsEmployees)} employees participated</div>
+                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${formatParticipantBreakdown(org.garmentsBreakdown)}</div>
                     </div>
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
                         <div style="font-size: 11px; font-weight: 750; color: #a0522d; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Diaries</div>
                         <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.diariesAchieved)} / ${numberText(targetDiaries)}</div>
-                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${numberText(org.diariesEmployees)} employees participated</div>
+                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${formatParticipantBreakdown(org.diariesBreakdown)}</div>
                     </div>
                 </div>
                 <div class="card-actions">

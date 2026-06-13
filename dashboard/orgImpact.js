@@ -33,6 +33,37 @@ export function renderOrgImpact(container, summary, search = "", programSettings
     const departments = summary.departments || [];
     const programContributions = summary.program_contributions || [];
     
+    // Map of user_id -> role for our organization
+    const people = summary.mission_people || [];
+    const userRoles = new Map(people.map((p) => [p.id, p.role]));
+
+    const getBreakdown = (contributions) => {
+        const uniqueUsers = new Set(contributions.map((c) => c.user_id).filter(Boolean));
+        const breakdown = { employee: 0, nodal: 0, head: 0 };
+        uniqueUsers.forEach((uid) => {
+            const role = userRoles.get(uid) || "employee";
+            if (role === "employee") breakdown.employee++;
+            else if (role === "nodal_officer") breakdown.nodal++;
+            else if (role === "org_head" || role === "admin") breakdown.head++;
+        });
+        return breakdown;
+    };
+
+    function formatParticipantBreakdown(breakdown) {
+        const parts = [];
+        if (breakdown.employee > 0) {
+            parts.push(`${breakdown.employee} employee${breakdown.employee > 1 ? 's' : ''}`);
+        }
+        if (breakdown.nodal > 0) {
+            parts.push(`${breakdown.nodal} nodal officer${breakdown.nodal > 1 ? 's' : ''}`);
+        }
+        if (breakdown.head > 0) {
+            parts.push(`${breakdown.head} org head${breakdown.head > 1 ? 's' : ''}`);
+        }
+        if (parts.length === 0) return "0 employees participated";
+        return parts.join(", ") + " participated";
+    }
+
     const participantCount = (summary.mission_people || summary.employees || []).filter((p) => p.role === "employee" || p.role === "nodal_officer").length;
     const nwppProgram = programSettings.find((p) => p.slug === "nwpp_bag");
     const nwppTargetPer = nwppProgram ? Number(nwppProgram.target_per_participant || 0) : 10;
@@ -61,6 +92,12 @@ export function renderOrgImpact(container, summary, search = "", programSettings
                 diariesByDept.set(item.department_id, (diariesByDept.get(item.department_id) || 0) + Number(item.quantity || 0));
             });
     }
+
+    const nwppBreakdown = getBreakdown(summary.nwpp_contributions || []);
+    const garmentsBreakdown = getBreakdown(summary.garment_contributions || []);
+    const diariesBreakdown = getBreakdown(
+        (summary.program_contributions || []).filter((item) => item.program_id === diaryProgramId)
+    );
 
     // Calculate total NWPP impact
     const supAvoided = totalNWPP * MULTIPLIERS.supBags;
@@ -407,20 +444,20 @@ export function renderOrgImpact(container, summary, search = "", programSettings
 
         <!-- Organisation Goal Progress Chart -->
         <div style="margin-top: 16px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-            <div class="card" style="background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+             <div class="card" style="background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <div style="font-size: 12px; font-weight: 750; color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">NWPP Bags Progress</div>
                 <div style="font-size: 22px; font-weight: 800; color: var(--ink);">${numberText(totalNWPP)} / ${numberText(targetNWPP)}</div>
-                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${numberText(summary.nwppEmployees || 0)} employees participated</div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${formatParticipantBreakdown(nwppBreakdown)}</div>
             </div>
             <div class="card" style="background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <div style="font-size: 12px; font-weight: 750; color: var(--blue); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Garments Progress</div>
                 <div style="font-size: 22px; font-weight: 800; color: var(--ink);">${numberText(totalGarments)} / ${numberText(targetGarments)}</div>
-                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${numberText(summary.garmentsEmployees || 0)} employees participated</div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${formatParticipantBreakdown(garmentsBreakdown)}</div>
             </div>
             <div class="card" style="background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <div style="font-size: 12px; font-weight: 750; color: #a0522d; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Diaries Progress</div>
                 <div style="font-size: 22px; font-weight: 800; color: var(--ink);">${numberText(totalDiaries)} / ${numberText(targetDiaries)}</div>
-                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${numberText(summary.diariesEmployees || 0)} employees participated</div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${formatParticipantBreakdown(diariesBreakdown)}</div>
             </div>
         </div>
 
