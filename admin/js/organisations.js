@@ -70,11 +70,9 @@ export function renderOrganisations(container, model, search = "") {
                     </div>
                     <span class="badge ${escapeHtml(org.status)}">${escapeHtml(org.status)}</span>
                 </div>
-                <div class="org-metrics">
+                <div class="org-metrics" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
                     <div class="mini-stat"><span>Nodal officers</span><strong>${numberText(org.nodalCount)}</strong></div>
                     <div class="mini-stat"><span>Employees</span><strong>${numberText(org.employeeCount)}</strong></div>
-                    <div class="mini-stat"><span>NWPP target</span><strong>${numberText(targetNWPP)}</strong></div>
-                    <div class="mini-stat"><span>Achieved</span><strong>${numberText(org.nwppAchieved)}</strong></div>
                 </div>
                 <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">

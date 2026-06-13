@@ -404,6 +404,199 @@ export function renderImpact(container, model, search = "") {
             </article>
         </div>
 
+        <!-- Top Performing Departments & Employees Leaderboard Section -->
+        <div class="content-grid" style="margin-top: 24px;">
+            <!-- Top Departments -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
+                <h3 style="margin-top: 0; margin-bottom: 18px; color: var(--ink); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-trophy" style="color: #ffd700; font-size: 18px;"></i> Top Performing Departments
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${(() => {
+                        const deptTotalsMap = new Map();
+                        const employeeTotalsMap = new Map();
+                        const userProfileMap = new Map((model.missionPeople || []).map(p => [p.id, p]));
+                        const diaryProgram = (model.programs || []).find((p) => p.slug === "diary");
+                        const diaryProgramId = diaryProgram?.id;
+
+                        const getDeptEntry = (userProfile) => {
+                            if (!userProfile || !userProfile.department_id) return null;
+                            const depId = userProfile.department_id;
+                            if (!deptTotalsMap.has(depId)) {
+                                deptTotalsMap.set(depId, {
+                                    department_name: userProfile.department_name,
+                                    organization_name: userProfile.organization_name,
+                                    bags: 0,
+                                    garments: 0,
+                                    diaries: 0,
+                                    total: 0
+                                });
+                            }
+                            return deptTotalsMap.get(depId);
+                        };
+
+                        (model.contributions || []).forEach(c => {
+                            const profile = userProfileMap.get(c.user_id);
+                            const bags = Number(c.bags_count || 0);
+                            if (profile) {
+                                const dept = getDeptEntry(profile);
+                                if (dept) {
+                                    dept.bags += bags;
+                                    dept.total += bags;
+                                }
+                            }
+                        });
+
+                        (model.garments || []).forEach(g => {
+                            const profile = userProfileMap.get(g.user_id);
+                            const garments = Number(g.garment_count || 0);
+                            if (profile) {
+                                const dept = getDeptEntry(profile);
+                                if (dept) {
+                                    dept.garments += garments;
+                                    dept.total += garments;
+                                }
+                            }
+                        });
+
+                        (model.programContributions || []).forEach(pc => {
+                            const profile = userProfileMap.get(pc.user_id);
+                            const qty = Number(pc.quantity || 0);
+                            if (profile) {
+                                const dept = getDeptEntry(profile);
+                                if (dept) {
+                                    if (diaryProgramId && pc.program_id === diaryProgramId) {
+                                        dept.diaries += qty;
+                                    }
+                                    dept.total += qty;
+                                }
+                            }
+                        });
+
+                        const topAdminDepts = [...deptTotalsMap.values()]
+                            .filter(d => d.total > 0)
+                            .sort((a, b) => b.total - a.total)
+                            .slice(0, 5);
+
+                        return topAdminDepts.length ? topAdminDepts.map((dept, index) => `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                    <div>
+                                        <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(dept.department_name)}</strong>
+                                        <span style="font-size: 11px; color: var(--muted);">${escapeHtml(dept.organization_name)}</span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="background: #e8f5ef; color: #2f8f6b; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(dept.total)} items</span>
+                                    <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
+                                        ${dept.bags ? `Bags: ${numberText(dept.bags)} · ` : ''}
+                                        ${dept.garments ? `Garments: ${numberText(dept.garments)} · ` : ''}
+                                        ${dept.diaries ? `Diaries: ${numberText(dept.diaries)}` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No department contributions logged yet.</div>';
+                    })()}
+                </div>
+            </article>
+
+            <!-- Top Employees -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
+                <h3 style="margin-top: 0; margin-bottom: 18px; color: var(--ink); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-medal" style="color: #ffd700; font-size: 18px;"></i> Top Performing Employees
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${(() => {
+                        const employeeTotalsMap = new Map();
+                        const userProfileMap = new Map((model.missionPeople || []).map(p => [p.id, p]));
+                        const diaryProgram = (model.programs || []).find((p) => p.slug === "diary");
+                        const diaryProgramId = diaryProgram?.id;
+
+                        const getEmpEntry = (userProfile) => {
+                            if (!userProfile) return null;
+                            const uid = userProfile.id;
+                            if (!employeeTotalsMap.has(uid)) {
+                                employeeTotalsMap.set(uid, {
+                                    fullName: [userProfile.first_name, userProfile.middle_name, userProfile.last_name].filter(Boolean).join(" "),
+                                    department_name: userProfile.department_name || "Organisation leadership",
+                                    organization_name: userProfile.organization_name,
+                                    bags: 0,
+                                    garments: 0,
+                                    diaries: 0,
+                                    total: 0
+                                });
+                            }
+                            return employeeTotalsMap.get(uid);
+                        };
+
+                        (model.contributions || []).forEach(c => {
+                            const profile = userProfileMap.get(c.user_id);
+                            const bags = Number(c.bags_count || 0);
+                            if (profile) {
+                                const emp = getEmpEntry(profile);
+                                if (emp) {
+                                    emp.bags += bags;
+                                    emp.total += bags;
+                                }
+                            }
+                        });
+
+                        (model.garments || []).forEach(g => {
+                            const profile = userProfileMap.get(g.user_id);
+                            const garments = Number(g.garment_count || 0);
+                            if (profile) {
+                                const emp = getEmpEntry(profile);
+                                if (emp) {
+                                    emp.garments += garments;
+                                    emp.total += garments;
+                                }
+                            }
+                        });
+
+                        (model.programContributions || []).forEach(pc => {
+                            const profile = userProfileMap.get(pc.user_id);
+                            const qty = Number(pc.quantity || 0);
+                            if (profile) {
+                                const emp = getEmpEntry(profile);
+                                if (emp) {
+                                    if (diaryProgramId && pc.program_id === diaryProgramId) {
+                                        emp.diaries += qty;
+                                    }
+                                    emp.total += qty;
+                                }
+                            }
+                        });
+
+                        const topAdminEmployees = [...employeeTotalsMap.values()]
+                            .filter(e => e.total > 0)
+                            .sort((a, b) => b.total - a.total)
+                            .slice(0, 5);
+
+                        return topAdminEmployees.length ? topAdminEmployees.map((p, index) => `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                    <div>
+                                        <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(p.fullName || "Mission Member")}</strong>
+                                        <span style="font-size: 11px; color: var(--muted);">${escapeHtml(p.organization_name)} · Dept: ${escapeHtml(p.department_name)}</span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="background: #eef4ff; color: #2f6fed; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(p.total)} items</span>
+                                    <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
+                                        ${p.bags ? `Bags: ${numberText(p.bags)} · ` : ''}
+                                        ${p.garments ? `Garments: ${numberText(p.garments)} · ` : ''}
+                                        ${p.diaries ? `Diaries: ${numberText(p.diaries)}` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No employee contributions logged yet.</div>';
+                    })()}
+                </div>
+            </article>
+        </div>
+
         <!-- Organisation Breakdown Section -->
         <div style="margin-top: 28px;">
             ${filteredOrgs.length ? `

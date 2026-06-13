@@ -424,6 +424,105 @@ export function renderOrgImpact(container, summary, search = "", programSettings
             </div>
         </div>
 
+         <!-- Leaderboards / Top Performers Section -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 24px; margin-bottom: 24px;">
+            <!-- Top Departments -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
+                <h3 style="margin-top: 0; margin-bottom: 18px; color: var(--ink); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-trophy" style="color: #ffd700; font-size: 18px;"></i> Top Performing Departments
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${(() => {
+                        const topDepts = [...departments].map(dept => {
+                            const bags = Number(dept.nwpp_bags || 0);
+                            const garments = Number(dept.garments || 0);
+                            const diaries = Number(diariesByDept.get(dept.id) || 0);
+                            const total = bags + garments + diaries;
+                            return { ...dept, bags, garments, diaries, total };
+                        })
+                        .filter(dept => dept.total > 0)
+                        .sort((a, b) => b.total - a.total)
+                        .slice(0, 5);
+
+                        return topDepts.length ? topDepts.map((dept, index) => `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                    <div>
+                                        <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(dept.department_name)}</strong>
+                                        <span style="font-size: 11px; color: var(--muted);">Nodal: ${escapeHtml(dept.nodal_name || "Unassigned")}</span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="background: #e8f5ef; color: #2f8f6b; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(dept.total)} items</span>
+                                    <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
+                                        ${dept.bags ? `Bags: ${numberText(dept.bags)} · ` : ''}
+                                        ${dept.garments ? `Garments: ${numberText(dept.garments)} · ` : ''}
+                                        ${dept.diaries ? `Diaries: ${numberText(dept.diaries)}` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No contributions logged yet.</div>';
+                    })()}
+                </div>
+            </article>
+
+            <!-- Top Employees -->
+            <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
+                <h3 style="margin-top: 0; margin-bottom: 18px; color: var(--ink); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-medal" style="color: #ffd700; font-size: 18px;"></i> Top Performing Employees
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${(() => {
+                        const nwppContributions = summary.nwpp_contributions || [];
+                        const garmentContributions = summary.garment_contributions || [];
+                        const otherContributions = programContributions || [];
+                        const people = summary.mission_people || [];
+
+                        const topEmployees = people.map(p => {
+                            const bags = nwppContributions.filter(c => c.user_id === p.id).reduce((sum, c) => sum + Number(c.bags_count || 0), 0);
+                            const garments = garmentContributions.filter(c => c.user_id === p.id).reduce((sum, c) => sum + Number(c.garment_count || 0), 0);
+                            const others = otherContributions.filter(c => c.user_id === p.id).reduce((sum, c) => sum + Number(c.quantity || 0), 0);
+                            const total = bags + garments + others;
+                            return {
+                                ...p,
+                                bags,
+                                garments,
+                                others,
+                                total
+                            };
+                        })
+                        .filter(p => p.total > 0)
+                        .sort((a, b) => b.total - a.total)
+                        .slice(0, 5);
+
+                        return topEmployees.length ? topEmployees.map((p, index) => {
+                            const fullName = [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(" ");
+                            return `
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                        <div>
+                                            <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(fullName || "Mission Member")}</strong>
+                                            <span style="font-size: 11px; color: var(--muted);">Dept: ${escapeHtml(p.department_name || "Organisation leadership")}</span>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span style="background: #eef4ff; color: #2f6fed; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(p.total)} items</span>
+                                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
+                                            ${p.bags ? `Bags: ${numberText(p.bags)} · ` : ''}
+                                            ${p.garments ? `Garments: ${numberText(p.garments)} · ` : ''}
+                                            ${p.others ? `Other: ${numberText(p.others)}` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No contributions logged yet.</div>';
+                    })()}
+                </div>
+            </article>
+        </div>
+
         <!-- Department Breakdown Table -->
         <div class="card" style="padding: 24px;">
             <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px;">Department-level impact breakdown</h3>
