@@ -21,7 +21,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-
         :root {
 
             --ink: #172033;
@@ -42,7 +41,9 @@
 
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
 
@@ -82,7 +83,8 @@
 
         }
 
-        .brand, .back {
+        .brand,
+        .back {
 
             display: inline-flex;
 
@@ -216,7 +218,9 @@
 
         }
 
-        .full { grid-column: 1 / -1; }
+        .full {
+            grid-column: 1 / -1;
+        }
 
         label {
 
@@ -230,7 +234,9 @@
 
         }
 
-        input, select, textarea {
+        input,
+        select,
+        textarea {
 
             width: 100%;
 
@@ -260,7 +266,9 @@
 
         }
 
-        input:focus, select:focus, textarea:focus {
+        input:focus,
+        select:focus,
+        textarea:focus {
 
             border-color: var(--green);
 
@@ -284,14 +292,14 @@
 
         .program-options {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: 1fr;
             gap: 12px;
         }
 
         .program-choice {
             display: grid;
             grid-template-columns: 20px 1fr;
-            gap: 10px;
+            gap: 12px;
             align-items: start;
             margin: 0;
             padding: 14px;
@@ -299,6 +307,24 @@
             border-radius: 8px;
             background: #fbfcfe;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .program-choice .program-preview-img {
+            display: none;
+            grid-column: 1 / -1;
+            width: 100%;
+            height: auto;
+            max-height: 360px;
+            object-fit: contain;
+            border-radius: 6px;
+            margin-top: 12px;
+            border: 1px solid var(--line);
+            background: #f4f6f9;
+        }
+
+        .program-choice:has(input:checked) .program-preview-img {
+            display: block;
         }
 
         .program-choice input {
@@ -309,8 +335,17 @@
             accent-color: var(--green);
         }
 
-        .program-choice strong, .program-choice small { display: block; }
-        .program-choice small { margin-top: 4px; color: var(--muted); font-weight: 500; line-height: 1.45; }
+        .program-choice strong,
+        .program-choice small {
+            display: block;
+        }
+
+        .program-choice small {
+            margin-top: 4px;
+            color: var(--muted);
+            font-weight: 500;
+            line-height: 1.45;
+        }
 
         .commitment {
 
@@ -408,23 +443,39 @@
 
         }
 
-        .status.ok { color: var(--green); }
+        .status.ok {
+            color: var(--green);
+        }
 
-        .status.error { color: var(--danger); }
+        .status.error {
+            color: var(--danger);
+        }
 
         @media (max-width: 720px) {
 
-            .topbar { align-items: flex-start; flex-direction: column; padding: 16px; }
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 16px;
+            }
 
-            main { padding: 28px 14px 48px; }
+            main {
+                padding: 28px 14px 48px;
+            }
 
-            form { padding: 18px; }
+            form {
+                padding: 18px;
+            }
 
-            .grid { grid-template-columns: 1fr; }
-            .program-options { grid-template-columns: 1fr; }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .program-options {
+                grid-template-columns: 1fr;
+            }
 
         }
-
     </style>
 
 </head>
@@ -437,7 +488,8 @@
 
             <a class="brand" href="/">
 
-                <img src="/sidebar.jpeg" alt="Logo" style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover;">
+                <img src="/sidebar.jpeg" alt="Logo"
+                    style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover;">
 
                 <span>VESACINDIA</span>
 
@@ -445,7 +497,8 @@
 
             <!-- Partner & Government Logos -->
 
-            <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--line); padding-left: 20px;">
+            <div
+                style="display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--line); padding-left: 20px;">
 
 
 
@@ -465,7 +518,8 @@
 
             <h1>Organisation Registration</h1>
 
-            <p>Submit the organisation onboarding details and create the Nodel officer login. Product entry opens only after admin approval.</p>
+            <p>Submit the organisation onboarding details and create the Nodel officer login. Product entry opens only
+                after admin approval.</p>
 
         </section>
 
@@ -486,7 +540,7 @@
                         </div>
                     </div>
 
-                    <div >
+                    <div>
 
                         <label for="organization_name">Organization name</label>
 
@@ -538,15 +592,41 @@
 
                     </div>
 
-                    <div>
+                    <div class="full">
 
-                        <label for="head_office_location">Head office location</label>
+                        <label for="address_line1">Address Line 1 (Building Name, Street, Area)</label>
 
-                        <input id="head_office_location" name="head_office_location" placeholder="Street, area, building, or landmark" required>
+                        <input id="address_line1" name="address_line1" required>
 
                     </div>
 
-                   
+                    <div class="full">
+
+                        <label for="address_line2">Address Line 2 (Landmark, Near by location - Optional)</label>
+
+                        <input id="address_line2" name="address_line2">
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_office_city">City</label>
+
+                        <input id="head_office_city" name="head_office_city" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="head_office_pincode">Pin Code (6 Digits)</label>
+
+                        <input id="head_office_pincode" name="head_office_pincode" type="text" maxlength="6"
+                            pattern="\d{6}" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            placeholder="Enter 6-digit pin code" required>
+
+                    </div>
+
+
 
                     <div>
 
@@ -586,17 +666,18 @@
 
                     </div>
 
-                   
+
 
                     <div>
 
                         <label for="participating_locations">Participating locations</label>
 
-                        <input id="participating_locations" name="participating_locations" type="number" min="1" step="1" required>
+                        <input id="participating_locations" name="participating_locations" type="number" min="1"
+                            step="1" required>
 
                     </div>
 
-                   
+
 
                 </div>
 
@@ -614,17 +695,19 @@
 
                         <label for="estimated_participants">Estimated total participants</label>
 
-                        <input id="estimated_participants" name="estimated_participants" type="number" min="1" step="1" required>
+                        <input id="estimated_participants" name="estimated_participants" type="number" min="1" step="1"
+                            required>
 
-                        <div class="hint" id="participantTargetHint">Targets are calculated from the selected program settings.</div>
+                        <div class="hint" id="participantTargetHint">Targets are calculated from the selected program
+                            settings.</div>
 
                     </div>
 
-                    <div class="full">
+                    <div>
 
-                        <label for="primary_departments">Primary departments or wings</label>
+                        <label for="primary_departments">Number of departments</label>
 
-                        <textarea id="primary_departments" name="primary_departments" placeholder="List the primary departments, wings, or groups."></textarea>
+                        <input id="primary_departments" name="primary_departments" type="number" min="1" step="1">
 
                     </div>
 
@@ -636,7 +719,7 @@
 
             <fieldset>
 
-                <legend><i class="fa-solid fa-user-tie"></i> Nodel officer</legend>
+                <legend><i class="fa-solid fa-user-tie"></i> Chief Nodel officer</legend>
 
                 <div class="grid">
 
@@ -698,7 +781,9 @@
 
                         <label for="head_mobile">Mobile number</label>
 
-                        <input id="head_mobile" name="head_mobile" type="tel" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 10-digit number" autocomplete="tel" required>
+                        <input id="head_mobile" name="head_mobile" type="tel" maxlength="10"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 10-digit number"
+                            autocomplete="tel" required>
 
                     </div>
 
@@ -712,21 +797,32 @@
 
                     </div>
 
-                    <div class="full">
+                    <div>
 
                         <label for="head_personal_address">Residential location</label>
 
-                        <textarea id="head_personal_address" name="head_personal_address" autocomplete="street-address" placeholder="Enter personal residential location" required></textarea>
+                        <input id="head_personal_address" name="head_personal_address" autocomplete="street-address"
+                            placeholder="Enter personal residential location" required>
 
                     </div>
 
                     <div>
 
+                        <label for="head_personal_pincode">Residential Pin Code (6 Digits)</label>
+
+                        <input id="head_personal_pincode" name="head_personal_pincode" type="text" maxlength="6"
+                            pattern="\d{6}" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            placeholder="Enter 6-digit pin code" required>
+
+                    </div>
+
+                    <!-- <div>
+
                         <label for="organization_head_office_location">Officer office location</label>
 
                         <input id="organization_head_office_location" name="organization_head_office_location" required>
 
-                    </div>
+                    </div> -->
 
                     <!-- <div>
 
@@ -740,17 +836,19 @@
 
                         <label for="head_photograph_url">Photograph URL</label>
 
-                        <input id="head_photograph_url" name="head_photograph_url" type="url" placeholder="https://..." required>
+                        <input id="head_photograph_url" name="head_photograph_url" type="url" placeholder="https://..."
+                            required>
 
                     </div>
 
-                   
+
 
                     <div>
 
                         <label for="password">Create password</label>
 
-                        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+                        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8"
+                            required>
 
                     </div>
 
@@ -758,25 +856,28 @@
 
                         <label for="confirm_password">Confirm password</label>
 
-                        <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required>
+                        <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password"
+                            minlength="8" required>
 
                     </div>
 
-                    <div class="full">
+                    <div>
 
                         <label for="notes">Notes</label>
 
-                        <textarea id="notes" name="notes" placeholder="Any additional context for onboarding."></textarea>
+                        <textarea id="notes" name="notes" placeholder="Any additional context for onboarding." rows="2"
+                            style="min-height: 80px;"></textarea>
 
                     </div>
 
-                   
+
 
                     <div>
 
                         <label for="organization_social_handle">Organisation social handle</label>
 
-                        <input id="organization_social_handle" name="organization_social_handle" placeholder="@organisation">
+                        <input id="organization_social_handle" name="organization_social_handle"
+                            placeholder="@organisation">
 
                     </div>
 
@@ -790,7 +891,8 @@
 
                 <input id="accepts_commitments" name="accepts_commitments" type="checkbox" required>
 
-                <label for="accepts_commitments">The organisation understands that departments, employees, NWPP bag entry, and garment entry open only after admin approval.</label>
+                <label for="accepts_commitments">The organisation understands that departments, employees, NWPP bag
+                    entry, and garment entry open only after admin approval.</label>
 
             </div>
 
@@ -798,7 +900,8 @@
 
             <div class="actions" style="margin-top: 22px;">
 
-                <button id="submitButton" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Registration</button>
+                <button id="submitButton" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit
+                    Registration</button>
 
                 <div id="formStatus" class="status" role="status" aria-live="polite"></div>
 
@@ -836,7 +939,11 @@
 
             "head_office_district",
 
-            "head_office_location",
+            "address_line1",
+
+            "head_office_city",
+
+            "head_office_pincode",
 
             "implementation_scope",
 
@@ -858,6 +965,8 @@
 
             "head_personal_address",
 
+            "head_personal_pincode",
+
             "organization_head_office_location",
 
             "head_photograph_url",
@@ -875,7 +984,9 @@
 
             "head_office_district": "Head Office District",
 
-            "head_office_location": "Head Office Location",
+            "address_line1": "Address Line 1",
+            "head_office_city": "City",
+            "head_office_pincode": "Pin Code",
             "implementation_scope": "Implementation Scope",
             "participating_locations": "Participating Locations",
             "estimated_participants": "Estimated Total Participants",
@@ -886,6 +997,8 @@
             "head_mobile": "Nodal Officer Mobile Number",
             "head_email": "Nodal Officer Official Email",
             "head_personal_address": "Nodal Officer Residential Location",
+
+            "head_personal_pincode": "Nodal Officer Residential Pin Code",
 
             "organization_head_office_location": "Nodal Officer Office Location",
             "head_photograph_url": "Nodal Officer Photograph URL",
@@ -1001,6 +1114,24 @@
                 .replaceAll("'", "&#039;");
         }
 
+        function updateTargetHint() {
+            const selectedIds = selectedProgramIds();
+            const selectedPrograms = availablePrograms.filter((program) => selectedIds.includes(program.id));
+
+            if (selectedPrograms.length === 0) {
+                document.getElementById("participantTargetHint").textContent = "Select programs to view participant targets.";
+                return;
+            }
+
+            const hints = selectedPrograms.map((program) => {
+                const target = Number(program.target_per_participant || 0);
+                const unit = program.unit_label || "items";
+                return `${escapeHtml(program.name)} target: participants x ${target} ${escapeHtml(unit)}.`;
+            });
+
+            document.getElementById("participantTargetHint").innerHTML = hints.join("<br>");
+        }
+
         async function loadPrograms() {
             const container = document.getElementById("programOptions");
             const { data, error } = await supabase
@@ -1016,6 +1147,12 @@
                 return;
             }
 
+            const programImages = {
+                "nwpp_bag": "/NWPP.jpeg",
+                "garment": "/garment.jpeg",
+                "diary": "/diaries.jpeg"
+            };
+
             availablePrograms = data || [];
             container.innerHTML = availablePrograms.map((program) => `
                 <label class="program-choice">
@@ -1024,14 +1161,14 @@
                         <strong>${escapeHtml(program.name)}</strong>
                         <small>${escapeHtml(program.description || `Minimum ${program.minimum_quantity} ${program.unit_label}.`)}</small>
                     </span>
+                    <img class="program-preview-img" src="${programImages[program.slug] || '/placeholder.png'}" alt="${escapeHtml(program.name)}">
                 </label>
             `).join("") || `<div class="status error">Registration programs are temporarily unavailable.</div>`;
 
-            const nwpp = availablePrograms.find((program) => program.slug === "nwpp_bag");
-            if (nwpp) {
-                document.getElementById("participantTargetHint").textContent =
-                    `NWPP target: participants x ${Number(nwpp.target_per_participant)} ${nwpp.unit_label}.`;
-            }
+            container.querySelectorAll('input[name="program_ids"]').forEach((checkbox) => {
+                checkbox.addEventListener("change", updateTargetHint);
+            });
+            updateTargetHint();
         }
 
         function buildRegistrationPayload(ownerId = null) {
@@ -1049,8 +1186,16 @@
 
 
             const rawNotes = value("notes") || null;
+            const locationParts = [
+                value("address_line1"),
+                value("address_line2"),
+                value("head_office_city"),
+                value("head_office_pincode")
+            ].filter(Boolean);
+            const combinedLocation = locationParts.join(", ");
+
             const headOfficeParts = [
-                value("head_office_location"),
+                combinedLocation,
                 value("head_office_district"),
                 value("head_office_state")
             ].filter(Boolean);
@@ -1095,7 +1240,7 @@
 
                 head_office_district: value("head_office_district"),
 
-                head_office_location: value("head_office_location"),
+                head_office_location: combinedLocation,
 
                 organization_social_handle: value("organization_social_handle") || null,
 
@@ -1125,7 +1270,7 @@
 
                 organization_head_email: value("head_email"),
 
-                organization_head_residential_address: value("head_personal_address"),
+                organization_head_residential_address: [value("head_personal_address"), value("head_personal_pincode")].filter(Boolean).join(", Pin Code: "),
 
                 organization_head_office_location: value("organization_head_office_location"),
 
@@ -1182,13 +1327,13 @@
             }
 
 
-              const mobile = value("head_mobile");
+            const mobile = value("head_mobile");
             if (!/^[0-9]{10}$/.test(mobile)) {
                 form.elements.head_mobile.focus();
                 setStatus("Mobile number must be exactly 10 digits.", "error");
                 return;
             }
-            
+
             if (!form.elements.accepts_commitments.checked) {
 
                 form.elements.accepts_commitments.focus();
