@@ -268,3 +268,44 @@ begin
   );
 end;
 $$;
+
+
+create or replace function public.get_registration_details(p_org_id uuid, p_dept_id uuid)
+returns jsonb
+language plpgsql
+security definer
+stable
+set search_path = public, pg_temp
+as $$
+declare
+  v_org_name text;
+  v_org_status text;
+  v_dept_name text;
+  v_office_location text;
+begin
+  select organization_name, status into v_org_name, v_org_status
+  from public.organization_registrations
+  where id = p_org_id;
+
+  if v_org_name is null then
+    return null;
+  end if;
+
+  select department_name, office_location into v_dept_name, v_office_location
+  from public.org_departments
+  where id = p_dept_id and organization_registration_id = p_org_id;
+
+  if v_dept_name is null then
+    return null;
+  end if;
+
+  return jsonb_build_object(
+    'organization_name', v_org_name,
+    'organization_status', v_org_status,
+    'department_name', v_dept_name,
+    'office_location', v_office_location
+  );
+end;
+$$;
+
+grant execute on function public.get_registration_details(uuid, uuid) to anon, authenticated;

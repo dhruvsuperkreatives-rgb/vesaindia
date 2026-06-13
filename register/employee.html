@@ -513,43 +513,26 @@
             }
 
             try {
-                // Fetch Org Details
-                const { data: org, error: orgError } = await supabase
-                    .from("organization_registrations")
-                    .select("id, organization_name, status")
-                    .eq("id", orgId)
-                    .single();
+                // Fetch Details via public RPC to bypass RLS securely
+                const { data, error } = await supabase.rpc("get_registration_details", {
+                    p_org_id: orgId,
+                    p_dept_id: deptId
+                });
 
-                if (orgError || !org) {
-                    showError("Organization not found", "The organization specified in this registration link does not exist.");
+                if (error || !data) {
+                    showError("Link Verification Failed", "The organization or department specified in this registration link does not exist.");
                     return;
                 }
 
-                if (org.status !== "approved") {
+                if (data.organization_status !== "approved") {
                     showError("Organization not approved", "This organization is not approved yet. Self-registration is disabled.");
                     return;
                 }
 
-                // Fetch Dept Details
-                const { data: dept, error: deptError } = await supabase
-                    .from("org_departments")
-                    .select("id, department_name, office_location")
-                    .eq("id", deptId)
-                    .eq("organization_registration_id", orgId)
-                    .single();
-
-                if (deptError || !dept) {
-                    showError("Department not found", "The department specified in this registration link does not exist or does not belong to the organization.");
-                    return;
-                }
-
-                validatedOrg = org;
-                validatedDept = dept;
-
                 // Show form & pre-fill
-                document.getElementById("displayOrg").textContent = org.organization_name;
-                document.getElementById("displayDept").textContent = dept.department_name;
-                document.getElementById("office_location").value = dept.office_location || "";
+                document.getElementById("displayOrg").textContent = data.organization_name;
+                document.getElementById("displayDept").textContent = data.department_name;
+                document.getElementById("office_location").value = data.office_location || "";
 
                 loader.style.display = "none";
                 registrationContent.style.display = "block";
