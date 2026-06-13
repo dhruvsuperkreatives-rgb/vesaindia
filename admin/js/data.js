@@ -4,14 +4,26 @@ export function buildAdminModel(raw) {
     const peopleByOrg = new Map();
     const departmentsByOrg = new Map();
 
+    const nwppUsersByOrg = new Map();
+    const garmentsUsersByOrg = new Map();
+    const diariesUsersByOrg = new Map();
+
     for (const item of raw.contributions) {
         const id = item.organization_registration_id;
         contributionsByOrg.set(id, (contributionsByOrg.get(id) || 0) + Number(item.bags_count || 0));
+        if (item.user_id) {
+            if (!nwppUsersByOrg.has(id)) nwppUsersByOrg.set(id, new Set());
+            nwppUsersByOrg.get(id).add(item.user_id);
+        }
     }
 
     for (const item of raw.garments) {
         const id = item.organization_registration_id;
         garmentsByOrg.set(id, (garmentsByOrg.get(id) || 0) + Number(item.garment_count || 0));
+        if (item.user_id) {
+            if (!garmentsUsersByOrg.has(id)) garmentsUsersByOrg.set(id, new Set());
+            garmentsUsersByOrg.get(id).add(item.user_id);
+        }
     }
 
     for (const profile of raw.profiles) {
@@ -36,6 +48,10 @@ export function buildAdminModel(raw) {
             if (item.program_id === diaryProgram.id) {
                 const id = item.organization_registration_id;
                 diariesByOrg.set(id, (diariesByOrg.get(id) || 0) + Number(item.quantity || 0));
+                if (item.user_id) {
+                    if (!diariesUsersByOrg.has(id)) diariesUsersByOrg.set(id, new Set());
+                    diariesUsersByOrg.get(id).add(item.user_id);
+                }
             }
         }
     }
@@ -47,6 +63,9 @@ export function buildAdminModel(raw) {
             nwppAchieved: contributionsByOrg.get(org.id) || 0,
             garmentsAchieved: garmentsByOrg.get(org.id) || 0,
             diariesAchieved: diariesByOrg.get(org.id) || 0,
+            nwppEmployees: nwppUsersByOrg.get(org.id)?.size || 0,
+            garmentsEmployees: garmentsUsersByOrg.get(org.id)?.size || 0,
+            diariesEmployees: diariesUsersByOrg.get(org.id)?.size || 0,
             nodalCount: Math.max(people.nodal, departmentsByOrg.get(org.id) || 0),
             employeeCount: people.employees
         };

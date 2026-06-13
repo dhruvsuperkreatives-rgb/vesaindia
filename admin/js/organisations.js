@@ -35,8 +35,28 @@ export function renderOrganisations(container, model, search = "") {
         return;
     }
 
+    const nwppProgram = model.programs?.find((p) => p.slug === "nwpp_bag");
+    const garmentProgram = model.programs?.find((p) => p.slug === "garment");
+    const diaryProgram = model.programs?.find((p) => p.slug === "diary");
+
     container.innerHTML = `<div class="organisations-grid">${organisations.map((org) => {
-        const progress = progressPercent(org.nwppAchieved, org.target_nwpp_bags);
+        const participantCount = Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
+        const nwppTargetPer = nwppProgram ? Number(nwppProgram.target_per_participant || 0) : 10;
+        const targetNWPP = participantCount * nwppTargetPer;
+        const nwppProgress = progressPercent(org.nwppAchieved, targetNWPP);
+
+        const garmentTargetPer = garmentProgram && Number(garmentProgram.target_per_participant) > 0 
+            ? Number(garmentProgram.target_per_participant) 
+            : 1;
+        const targetGarments = participantCount * garmentTargetPer;
+        const garmentProgress = progressPercent(org.garmentsAchieved, targetGarments);
+
+        const diaryTargetPer = diaryProgram && Number(diaryProgram.target_per_participant) > 0 
+            ? Number(diaryProgram.target_per_participant) 
+            : 1;
+        const targetDiaries = participantCount * diaryTargetPer;
+        const diaryProgress = progressPercent(org.diariesAchieved, targetDiaries);
+
         return `
             <article class="organisation-card">
                 <div class="org-heading">
@@ -53,11 +73,26 @@ export function renderOrganisations(container, model, search = "") {
                 <div class="org-metrics">
                     <div class="mini-stat"><span>Nodal officers</span><strong>${numberText(org.nodalCount)}</strong></div>
                     <div class="mini-stat"><span>Employees</span><strong>${numberText(org.employeeCount)}</strong></div>
-                    <div class="mini-stat"><span>NWPP target</span><strong>${numberText(org.target_nwpp_bags)}</strong></div>
+                    <div class="mini-stat"><span>NWPP target</span><strong>${numberText(targetNWPP)}</strong></div>
                     <div class="mini-stat"><span>Achieved</span><strong>${numberText(org.nwppAchieved)}</strong></div>
                 </div>
-                <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
-                <div class="progress-copy"><span>${progress}% of target</span><span>${numberText(org.garmentsAchieved)} garments</span></div>
+                <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                    <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 750; color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">NWPP Bags</div>
+                        <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.nwppAchieved)} / ${numberText(targetNWPP)}</div>
+                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${numberText(org.nwppEmployees)} employees participated</div>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 750; color: var(--blue); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Garments</div>
+                        <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.garmentsAchieved)} / ${numberText(targetGarments)}</div>
+                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${numberText(org.garmentsEmployees)} employees participated</div>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 750; color: #a0522d; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Diaries</div>
+                        <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.diariesAchieved)} / ${numberText(targetDiaries)}</div>
+                        <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${numberText(org.diariesEmployees)} employees participated</div>
+                    </div>
+                </div>
                 <div class="card-actions">
                     <button class="primary-button" type="button" data-org-view="reports" data-org-id="${escapeHtml(org.id)}">
                         <i class="fa-solid fa-chart-line"></i> Analytics

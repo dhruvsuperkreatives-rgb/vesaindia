@@ -33,8 +33,11 @@ export function renderOrgImpact(container, summary, search = "", programSettings
     const departments = summary.departments || [];
     const programContributions = summary.program_contributions || [];
     
+    const participantCount = (summary.mission_people || summary.employees || []).filter((p) => p.role === "employee" || p.role === "nodal_officer").length;
+    const nwppProgram = programSettings.find((p) => p.slug === "nwpp_bag");
+    const nwppTargetPer = nwppProgram ? Number(nwppProgram.target_per_participant || 0) : 10;
+    const targetNWPP = participantCount * nwppTargetPer;
     const totalNWPP = Number(orgTotals.nwpp_bags || 0);
-    const targetNWPP = Number(org.target_nwpp_bags || 0);
     const totalGarments = Number(orgTotals.garments || 0);
 
     // Identify Diary program ID
@@ -96,6 +99,21 @@ export function renderOrgImpact(container, summary, search = "", programSettings
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (Math.min(100, overallPct) / 100) * circumference;
+
+    const garmentProgram = programSettings.find((p) => p.slug === "garment");
+    const garmentTargetPer = garmentProgram && Number(garmentProgram.target_per_participant) > 0 
+        ? Number(garmentProgram.target_per_participant) 
+        : 1;
+    const targetGarments = participantCount * garmentTargetPer;
+    const garmentPct = targetGarments > 0 ? Math.round((totalGarments / targetGarments) * 100) : 0;
+    const garmentStrokeDashoffset = circumference - (Math.min(100, garmentPct) / 100) * circumference;
+
+    const diaryTargetPer = diaryProgram && Number(diaryProgram.target_per_participant) > 0 
+        ? Number(diaryProgram.target_per_participant) 
+        : 1;
+    const targetDiaries = participantCount * diaryTargetPer;
+    const diaryPct = targetDiaries > 0 ? Math.round((totalDiaries / targetDiaries) * 100) : 0;
+    const diaryStrokeDashoffset = circumference - (Math.min(100, diaryPct) / 100) * circumference;
 
     // Active tab styles
     const nwppStyle = activeTab === "nwpp" ? "border: 2px solid var(--green); box-shadow: 0 4px 15px rgba(47, 143, 107, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
@@ -388,20 +406,21 @@ export function renderOrgImpact(container, summary, search = "", programSettings
         </div>
 
         <!-- Organisation Goal Progress Chart -->
-        <div class="card" style="padding: 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap;">
-            <svg width="110" height="110" viewBox="0 0 120 120" style="transform: rotate(-90deg); flex-shrink: 0;">
-                <circle cx="60" cy="60" r="50" fill="transparent" stroke="#e8edf3" stroke-width="12"></circle>
-                <circle cx="60" cy="60" r="50" fill="transparent" stroke="var(--green)" stroke-width="12"
-                    stroke-dasharray="${circumference}" stroke-dashoffset="${strokeDashoffset}"
-                    stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease;"></circle>
-            </svg>
-            <div>
-                <h4 style="margin: 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Our Bag Goal Progress</h4>
-                <div style="font-size: 32px; font-weight: 800; color: var(--green); margin-top: 2px;">${overallPct}%</div>
-                <div style="font-size: 13px; color: var(--ink); font-weight: 600; margin-top: 2px;">Target Achieved</div>
-                <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
-                    Contributed <strong>${numberText(totalNWPP)}</strong> of <strong>${numberText(targetNWPP)}</strong> target bags
-                </div>
+        <div style="margin-top: 16px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div class="card" style="background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 750; color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">NWPP Bags Progress</div>
+                <div style="font-size: 22px; font-weight: 800; color: var(--ink);">${numberText(totalNWPP)} / ${numberText(targetNWPP)}</div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${numberText(summary.nwppEmployees || 0)} employees participated</div>
+            </div>
+            <div class="card" style="background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 750; color: var(--blue); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Garments Progress</div>
+                <div style="font-size: 22px; font-weight: 800; color: var(--ink);">${numberText(totalGarments)} / ${numberText(targetGarments)}</div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${numberText(summary.garmentsEmployees || 0)} employees participated</div>
+            </div>
+            <div class="card" style="background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 750; color: #a0522d; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Diaries Progress</div>
+                <div style="font-size: 22px; font-weight: 800; color: var(--ink);">${numberText(totalDiaries)} / ${numberText(targetDiaries)}</div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;">${numberText(summary.diariesEmployees || 0)} employees participated</div>
             </div>
         </div>
 

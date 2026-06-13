@@ -883,7 +883,7 @@
                                 </div>
                                 <div>
                                     <label for="settings_mobile_number">Mobile number</label>
-                                    <input id="settings_mobile_number" name="mobile_number" type="tel" required>
+                                    <input id="settings_mobile_number" name="mobile_number" type="tel" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 10-digit number" required>
                                 </div>
                                 <div>
                                     <label for="settings_email">Email</label>
@@ -894,19 +894,19 @@
                                     <input id="settings_office_location" name="office_location" required>
                                 </div>
                                 <div class="full">
-                                    <label for="settings_social_media_handle">Social media handle</label>
-                                    <input id="settings_social_media_handle" name="social_media_handle" placeholder="@handle or profile URL">
-                                    <p class="field-help">Clear this field to remove the social handle from your profile.</p>
-                                </div>
-                                <div class="full">
                                     <label for="settings_residential_address">Residential location</label>
-                                    <textarea id="settings_residential_address" name="residential_address" required></textarea>
+                                    <textarea id="settings_residential_address" name="settings_residential_address" required></textarea>
                                 </div>
                                 <div class="full">
                                     <label class="checkbox" for="settings_wants_volunteer">
                                         <input id="settings_wants_volunteer" name="wants_volunteer" type="checkbox">
                                         Wants to volunteer
                                     </label>
+                                </div>
+                                <div class="full">
+                                    <label for="settings_social_media_handle">Social media handle</label>
+                                    <input id="settings_social_media_handle" name="settings_social_media_handle" placeholder="@handle or profile URL">
+                                    <p class="field-help">Clear this field to remove the social handle from your profile.</p>
                                 </div>
                             </div>
                             <div class="row">
@@ -954,9 +954,9 @@
             ["email", "Email", "email", true],
             ["residential_address", "Residential location", "textarea", true],
             ["office_location", "Office location", "text", true],
-            ["social_media_handle", "Social media handle", "text", false],
             ["photograph_url", "Photograph URL", "url", false],
             ["wants_volunteer", "Wants to volunteer", "checkbox", false],
+            ["social_media_handle", "Social media handle", "text", false],
         ];
         const profileSettingFields = [
             "first_name",
@@ -1053,6 +1053,9 @@
                 if (type === "checkbox") {
                     return `<div class="full"><label class="checkbox" for="${id}"><input id="${id}" name="${name}" type="checkbox"> ${label}</label></div>`;
                 }
+                if (type === "tel") {
+                    return `<div><label for="${id}">${label}</label><input id="${id}" name="${name}" type="tel" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 10-digit number" ${required ? "required" : ""}></div>`;
+                }
                 return `<div><label for="${id}">${label}</label><input id="${id}" name="${name}" type="${type}" ${type === "number" ? "min=\"1\" max=\"125\" step=\"1\"" : ""} ${required ? "required" : ""}></div>`;
             }).join("");
             const volunteerToggle = container.querySelector('[name="wants_volunteer"]');
@@ -1085,12 +1088,22 @@
         }
 
         function configureVolunteerPhoto(form) {
-            if (!form?.elements?.photograph_url || !form.elements.wants_volunteer) return;
+            if (!form?.elements?.wants_volunteer) return;
             const isVolunteer = form.elements.wants_volunteer.checked;
+            
             const photoField = form.elements.photograph_url;
-            photoField.disabled = !isVolunteer;
-            photoField.required = false;
-            if (!isVolunteer) photoField.value = "";
+            if (photoField) {
+                photoField.disabled = !isVolunteer;
+                if (!isVolunteer) photoField.value = "";
+            }
+
+            const socialField = form.elements.social_media_handle;
+            if (socialField) {
+                socialField.disabled = !isVolunteer;
+                const container = socialField.closest("div");
+                if (container) container.style.display = isVolunteer ? 'block' : 'none';
+                if (!isVolunteer) socialField.value = "";
+            }
         }
 
         function renderSettings() {
@@ -1123,6 +1136,12 @@
                 preview.outerHTML = `<div id="settingsPhotoPreview" class="settings-photo-preview settings-photo-empty" aria-hidden="true">${escapeHtml(initials)}</div>`;
             }
             document.getElementById("removeProfileImage").disabled = !isVolunteer || !photoField.value.trim();
+
+            const socialField = profileSettingsForm.elements.social_media_handle;
+            if (socialField) {
+                const container = socialField.closest("div");
+                if (container) container.style.display = isVolunteer ? 'block' : 'none';
+            }
         }
 
         function readProfileSettings() {
@@ -1511,15 +1530,23 @@
                 return;
             }
 
-            if (summary.approved) {
-                const [programResult, selectionResult, contribResult] = await Promise.all([
+             if (summary.approved) {
+                const [programResult, selectionResult, contribResult, nwppResult, garmentResult] = await Promise.all([
                     supabase.from("mission_programs").select("*").eq("is_active", true).order("sort_order"),
                     supabase.from("organization_programs").select("program_id").eq("organization_registration_id", summary.organization.id),
-                    supabase.from("program_contributions").select("program_id, quantity, department_id").eq("organization_registration_id", summary.organization.id)
+                    supabase.from("program_contributions").select("program_id, quantity, department_id, user_id").eq("organization_registration_id", summary.organization.id),
+                    supabase.from("nwpp_contributions").select("user_id").eq("organization_registration_id", summary.organization.id),
+                    supabase.from("garment_contributions").select("user_id").eq("organization_registration_id", summary.organization.id)
                 ]);
                 programSettings = programResult.data || [];
                 selectedProgramIds = (selectionResult.data || []).map((item) => item.program_id);
                 summary.program_contributions = contribResult.data || [];
+
+                summary.nwppEmployees = new Set((nwppResult.data || []).map((item) => item.user_id)).size;
+                summary.garmentsEmployees = new Set((garmentResult.data || []).map((item) => item.user_id)).size;
+                const diaryProg = programSettings.find((p) => p.slug === "diary");
+                summary.diariesEmployees = diaryProg ? new Set((contribResult.data || []).filter((item) => item.program_id === diaryProg.id).map((item) => item.user_id)).size : 0;
+
                 const { data: missionPeople, error: directoryError } = await supabase.rpc("get_mission_people");
                 if (!directoryError) summary.mission_people = missionPeople || [];
             }
@@ -1621,6 +1648,12 @@
         departmentForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             const form = event.currentTarget;
+            const nodal = readPerson(form);
+            if (!/^[0-9]{10}$/.test(nodal.mobile_number)) {
+                setStatus("departmentStatus", "Nodal Officer mobile number must be exactly 10 digits.", "error");
+                return;
+            }
+
             setStatus("departmentStatus", "Creating department and login...");
 
             const { data, error } = await supabase.functions.invoke("create-member-account", {
@@ -1646,6 +1679,11 @@
             event.preventDefault();
             const form = event.currentTarget;
             const employee = readPerson(form);
+
+            if (!/^[0-9]{10}$/.test(employee.mobile_number)) {
+                setStatus("employeeStatus", "Mobile number must be exactly 10 digits.", "error");
+                return;
+            }
 
             if (editingEmployeeId) {
                 setStatus("employeeStatus", "Updating employee...");
@@ -1767,6 +1805,10 @@
         profileSettingsForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             const profilePatch = readProfileSettings();
+            if (!/^[0-9]{10}$/.test(profilePatch.mobile_number)) {
+                setStatus("settingsStatus", "Mobile number must be exactly 10 digits.", "error");
+                return;
+            }
             if (profilePatch.photograph_url && !safeHttpUrl(profilePatch.photograph_url)) {
                 setStatus("settingsStatus", "Use a valid http or https image URL.", "error");
                 return;

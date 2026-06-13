@@ -33,10 +33,10 @@ export async function loadAdminData() {
     const [nwpp, garments, profiles, departments, programs, missionPeople, programContributions] = await Promise.all([
         optionalQuery("NWPP contributions", supabase
             .from("nwpp_contributions")
-            .select("id, created_at, organization_registration_id, bags_count, status")),
+            .select("id, created_at, organization_registration_id, user_id, bags_count, status")),
         optionalQuery("Garment contributions", supabase
             .from("garment_contributions")
-            .select("id, created_at, organization_registration_id, garment_count, status")),
+            .select("id, created_at, organization_registration_id, user_id, garment_count, status")),
         optionalQuery("Organisation members", supabase
             .from("profiles")
             .select("id, role, status, organization_registration_id")),
@@ -51,7 +51,7 @@ export async function loadAdminData() {
         optionalQuery("Mission people", supabase.rpc("get_mission_people")),
         optionalQuery("Program contributions", supabase
             .from("program_contributions")
-            .select("id, created_at, organization_registration_id, program_id, quantity, status"))
+            .select("id, created_at, organization_registration_id, user_id, program_id, quantity, status"))
     ]);
 
     return {
