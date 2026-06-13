@@ -584,8 +584,10 @@
             const photographUrl = form.elements.photograph_url.value.trim() || null;
 
             try {
+                console.log("Before signOut, active session:", await supabase.auth.getSession());
                 // Sign out any active session (e.g. logged in Nodal Officer) first
                 await supabase.auth.signOut();
+                console.log("After signOut, active session:", await supabase.auth.getSession());
 
                 // 1. Sign up the user in Supabase Auth
                 const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -602,6 +604,12 @@
 
                 if (authError) {
                     throw authError;
+                }
+
+                console.log("signUp returned authData:", authData);
+                if (authData?.session) {
+                    await supabase.auth.setSession(authData.session);
+                    console.log("After setting session explicitly, session:", await supabase.auth.getSession());
                 }
 
                 // 2. Call the complete_employee_self_registration RPC function
