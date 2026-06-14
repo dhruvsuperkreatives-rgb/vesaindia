@@ -19,18 +19,18 @@ set search_path = public, pg_temp
 as $$
 declare
   current_user_id uuid := auth.uid();
-  current_role text;
+  v_user_role text;
   v_office_location text;
 begin
   if current_user_id is null then
     raise exception 'Not authenticated';
   end if;
 
-  select role into current_role
+  select role into v_user_role
   from public.profiles
   where id = current_user_id;
 
-  if current_role <> 'guest' then
+  if v_user_role <> 'guest' then
     raise exception 'Only guest profiles can complete employee self-registration.';
   end if;
 
