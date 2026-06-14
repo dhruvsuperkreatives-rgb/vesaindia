@@ -476,8 +476,50 @@
             }
 
         }
-    </style>
 
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none !important;
+            border: none !important;
+            padding: 0 !important;
+            min-height: unset !important;
+            width: auto !important;
+            margin-top: 0 !important;
+            cursor: pointer;
+            color: var(--muted) !important;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-toggle:hover {
+            color: var(--ink) !important;
+        }
+    </style>
+    <script>
+        window.togglePasswordVisibility = (inputId, btn) => {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        };
+    </script>
 </head>
 
 <body>
@@ -838,21 +880,18 @@
 
 
                     <div>
-
                         <label for="password">Create password</label>
-
-                        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8"
-                            required>
-
+                        <div class="password-wrapper">
+                            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+                            <button class="password-toggle" type="button" onclick="togglePasswordVisibility('password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                        </div>
                     </div>
-
                     <div>
-
                         <label for="confirm_password">Confirm password</label>
-
-                        <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password"
-                            minlength="8" required>
-
+                        <div class="password-wrapper">
+                            <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required>
+                            <button class="password-toggle" type="button" onclick="togglePasswordVisibility('confirm_password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                        </div>
                     </div>
 
                     <div>

@@ -136,7 +136,49 @@
             font-weight: 700;
             line-height: 1.5;
         }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none !important;
+            border: none !important;
+            padding: 0 !important;
+            min-height: unset !important;
+            width: auto !important;
+            margin-top: 0 !important;
+            cursor: pointer;
+            color: var(--muted) !important;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-toggle:hover {
+            color: var(--ink) !important;
+        }
     </style>
+    <script>
+        window.togglePasswordVisibility = (inputId, btn) => {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        };
+    </script>
 </head>
 <body>
     <main class="card">
@@ -150,7 +192,10 @@
                 <input id="email" name="email" type="email" autocomplete="email" required>
  
                 <label for="password">Password</label>
-                <input id="password" name="password" type="password" autocomplete="current-password" required>
+                <div class="password-wrapper">
+                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+                    <button class="password-toggle" type="button" onclick="togglePasswordVisibility('password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                </div>
  
                 <button id="loginButton" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
                 <div id="status" class="status" role="status" aria-live="polite"></div>

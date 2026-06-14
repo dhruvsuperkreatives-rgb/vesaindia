@@ -565,6 +565,32 @@
             .person-card { grid-template-columns: 56px minmax(0, 1fr); padding: 12px; }
             .person-photo, .person-photo-link { width: 56px; height: 56px; }
         }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none !important;
+            border: none !important;
+            padding: 0 !important;
+            min-height: unset !important;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-toggle:hover {
+            color: var(--ink);
+        }
     </style>
 </head>
 <body>
@@ -778,11 +804,17 @@
                                     </div>
                                     <div>
                                         <label for="nodal_password">Nodal password</label>
-                                        <input id="nodal_password" name="nodal_password" type="password" minlength="8" required>
+                                        <div class="password-wrapper">
+                                            <input id="nodal_password" name="nodal_password" type="password" minlength="8" required>
+                                            <button class="password-toggle" type="button" onclick="togglePasswordVisibility('nodal_password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                                        </div>
                                     </div>
                                     <div>
                                         <label for="nodal_confirm_password">Confirm password</label>
-                                        <input id="nodal_confirm_password" name="nodal_confirm_password" type="password" minlength="8" required>
+                                        <div class="password-wrapper">
+                                            <input id="nodal_confirm_password" name="nodal_confirm_password" type="password" minlength="8" required>
+                                            <button class="password-toggle" type="button" onclick="togglePasswordVisibility('nodal_confirm_password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                                        </div>
                                     </div>
                                 </div>
                                 <button class="primary" type="submit"><i class="fa-solid fa-user-plus"></i> Create Nodal Officer</button>
@@ -801,7 +833,10 @@
                                 <h2 id="employeeFormTitle">Create Employee Login</h2>
                                 <div class="form-grid" data-employee-fields></div>
                                 <label for="employee_password">Password</label>
-                                <input id="employee_password" name="employee_password" type="password" minlength="8">
+                                <div class="password-wrapper">
+                                    <input id="employee_password" name="employee_password" type="password" minlength="8">
+                                    <button class="password-toggle" type="button" onclick="togglePasswordVisibility('employee_password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                                </div>
                                 <div class="row">
                                     <button class="primary" type="submit"><i class="fa-solid fa-user-plus"></i> Save Employee</button>
                                     <button id="cancelEmployeeEdit" class="hidden" type="button"><i class="fa-solid fa-xmark"></i> Cancel</button>
@@ -940,9 +975,13 @@
                                     <label for="settings_office_location">Office location</label>
                                     <input id="settings_office_location" name="office_location" required>
                                 </div>
-                                <div class="full">
-                                    <label for="settings_residential_address">Residential location</label>
-                                    <textarea id="settings_residential_address" name="residential_address"></textarea>
+                                <div>
+                                    <label for="settings_residential_address">Residential locations</label>
+                                    <input id="settings_residential_address" name="residential_address">
+                                </div>
+                                <div>
+                                    <label for="settings_pin_code">Pin code</label>
+                                    <input id="settings_pin_code" name="pin_code">
                                 </div>
                                 <div class="full">
                                     <label class="checkbox" for="settings_wants_volunteer">
@@ -974,6 +1013,19 @@
         import { supabase } from "../supabaseClient.js";
         import { renderOrgImpact } from "./orgImpact.js";
 
+        window.togglePasswordVisibility = function(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const icon = btn.querySelector('i');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.className = "fa-solid fa-eye-slash";
+            } else {
+                input.type = "password";
+                icon.className = "fa-solid fa-eye";
+            }
+        };
+
         const pendingRegistrationKey = "aashayein_pending_registration";
         const panelLinks = [...document.querySelectorAll("[data-panel-link]")];
         const panels = [...document.querySelectorAll("[data-panel]")];
@@ -1000,7 +1052,8 @@
             ["age", "Age", "number", true],
             ["mobile_number", "Mobile number", "tel", true],
             ["email", "Email", "email", true],
-            ["residential_address", "Residential location", "textarea", true],
+            ["residential_address", "Residential locations", "text", false],
+            ["pin_code", "Pin code", "text", false],
             ["office_location", "Office location", "text", true],
             ["photograph_url", "Photograph URL", "url", false],
             ["wants_volunteer", "Wants to volunteer", "checkbox", false],
@@ -1016,6 +1069,7 @@
             "social_media_handle",
             "photograph_url",
             "residential_address",
+            "pin_code",
             "wants_volunteer"
         ];
 

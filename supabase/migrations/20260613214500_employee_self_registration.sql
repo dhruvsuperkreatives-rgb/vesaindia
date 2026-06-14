@@ -134,7 +134,16 @@ begin
   if not approved then
     return jsonb_build_object(
       'approved', false,
-      'profile', jsonb_build_object('id', p.id, 'role', p.role, 'status', p.status),
+      'profile', jsonb_build_object(
+        'id', p.id,
+        'role', p.role,
+        'status', p.status,
+        'office_location', p.office_location,
+        'residential_address', p.residential_address,
+        'social_media_handle', p.social_media_handle,
+        'photograph_url', p.photograph_url,
+        'pin_code', p.pin_code
+      ),
       'organization', case when org.id is null then null else jsonb_build_object('id', org.id, 'organization_name', org.organization_name, 'status', org.status) end,
       'public_totals', coalesce(public_totals, '{}'::jsonb)
     );
@@ -227,7 +236,8 @@ begin
       'social_media_handle', ep.social_media_handle,
       'photograph_url', ep.photograph_url,
       'wants_volunteer', ep.wants_volunteer,
-      'verification_code', ep.verification_code
+      'verification_code', ep.verification_code,
+      'pin_code', ep.pin_code
     ) order by ep.created_at desc), '[]'::jsonb)
     into employees_json
     from public.profiles ep
@@ -252,7 +262,8 @@ begin
       'office_location', p.office_location,
       'residential_address', p.residential_address,
       'social_media_handle', p.social_media_handle,
-      'photograph_url', p.photograph_url
+      'photograph_url', p.photograph_url,
+      'pin_code', p.pin_code
     ),
     'organization', jsonb_build_object(
       'id', org.id,
