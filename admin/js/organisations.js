@@ -37,6 +37,18 @@ function formatParticipantBreakdown(breakdown) {
     return parts.join(", ") + " participated";
 }
 
+function formatRegistrationType(type) {
+    const map = {
+        government_state: "Government State",
+        government_central: "Government Central",
+        corporate: "Corporate Entity",
+        educational: "Educational Institution",
+        ngo_civil_group: "NGO / Civil Group",
+        other: "Other"
+    };
+    return map[type] || type || "Unknown type";
+}
+
 export function renderOrganisations(container, model, search = "") {
     const term = search.trim().toLowerCase();
     const organisations = model.organisations.filter((org) => (
@@ -72,6 +84,8 @@ export function renderOrganisations(container, model, search = "") {
         const targetDiaries = participantCount * diaryTargetPer;
         const diaryProgress = progressPercent(org.diariesAchieved, targetDiaries);
 
+        const headFullName = [org.organization_head_first_name, org.organization_head_middle_name, org.organization_head_last_name].filter(Boolean).join(" ");
+
         return `
             <article class="organisation-card">
                 <div class="org-heading">
@@ -79,6 +93,7 @@ export function renderOrganisations(container, model, search = "") {
                         <div class="org-logo">${logoMarkup(org)}</div>
                         <div>
                             <div class="org-name">${escapeHtml(org.organization_name)}</div>
+                            <div class="org-type-badge">${escapeHtml(formatRegistrationType(org.registration_type))}</div>
                             <div class="org-meta">${escapeHtml(org.core_work_location || "Location not provided")}</div>
                             <div class="org-meta">${orgUrlMarkup(org)}</div>
                         </div>
@@ -88,6 +103,12 @@ export function renderOrganisations(container, model, search = "") {
                 <div class="org-metrics" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
                     <div class="mini-stat"><span>Nodal officers</span><strong>${numberText(org.nodalCount)}</strong></div>
                     <div class="mini-stat"><span>Employees</span><strong>${numberText(org.employeeCount)}</strong></div>
+                </div>
+                <div style="margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 10px; font-size: 13px; color: var(--ink);">
+                    <div style="font-size: 11px; font-weight: 750; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Org Head Contact</div>
+                    <div style="font-weight: 700;">${escapeHtml(headFullName || "---")}</div>
+                    <div style="margin-top: 2px;"><i class="fa-solid fa-phone" style="font-size: 11px; margin-right: 6px; color: var(--muted);"></i>${escapeHtml(org.organization_head_mobile || "---")}</div>
+                    <div><i class="fa-solid fa-envelope" style="font-size: 11px; margin-right: 6px; color: var(--muted);"></i>${escapeHtml(org.organization_head_email || "---")}</div>
                 </div>
                 <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">

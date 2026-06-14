@@ -619,7 +619,9 @@
             <div class="sidebar-identity hidden" id="sidebarIdentity">
                 <span class="identity-label">My mission identity</span>
                 <strong id="sidebarIdentityName">Member</strong>
-                <span class="verification-code" id="sidebarIdentityCode">----------</span>
+                <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 4px;" id="sidebarIdentityOrg">Organisation</div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-top: 2px; font-weight: 700;" id="sidebarIdentityRole">Role</div>
+                <span class="verification-code" id="sidebarIdentityCode" style="margin-top: 8px;">----------</span>
             </div>
         </aside>
         <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
@@ -630,8 +632,9 @@
                     <i class="fa-solid fa-bars"></i> Menu
                 </button>
                 <div class="topbar-actions">
-                    <a href="/register/"><i class="fa-solid fa-building-circle-check"></i> Register</a>
-                    <button id="logoutButton" type="button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                    <span class="pill" id="topbarRole" style="display: none; background: #eef2f6; color: var(--muted); border: 1px solid var(--line); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; min-height: 38px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px;">Role</span>
+                    <a href="#settings" data-panel-link="settings"><i class="fa-solid fa-user-gear"></i> Settings</a>
+                    <button class="danger" id="logoutButton" type="button"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
             </header>
 
@@ -1056,8 +1059,8 @@
             ["residential_address", "Residential locations", "text", false],
             ["pin_code", "Pin code", "text", false],
             ["office_location", "Office location", "text", true],
-            ["photograph_url", "Photograph URL", "url", false],
             ["wants_volunteer", "Wants to volunteer", "checkbox", false],
+            ["photograph_url", "Photograph URL", "url", false],
             ["social_media_handle", "Social media handle", "text", false],
         ];
         const profileSettingFields = [
@@ -1164,8 +1167,9 @@
             }).join("");
             const volunteerToggle = container.querySelector('[name="wants_volunteer"]');
             if (volunteerToggle) {
-                volunteerToggle.addEventListener("change", () => configureVolunteerPhoto(container.closest("form")));
-                configureVolunteerPhoto(container.closest("form"));
+                const form = container.closest("form");
+                volunteerToggle.addEventListener("change", () => configureVolunteerPhoto(form));
+                configureVolunteerPhoto(form);
             }
         }
 
@@ -1196,7 +1200,10 @@
             
             const photoField = form.elements.photograph_url;
             if (photoField) {
-                photoField.disabled = false;
+                photoField.disabled = !isVolunteer;
+                const container = photoField.closest("div");
+                if (container) container.style.display = isVolunteer ? 'block' : 'none';
+                if (!isVolunteer) photoField.value = "";
             }
 
             const socialField = form.elements.social_media_handle;
@@ -1226,7 +1233,15 @@
             if (!profileSettingsForm) return;
             const photoField = profileSettingsForm.elements.photograph_url;
             const isVolunteer = profileSettingsForm.elements.wants_volunteer.checked;
-            photoField.disabled = false;
+            photoField.disabled = !isVolunteer;
+            if (!isVolunteer) {
+                photoField.value = "";
+            }
+
+            const photoRow = profileSettingsForm.querySelector(".settings-photo-row");
+            if (photoRow) {
+                photoRow.style.display = isVolunteer ? "grid" : "none";
+            }
 
             const preview = document.getElementById("settingsPhotoPreview");
             const photoUrl = safeHttpUrl(photoField.value);
@@ -1236,7 +1251,7 @@
             } else {
                 preview.outerHTML = `<div id="settingsPhotoPreview" class="settings-photo-preview settings-photo-empty" aria-hidden="true">${escapeHtml(initials)}</div>`;
             }
-            document.getElementById("removeProfileImage").disabled = !photoField.value.trim();
+            document.getElementById("removeProfileImage").disabled = !photoField.value.trim() || !isVolunteer;
 
             const socialField = profileSettingsForm.elements.social_media_handle;
             if (socialField) {
@@ -1450,6 +1465,8 @@
             const identityCode = summary.mission_people?.find((person) => person.id === summary.profile?.id)?.verification_code;
             identity.classList.toggle("hidden", !identityCode);
             document.getElementById("sidebarIdentityName").textContent = identityName || "Mission member";
+            document.getElementById("sidebarIdentityOrg").textContent = summary.organization?.organization_name || "Organisation";
+            document.getElementById("sidebarIdentityRole").textContent = String(summary.profile?.role || "employee").replaceAll("_", " ");
             document.getElementById("sidebarIdentityCode").textContent = identityCode || "----------";
 
             renderDepartments();
@@ -1820,6 +1837,13 @@
             }
 
             summary = data || {};
+            if (summary.profile?.role) {
+                const roleEl = document.getElementById("topbarRole");
+                if (roleEl) {
+                    roleEl.textContent = String(summary.profile.role).replaceAll("_", " ");
+                    roleEl.style.display = "inline-flex";
+                }
+            }
             if (summary.organization?.status === "rejected") {
                 await supabase.auth.signOut();
                 window.location.replace("/login/");

@@ -664,3 +664,17 @@ tr:last-child td { border-bottom: 0; }
     .dialog-actions button { width: 100%; }
     .impact-grid { grid-template-columns: 1fr !important; }
 }
+
+.org-type-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 6px;
+    padding: 3px 8px;
+    color: #315a91;
+    background: #eef5ff;
+    font-size: 11px;
+    font-weight: 750;
+    margin-top: 4px;
+    border: 1px solid #d0e1fd;
+    width: fit-content;
+}
