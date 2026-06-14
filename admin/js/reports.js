@@ -26,7 +26,7 @@ export function renderReports(container, model, filters = {}) {
         const period = periodKey(item.created_at, grouping);
         const orgName = names.get(item.organization_registration_id) || "Unknown organisation";
         const key = `${period}|${orgName}`;
-        if (!rows.has(key)) rows.set(key, { period, orgName, nwpp: 0, garments: 0, entries: 0, timestamp: new Date(item.created_at).getTime() });
+        if (!rows.has(key)) rows.set(key, { period, orgName, nwpp: 0, garments: 0, diaries: 0, entries: 0, timestamp: new Date(item.created_at).getTime() });
         const row = rows.get(key);
         row[kind] += Number(item[field] || 0);
         row.entries += 1;
@@ -34,6 +34,16 @@ export function renderReports(container, model, filters = {}) {
 
     model.contributions.forEach((item) => add(item, "bags_count", "nwpp"));
     model.garments.forEach((item) => add(item, "garment_count", "garments"));
+
+    const diaryProgram = model.programs?.find((p) => p.slug === "diary");
+    if (diaryProgram && model.programContributions) {
+        model.programContributions.forEach((item) => {
+            if (item.program_id === diaryProgram.id) {
+                add(item, "quantity", "diaries");
+            }
+        });
+    }
+
     const reportRows = [...rows.values()];
     const sortedRows = [...reportRows].sort((a, b) => a.timestamp - b.timestamp);
 
@@ -74,9 +84,10 @@ export function renderReports(container, model, filters = {}) {
                 <input id="reportStartDate" type="date" value="${escapeHtml(start)}">
             </label>
         </div>
-        <div class="stats-grid">
+        <div class="stats-grid" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
             <article class="stat-card"><div class="stat-label">NWPP in report</div><div class="stat-value">${numberText(reportRows.reduce((sum, row) => sum + row.nwpp, 0))}</div></article>
             <article class="stat-card"><div class="stat-label">Garments in report</div><div class="stat-value">${numberText(reportRows.reduce((sum, row) => sum + row.garments, 0))}</div></article>
+            <article class="stat-card"><div class="stat-label">Diaries in report</div><div class="stat-value">${numberText(reportRows.reduce((sum, row) => sum + row.diaries, 0))}</div></article>
             <article class="stat-card"><div class="stat-label">Entries</div><div class="stat-value">${numberText(reportRows.reduce((sum, row) => sum + row.entries, 0))}</div></article>
             <article class="stat-card"><div class="stat-label">Periods</div><div class="stat-value">${numberText(new Set(reportRows.map((row) => row.period)).size)}</div></article>
         </div>
@@ -85,13 +96,14 @@ export function renderReports(container, model, filters = {}) {
             ${reportRows.length ? `
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Period</th><th>Organisation</th><th>NWPP bags</th><th>Garments</th><th>Entries</th></tr></thead>
+                        <thead><tr><th>Period</th><th>Organisation</th><th>NWPP bags</th><th>Garments</th><th>Diaries</th><th>Entries</th></tr></thead>
                         <tbody>${reportRows.map((row) => `
                             <tr>
                                 <td>${escapeHtml(row.period)}</td>
                                 <td>${escapeHtml(row.orgName)}</td>
                                 <td>${numberText(row.nwpp)}</td>
                                 <td>${numberText(row.garments)}</td>
+                                <td>${numberText(row.diaries)}</td>
                                 <td>${numberText(row.entries)}</td>
                             </tr>
                         `).join("")}</tbody>
@@ -133,6 +145,19 @@ export function renderReports(container, model, filters = {}) {
                             pointRadius: 4.5,
                             pointBackgroundColor: '#ffffff',
                             pointBorderColor: '#2f6fed',
+                            pointBorderWidth: 2.5
+                        },
+                        {
+                            label: 'Diaries',
+                            data: sortedRows.map(r => r.diaries),
+                            borderColor: '#a0522d',
+                            backgroundColor: 'rgba(160, 82, 45, 0.05)',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 4.5,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#a0522d',
                             pointBorderWidth: 2.5
                         }
                     ]

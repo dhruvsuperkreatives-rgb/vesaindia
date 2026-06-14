@@ -248,7 +248,11 @@ begin
       'last_name', p.last_name,
       'email', p.email,
       'mobile_number', p.mobile_number,
-      'wants_volunteer', p.wants_volunteer
+      'wants_volunteer', p.wants_volunteer,
+      'office_location', p.office_location,
+      'residential_address', p.residential_address,
+      'social_media_handle', p.social_media_handle,
+      'photograph_url', p.photograph_url
     ),
     'organization', jsonb_build_object(
       'id', org.id,
