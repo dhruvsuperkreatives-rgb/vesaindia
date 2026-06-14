@@ -572,7 +572,7 @@
 
             <fieldset>
 
-                <legend><i class="fa-solid fa-building"></i> Entry Details</legend>
+                <legend><i class="fa-solid fa-building"></i> Know Our Activities</legend>
 
                 <div class="grid">
 
@@ -585,7 +585,7 @@
 
                     <div>
 
-                        <label for="organization_name">Organization name</label>
+                        <label for="organization_name" id="organization_name_label">Organization name</label>
 
                         <input id="organization_name" name="organization_name" autocomplete="organization" required>
 
@@ -612,6 +612,11 @@
                             <option value="other">Other</option>
 
                         </select>
+
+                        <div id="other_registration_type_container" style="display: none; margin-top: 12px;">
+                            <label for="other_registration_type">Specify organization type</label>
+                            <input id="other_registration_type" name="other_registration_type" type="text" placeholder="Please specify...">
+                        </div>
 
                     </div>
 
@@ -673,9 +678,41 @@
 
                     <div>
 
-                        <label for="company_logo_url">Company logo URL</label>
+                        <label for="company_logo_url" id="company_logo_url_label">Company logo URL</label>
 
                         <input id="company_logo_url" name="company_logo_url" type="url" placeholder="https://...">
+
+                    </div>
+
+                </div>
+
+            </fieldset>
+
+
+
+            <fieldset>
+
+                <legend><i class="fa-solid fa-users-gear"></i> Headcount and Structure</legend>
+
+                <div class="grid">
+
+                    <div>
+
+                        <label for="estimated_participants" id="estimated_participants_label">Estimated total participants</label>
+
+                        <input id="estimated_participants" name="estimated_participants" type="number" min="1" step="1"
+                            required>
+
+                        <div class="hint" id="participantTargetHint">Targets are calculated from the selected program
+                            settings.</div>
+
+                    </div>
+
+                    <div>
+
+                        <label for="primary_departments" id="primary_departments_label">Number of departments</label>
+
+                        <input id="primary_departments" name="primary_departments" type="number" min="1" step="1">
 
                     </div>
 
@@ -730,39 +767,7 @@
 
             <fieldset>
 
-                <legend><i class="fa-solid fa-users-gear"></i> Headcount and Structure</legend>
-
-                <div class="grid">
-
-                    <div>
-
-                        <label for="estimated_participants">Estimated total participants</label>
-
-                        <input id="estimated_participants" name="estimated_participants" type="number" min="1" step="1"
-                            required>
-
-                        <div class="hint" id="participantTargetHint">Targets are calculated from the selected program
-                            settings.</div>
-
-                    </div>
-
-                    <div>
-
-                        <label for="primary_departments">Number of departments</label>
-
-                        <input id="primary_departments" name="primary_departments" type="number" min="1" step="1">
-
-                    </div>
-
-                </div>
-
-            </fieldset>
-
-
-
-            <fieldset>
-
-                <legend><i class="fa-solid fa-user-tie"></i> Chief Nodel officer</legend>
+                <legend id="nodal_officer_legend"><i class="fa-solid fa-user-tie"></i> Chief Nodel officer</legend>
 
                 <div class="grid">
 
@@ -942,6 +947,22 @@
             </div>
 
         </form>
+
+    <div id="impactModalOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="impact-modal" style="background: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative;">
+            <button type="button" id="closeImpactModal" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 0; min-height: unset; width: auto;"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="margin: 0 0 16px; font-size: 22px; color: var(--green);"><i class="fa-solid fa-leaf"></i> Estimated Ecological Impact</h2>
+            <p style="color: var(--muted); margin: 0 0 20px; font-size: 15px; line-height: 1.5;">Based on your selected programs and headcount, your organisation is estimated to contribute:</p>
+            
+            <div id="impactBreakdown" style="background: #f1fcf4; border: 1px solid #c2ecd6; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 15px;">
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" id="cancelSubmitBtn" style="background: #f5f8fb; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 0 16px; font-weight: 600; cursor: pointer; min-height: 40px;">Cancel</button>
+                <button type="button" id="confirmSubmitBtn" style="background: var(--green); color: white; border: none; border-radius: 8px; padding: 0 16px; font-weight: 600; cursor: pointer; min-height: 40px;">Confirm & Submit</button>
+            </div>
+        </div>
+    </div>
 
     </main>
 
@@ -1209,11 +1230,11 @@
                     <div class="program-tab-content" style="padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfe;">
                         ${availablePrograms.map((program) => {
                             const isActive = program.id === activeTabId;
-                            const isChecked = selectedProgramIds().includes(program.id);
+                            const anySelected = selectedProgramIds().length > 0;
                             return `
                                 <div class="program-tab-pane" data-pane-id="${program.id}" style="display: ${isActive ? 'block' : 'none'};">
                                     <p style="margin: 0 0 14px; font-size: 14px; color: var(--muted); line-height: 1.55; font-weight: 500;">${escapeHtml(program.description || `Minimum ${program.minimum_quantity} ${program.unit_label}.`)}</p>
-                                    <img class="program-preview-img" src="${programImages[program.slug] || '/placeholder.png'}" alt="${escapeHtml(program.name)}" style="display: ${isChecked ? 'block' : 'none'}; width: 100%; height: auto; max-height: 380px; object-fit: contain; border-radius: 6px; border: 1px solid var(--line); background: #f4f6f9; margin-top: 10px;">
+                                    <img class="program-preview-img" src="${programImages[program.slug] || '/placeholder.png'}" alt="${escapeHtml(program.name)}" style="display: ${anySelected ? 'block' : 'none'}; width: 100%; height: auto; max-height: 380px; object-fit: contain; border-radius: 6px; border: 1px solid var(--line); background: #f4f6f9; margin-top: 10px;">
                                 </div>
                             `;
                         }).join("")}
@@ -1229,7 +1250,14 @@
                         if (e.target !== checkbox) {
                             checkbox.checked = !checkbox.checked;
                         }
-                        activeTabId = tabId;
+                        
+                        const checkedIds = selectedProgramIds();
+                        if (!checkbox.checked && tabId === activeTabId && checkedIds.length > 0) {
+                            activeTabId = checkedIds[0];
+                        } else {
+                            activeTabId = tabId;
+                        }
+
                         renderTabs();
                         updateTargetHint();
                     });
@@ -1301,7 +1329,7 @@
 
                 organization_name: value("organization_name"),
 
-                registration_type: value("registration_type"),
+                registration_type: value("registration_type") === "other" ? value("other_registration_type") : value("registration_type"),
 
                 core_work_location: headOfficeParts.join(", "),
 
@@ -1373,15 +1401,18 @@
 
 
 
-            const missingFields = [];
+             const missingFields = [];
             for (const field of requiredFields) {
                 if (!value(field)) {
                     missingFields.push(fieldLabels[field] || field);
                 }
             }
+            if (value("registration_type") === "other" && !value("other_registration_type")) {
+                missingFields.push("Specify organization type");
+            }
 
             if (missingFields.length > 0) {
-                const firstMissing = requiredFields.find(f => !value(f));
+                const firstMissing = requiredFields.find(f => !value(f)) || (value("registration_type") === "other" && !value("other_registration_type") ? "other_registration_type" : null);
                 if (firstMissing && form.elements[firstMissing]) {
                     form.elements[firstMissing].focus();
                 }
@@ -1439,101 +1470,110 @@
 
 
 
-            submitButton.disabled = true;
+            const estimatedParticipants = Number(value("estimated_participants") || 0);
+            let totalWater = 0;
+            let totalCO2 = 0;
+            let totalCrudeOil = 0;
+            let totalTrees = 0;
+            
+            const selectedIds = selectedProgramIds();
+            const selectedProgramNames = availablePrograms.filter(p => selectedIds.includes(p.id)).map(p => p.name).join(", ");
+            
+            availablePrograms.filter(p => selectedIds.includes(p.id)).forEach(program => {
+                const targetPerPart = Number(program.target_per_participant || 0);
+                const units = estimatedParticipants * targetPerPart;
+                if (program.slug === 'nwpp_bag') {
+                    totalWater += units * 45;
+                    totalCO2 += units * 1.5;
+                    totalCrudeOil += units * 0.44;
+                    totalTrees += units * 0.075;
+                } else if (program.slug === 'garment') {
+                    totalWater += units * 7500;
+                    totalCO2 += units * 25;
+                    totalTrees += units * 1.2;
+                } else if (program.slug === 'diary') {
+                    totalWater += units * 40.5;
+                    totalCO2 += units * 1.35;
+                    totalTrees += units * 0.015;
+                }
+            });
 
+            const breakdownHtml = `
+                <div style="margin-bottom: 12px; font-size: 14px;"><strong>Selected Programs:</strong> ${escapeHtml(selectedProgramNames)}</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> Water: <strong>${totalWater.toLocaleString()} L</strong></div>
+                    <div><i class="fa-solid fa-cloud" style="color: #8b5cf6;"></i> CO2: <strong>${totalCO2.toLocaleString()} kg</strong></div>
+                    ${totalCrudeOil > 0 ? `<div><i class="fa-solid fa-oil-can" style="color: #64748b;"></i> Crude Oil: <strong>${totalCrudeOil.toLocaleString()} kg</strong></div>` : ''}
+                    <div><i class="fa-solid fa-tree" style="color: #22c55e;"></i> Trees: <strong>${totalTrees.toLocaleString()}</strong></div>
+                </div>
+            `;
+            
+            document.getElementById("impactBreakdown").innerHTML = breakdownHtml;
+            document.getElementById("impactModalOverlay").style.display = "flex";
+
+        });
+
+        const impactModalOverlay = document.getElementById("impactModalOverlay");
+        const cancelSubmitBtn = document.getElementById("cancelSubmitBtn");
+        const confirmSubmitBtn = document.getElementById("confirmSubmitBtn");
+        const closeImpactModal = document.getElementById("closeImpactModal");
+
+        function hideModal() {
+            impactModalOverlay.style.display = "none";
+        }
+
+        cancelSubmitBtn.addEventListener("click", hideModal);
+        closeImpactModal.addEventListener("click", hideModal);
+
+        confirmSubmitBtn.addEventListener("click", async () => {
+            hideModal();
+            submitButton.disabled = true;
             setStatus("Creating organisation login...");
 
-
-
             const email = value("head_email");
-
             const password = value("password");
-
             const payload = buildRegistrationPayload();
-
-
-
             const programIds = selectedProgramIds();
             localStorage.setItem(pendingRegistrationKey, JSON.stringify({ email, payload, programIds }));
 
-
-
             const { data: authData, error: authError } = await supabase.auth.signUp({
-
                 email,
-
                 password,
-
                 options: {
-
                     data: {
-
                         role: "org_head",
-
                         organization_name: payload.organization_name,
-
                         first_name: payload.organization_head_first_name,
-
                         last_name: payload.organization_head_last_name
-
                     }
-
                 }
-
             });
 
-
-
             if (authError) {
-
                 submitButton.disabled = false;
-
                 localStorage.removeItem(pendingRegistrationKey);
-
                 setStatus(authError.message || "Login account could not be created.", "error");
-
                 return;
-
             }
-
-
 
             const userId = authData.session?.user?.id;
-
             if (!userId) {
-
                 submitButton.disabled = false;
-
                 setStatus("Account created. Please confirm the email, then login to open the dashboard.", "ok");
-
                 return;
-
             }
 
-
-
             const { data: registration, error: registrationError } = await supabase
-
                 .from("organization_registrations")
-
                 .insert({ ...payload, owner_id: userId })
-
                 .select("id")
-
                 .single();
-
-
 
             submitButton.disabled = false;
 
-
-
             if (registrationError) {
-
                 setStatus(registrationError.message || "Organisation could not be registered.", "error");
-
                 return;
-
             }
 
             const { error: programError } = await supabase
@@ -1548,18 +1588,53 @@
                 return;
             }
 
-
-
             localStorage.removeItem(pendingRegistrationKey);
-
             setStatus("Organisation registered. Opening dashboard...", "ok");
-
             window.location.href = "/dashboard/";
-
         });
 
         loadPrograms();
         initStatesAndDistricts();
+
+        const registrationTypeSelect = document.getElementById("registration_type");
+        const otherRegTypeContainer = document.getElementById("other_registration_type_container");
+        const otherRegTypeInput = document.getElementById("other_registration_type");
+
+        registrationTypeSelect.addEventListener("change", () => {
+            const orgNameLabel = document.getElementById("organization_name_label");
+            const logoUrlLabel = document.getElementById("company_logo_url_label");
+            const estPartLabel = document.getElementById("estimated_participants_label");
+            const deptLabel = document.getElementById("primary_departments_label");
+            const nodalLegend = document.getElementById("nodal_officer_legend");
+
+            const selectedType = registrationTypeSelect.value;
+
+            // Defaults
+            orgNameLabel.textContent = "Organization name";
+            logoUrlLabel.textContent = "Company logo URL";
+            estPartLabel.textContent = "Estimated total participants";
+            deptLabel.textContent = "Number of departments";
+            nodalLegend.innerHTML = '<i class="fa-solid fa-user-tie"></i> Chief Nodel officer';
+
+            if (selectedType === "ngo_civil_group") {
+                logoUrlLabel.textContent = "Logo URL";
+                estPartLabel.textContent = "Estimated total volunteers/participants";
+                deptLabel.textContent = "Number of wings";
+            } else if (selectedType === "educational") {
+                orgNameLabel.textContent = "Institution name";
+                logoUrlLabel.textContent = "Institution logo URL";
+                estPartLabel.textContent = "Estimated total students/staff";
+                deptLabel.textContent = "Number of departments/classes";
+                nodalLegend.innerHTML = '<i class="fa-solid fa-user-tie"></i> Nodal Officer / Principal';
+            }
+
+            if (selectedType === "other") {
+                otherRegTypeContainer.style.display = "block";
+            } else {
+                otherRegTypeContainer.style.display = "none";
+                otherRegTypeInput.value = "";
+            }
+        });
 
     </script>
 
