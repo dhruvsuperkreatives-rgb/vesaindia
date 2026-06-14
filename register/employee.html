@@ -541,7 +541,7 @@
 
         // Parse query params
         const params = new URLSearchParams(window.location.search);
-        const orgId = params.get("org_id");
+        let orgId = params.get("org_id");
         const deptId = params.get("dept_id");
 
         const loader = document.getElementById("loader");
@@ -553,17 +553,15 @@
 
         // Verify Org & Dept exist and are active/approved
         async function initPage() {
-            if (!orgId || !deptId) {
-                showError("Invalid link format", "The registration link is missing organization or department parameters.");
+            if (!deptId) {
+                showError("Invalid link format", "The registration link is missing department parameter.");
                 return;
             }
 
             try {
                 // Fetch Details via public RPC to bypass RLS securely
-                const { data, error } = await supabase.rpc("get_registration_details", {
-                    p_org_id: orgId,
-                    p_dept_id: deptId
-                });
+                const rpcParams = orgId ? { p_org_id: orgId, p_dept_id: deptId } : { p_dept_id: deptId };
+                const { data, error } = await supabase.rpc("get_registration_details", rpcParams);
 
                 if (error || !data) {
                     showError("Link Verification Failed", "The organization or department specified in this registration link does not exist.");
@@ -573,6 +571,11 @@
                 if (data.organization_status !== "approved") {
                     showError("Organization not approved", "This organization is not approved yet. Self-registration is disabled.");
                     return;
+                }
+
+                // Dynamically resolve organization ID if not provided in URL
+                if (!orgId) {
+                    orgId = data.organization_id;
                 }
 
                 // Show form & pre-fill

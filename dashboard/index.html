@@ -1433,9 +1433,8 @@
                 const specialLinkContainer = document.getElementById("specialLinkContainer");
                 if (specialLinkContainer) {
                     specialLinkContainer.classList.remove("hidden");
-                    const orgId = summary.profile.organization_registration_id;
                     const deptId = summary.profile.department_id;
-                    const regUrl = `https://vesacindia.com/register/employee.html?org_id=${orgId}&dept_id=${deptId}`;
+                    const regUrl = `https://vesacindia.com/register/employee.html?dept_id=${deptId}`;
                     document.getElementById("generatedLinkInput").value = regUrl;
                 }
             } else {
