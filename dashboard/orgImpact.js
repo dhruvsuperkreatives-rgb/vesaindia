@@ -1,178 +1,234 @@
 const MULTIPLIERS = {
-    supBags: 100,
-    plasticKg: 0.25,
-    crudeOilKg: 0.44,
-    waterLitres: 45,
-    energyKwh: 3.75,
-    co2Kg: 1.5,
-    trees: 0.075
+  supBags: 100,
+  plasticKg: 0.25,
+  crudeOilKg: 0.44,
+  waterLitres: 45,
+  energyKwh: 3.75,
+  co2Kg: 1.5,
+  trees: 0.075,
 };
 
 const GARMENT_MULTIPLIERS = {
-    divertedKg: 0.7,
-    waterLitres: 7500,
-    energyKwh: 25,
-    co2Kg: 25,
-    trees: 1.2
+  divertedKg: 0.7,
+  waterLitres: 7500,
+  energyKwh: 25,
+  co2Kg: 25,
+  trees: 1.2,
 };
 
 const DIARY_MULTIPLIERS = {
-    pages: 384,
-    notebooks: 8,
-    waterLitres: 40.5,
-    energyKwh: 3,
-    co2Kg: 1.35,
-    trees: 0.015
+  pages: 384,
+  notebooks: 8,
+  waterLitres: 40.5,
+  energyKwh: 3,
+  co2Kg: 1.35,
+  trees: 0.015,
 };
 
-let activeTab = "nwpp";
+let activeTab = "total";
 
-export function renderOrgImpact(container, summary, search = "", programSettings = []) {
-    const org = summary.organization || {};
-    const orgTotals = summary.org_totals || {};
-    const departments = summary.departments || [];
-    const programContributions = summary.program_contributions || [];
-    
-    // Map of user_id -> role for our organization
-    const people = summary.mission_people || [];
-    const userRoles = new Map(people.map((p) => [p.id, p.role]));
+export function renderOrgImpact(
+  container,
+  summary,
+  search = "",
+  programSettings = [],
+) {
+  const org = summary.organization || {};
+  const orgTotals = summary.org_totals || {};
+  const departments = summary.departments || [];
+  const programContributions = summary.program_contributions || [];
 
-    const getBreakdown = (contributions) => {
-        const uniqueUsers = new Set(contributions.map((c) => c.user_id).filter(Boolean));
-        const breakdown = { employee: 0, nodal: 0, head: 0 };
-        uniqueUsers.forEach((uid) => {
-            const role = userRoles.get(uid) || "employee";
-            if (role === "employee") breakdown.employee++;
-            else if (role === "nodal_officer") breakdown.nodal++;
-            else if (role === "org_head" || role === "admin") breakdown.head++;
-        });
-        return breakdown;
-    };
+  // Map of user_id -> role for our organization
+  const people = summary.mission_people || [];
+  const userRoles = new Map(people.map((p) => [p.id, p.role]));
 
-    function formatParticipantBreakdown(breakdown) {
-        const parts = [];
-        if (breakdown.employee > 0) {
-            parts.push(`${breakdown.employee} employee${breakdown.employee > 1 ? 's' : ''}`);
-        }
-        if (breakdown.nodal > 0) {
-            parts.push(`${breakdown.nodal} nodal officer${breakdown.nodal > 1 ? 's' : ''}`);
-        }
-        if (breakdown.head > 0) {
-            parts.push(`${breakdown.head} org head${breakdown.head > 1 ? 's' : ''}`);
-        }
-        if (parts.length === 0) return "0 employees participated";
-        return parts.join(", ") + " participated";
-    }
-
-    const participantCount = (summary.mission_people || summary.employees || []).filter((p) => p.role === "employee" || p.role === "nodal_officer").length;
-    const nwppProgram = programSettings.find((p) => p.slug === "nwpp_bag");
-    const nwppTargetPer = nwppProgram ? Number(nwppProgram.target_per_participant || 0) : 10;
-    const targetNWPP = participantCount * nwppTargetPer;
-    const totalNWPP = Number(orgTotals.nwpp_bags || 0);
-    const totalGarments = Number(orgTotals.garments || 0);
-
-    // Identify Diary program ID
-    const diaryProgram = programSettings.find((p) => p.slug === "diary");
-    const diaryProgramId = diaryProgram?.id;
-
-    // Calculate total diaries for organization
-    let totalDiaries = 0;
-    if (diaryProgramId) {
-        totalDiaries = programContributions
-            .filter((item) => item.program_id === diaryProgramId)
-            .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-    }
-
-    // Map diaries by department
-    const diariesByDept = new Map();
-    if (diaryProgramId) {
-        programContributions
-            .filter((item) => item.program_id === diaryProgramId && item.department_id)
-            .forEach((item) => {
-                diariesByDept.set(item.department_id, (diariesByDept.get(item.department_id) || 0) + Number(item.quantity || 0));
-            });
-    }
-
-    const nwppBreakdown = getBreakdown(summary.nwpp_contributions || []);
-    const garmentsBreakdown = getBreakdown(summary.garment_contributions || []);
-    const diariesBreakdown = getBreakdown(
-        (summary.program_contributions || []).filter((item) => item.program_id === diaryProgramId)
+  const getBreakdown = (contributions) => {
+    const uniqueUsers = new Set(
+      contributions.map((c) => c.user_id).filter(Boolean),
     );
+    const breakdown = { employee: 0, nodal: 0, head: 0 };
+    uniqueUsers.forEach((uid) => {
+      const role = userRoles.get(uid) || "employee";
+      if (role === "employee") breakdown.employee++;
+      else if (role === "nodal_officer") breakdown.nodal++;
+      else if (role === "org_head" || role === "admin") breakdown.head++;
+    });
+    return breakdown;
+  };
 
-    // Calculate total NWPP impact
-    const supAvoided = totalNWPP * MULTIPLIERS.supBags;
-    const plasticPrevented = totalNWPP * MULTIPLIERS.plasticKg;
-    const crudeOilSaved = totalNWPP * MULTIPLIERS.crudeOilKg;
-    const waterSaved = totalNWPP * MULTIPLIERS.waterLitres;
-    const energySaved = totalNWPP * MULTIPLIERS.energyKwh;
-    const co2Reduced = totalNWPP * MULTIPLIERS.co2Kg;
-    const treesPreserved = totalNWPP * MULTIPLIERS.trees;
-
-    // Calculate total Garment impact
-    const garmentWasteDiverted = totalGarments * GARMENT_MULTIPLIERS.divertedKg;
-    const garmentWaterPreserved = totalGarments * GARMENT_MULTIPLIERS.waterLitres;
-    const garmentEnergyPreserved = totalGarments * GARMENT_MULTIPLIERS.energyKwh;
-    const garmentCo2Extended = totalGarments * GARMENT_MULTIPLIERS.co2Kg;
-    const garmentTreesPreserved = totalGarments * GARMENT_MULTIPLIERS.trees;
-
-    // Calculate total Diary impact
-    const diaryPages = totalDiaries * DIARY_MULTIPLIERS.pages;
-    const diaryNotebooks = totalDiaries * DIARY_MULTIPLIERS.notebooks;
-    const diaryWaterSaved = totalDiaries * DIARY_MULTIPLIERS.waterLitres;
-    const diaryEnergySaved = totalDiaries * DIARY_MULTIPLIERS.energyKwh;
-    const diaryCo2Avoided = totalDiaries * DIARY_MULTIPLIERS.co2Kg;
-    const diaryTreesPreserved = totalDiaries * DIARY_MULTIPLIERS.trees;
-
-    // Filter departments for table view
-    const term = search.trim().toLowerCase();
-    const filteredDepts = departments.filter((dept) => (
-        !term || 
-        String(dept.department_name || "").toLowerCase().includes(term) ||
-        String(dept.nodal_name || "").toLowerCase().includes(term)
-    ));
-
-    // Donut chart calculation
-    const overallPct = targetNWPP > 0 ? Math.round((totalNWPP / targetNWPP) * 100) : 0;
-    const radius = 50;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (Math.min(100, overallPct) / 100) * circumference;
-
-    const garmentProgram = programSettings.find((p) => p.slug === "garment");
-    const garmentTargetPer = garmentProgram && Number(garmentProgram.target_per_participant) > 0 
-        ? Number(garmentProgram.target_per_participant) 
-        : 1;
-    const targetGarments = participantCount * garmentTargetPer;
-    const garmentPct = targetGarments > 0 ? Math.round((totalGarments / targetGarments) * 100) : 0;
-    const garmentStrokeDashoffset = circumference - (Math.min(100, garmentPct) / 100) * circumference;
-
-    const diaryTargetPer = diaryProgram && Number(diaryProgram.target_per_participant) > 0 
-        ? Number(diaryProgram.target_per_participant) 
-        : 1;
-    const targetDiaries = participantCount * diaryTargetPer;
-    const diaryPct = targetDiaries > 0 ? Math.round((totalDiaries / targetDiaries) * 100) : 0;
-    const diaryStrokeDashoffset = circumference - (Math.min(100, diaryPct) / 100) * circumference;
-
-    // Active tab styles
-    const nwppStyle = activeTab === "nwpp" ? "border: 2px solid var(--green); box-shadow: 0 4px 15px rgba(47, 143, 107, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
-    const garmentStyle = activeTab === "garments" ? "border: 2px solid var(--blue); box-shadow: 0 4px 15px rgba(47, 111, 237, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
-    const diaryStyle = activeTab === "diaries" ? "border: 2px solid #a0522d; box-shadow: 0 4px 15px rgba(160, 82, 45, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
-
-    function numberText(value) {
-        return new Intl.NumberFormat("en-IN").format(Number(value || 0));
+  function formatParticipantBreakdown(breakdown) {
+    const parts = [];
+    if (breakdown.employee > 0) {
+      parts.push(
+        `${breakdown.employee} employee${breakdown.employee > 1 ? "s" : ""}`,
+      );
     }
-
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+    if (breakdown.nodal > 0) {
+      parts.push(
+        `${breakdown.nodal} nodal officer${breakdown.nodal > 1 ? "s" : ""}`,
+      );
     }
+    if (breakdown.head > 0) {
+      parts.push(`${breakdown.head} org head${breakdown.head > 1 ? "s" : ""}`);
+    }
+    if (parts.length === 0) return "0 employees participated";
+    return parts.join(", ") + " participated";
+  }
 
-    container.innerHTML = `
+  const participantCount = (
+    summary.mission_people ||
+    summary.employees ||
+    []
+  ).filter((p) => (p.organization_id === org.id || p.organization_registration_id === org.id) && (p.role === "employee" || p.role === "nodal_officer")).length;
+  const nwppProgram = programSettings.find((p) => p.slug === "nwpp_bag");
+  const nwppTargetPer = nwppProgram
+    ? Number(nwppProgram.target_per_participant || 0)
+    : 10;
+  const targetNWPP = participantCount * nwppTargetPer;
+  const totalNWPP = Number(orgTotals.nwpp_bags || 0);
+  const totalGarments = Number(orgTotals.garments || 0);
+
+  // Identify Diary program ID
+  const diaryProgram = programSettings.find((p) => p.slug === "diary");
+  const diaryProgramId = diaryProgram?.id;
+
+  // Calculate total diaries for organization
+  let totalDiaries = 0;
+  if (diaryProgramId) {
+    totalDiaries = programContributions
+      .filter((item) => item.program_id === diaryProgramId)
+      .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  }
+
+  // Map diaries by department
+  const diariesByDept = new Map();
+  if (diaryProgramId) {
+    programContributions
+      .filter(
+        (item) => item.program_id === diaryProgramId && item.department_id,
+      )
+      .forEach((item) => {
+        diariesByDept.set(
+          item.department_id,
+          (diariesByDept.get(item.department_id) || 0) +
+            Number(item.quantity || 0),
+        );
+      });
+  }
+
+  const nwppBreakdown = getBreakdown(summary.nwpp_contributions || []);
+  const garmentsBreakdown = getBreakdown(summary.garment_contributions || []);
+  const diariesBreakdown = getBreakdown(
+    (summary.program_contributions || []).filter(
+      (item) => item.program_id === diaryProgramId,
+    ),
+  );
+
+  // Calculate total NWPP impact
+  const supAvoided = totalNWPP * MULTIPLIERS.supBags;
+  const plasticPrevented = totalNWPP * MULTIPLIERS.plasticKg;
+  const crudeOilSaved = totalNWPP * MULTIPLIERS.crudeOilKg;
+  const waterSaved = totalNWPP * MULTIPLIERS.waterLitres;
+  const energySaved = totalNWPP * MULTIPLIERS.energyKwh;
+  const co2Reduced = totalNWPP * MULTIPLIERS.co2Kg;
+  const treesPreserved = totalNWPP * MULTIPLIERS.trees;
+
+  // Calculate total Garment impact
+  const garmentWasteDiverted = totalGarments * GARMENT_MULTIPLIERS.divertedKg;
+  const garmentWaterPreserved = totalGarments * GARMENT_MULTIPLIERS.waterLitres;
+  const garmentEnergyPreserved = totalGarments * GARMENT_MULTIPLIERS.energyKwh;
+  const garmentCo2Extended = totalGarments * GARMENT_MULTIPLIERS.co2Kg;
+  const garmentTreesPreserved = totalGarments * GARMENT_MULTIPLIERS.trees;
+
+  // Calculate total Diary impact
+  const diaryPages = totalDiaries * DIARY_MULTIPLIERS.pages;
+  const diaryNotebooks = totalDiaries * DIARY_MULTIPLIERS.notebooks;
+  const diaryWaterSaved = totalDiaries * DIARY_MULTIPLIERS.waterLitres;
+  const diaryEnergySaved = totalDiaries * DIARY_MULTIPLIERS.energyKwh;
+  const diaryCo2Avoided = totalDiaries * DIARY_MULTIPLIERS.co2Kg;
+  const diaryTreesPreserved = totalDiaries * DIARY_MULTIPLIERS.trees;
+
+  // Filter departments for table view
+  const term = search.trim().toLowerCase();
+  const filteredDepts = departments.filter(
+    (dept) =>
+      !term ||
+      String(dept.department_name || "")
+        .toLowerCase()
+        .includes(term) ||
+      String(dept.nodal_name || "")
+        .toLowerCase()
+        .includes(term),
+  );
+
+  // Donut chart calculation
+  const overallPct =
+    targetNWPP > 0 ? Math.round((totalNWPP / targetNWPP) * 100) : 0;
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset =
+    circumference - (Math.min(100, overallPct) / 100) * circumference;
+
+  const garmentProgram = programSettings.find((p) => p.slug === "garment");
+  const garmentTargetPer =
+    garmentProgram && Number(garmentProgram.target_per_participant) > 0
+      ? Number(garmentProgram.target_per_participant)
+      : 1;
+  const targetGarments = participantCount * garmentTargetPer;
+  const garmentPct =
+    targetGarments > 0 ? Math.round((totalGarments / targetGarments) * 100) : 0;
+  const garmentStrokeDashoffset =
+    circumference - (Math.min(100, garmentPct) / 100) * circumference;
+
+  const diaryTargetPer =
+    diaryProgram && Number(diaryProgram.target_per_participant) > 0
+      ? Number(diaryProgram.target_per_participant)
+      : 1;
+  const targetDiaries = participantCount * diaryTargetPer;
+  const diaryPct =
+    targetDiaries > 0 ? Math.round((totalDiaries / targetDiaries) * 100) : 0;
+  const diaryStrokeDashoffset =
+    circumference - (Math.min(100, diaryPct) / 100) * circumference;
+
+  // Active tab styles
+  const totalStyle =
+    activeTab === "total"
+      ? "border: 2px solid var(--green); box-shadow: 0 4px 15px rgba(36, 124, 92, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+  const nwppStyle =
+    activeTab === "nwpp"
+      ? "border: 2px solid var(--green); box-shadow: 0 4px 15px rgba(47, 143, 107, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+  const garmentStyle =
+    activeTab === "garments"
+      ? "border: 2px solid var(--blue); box-shadow: 0 4px 15px rgba(47, 111, 237, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+  const diaryStyle =
+    activeTab === "diaries"
+      ? "border: 2px solid #a0522d; box-shadow: 0 4px 15px rgba(160, 82, 45, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+
+  function numberText(value) {
+    return new Intl.NumberFormat("en-IN").format(Number(value || 0));
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  container.innerHTML = `
         <!-- Top Summary Cards (Interactive Tabs) -->
-        <div class="stats" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 24px;">
+        <div class="stats" style="grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 24px;">
+            <article class="card" data-tab="total" style="${totalStyle} transition: all 0.2s ease;">
+                <div class="metric-label">Total Impact</div>
+                <div class="metric-value" style="color: var(--green);">Combined</div>
+                <div class="metric-unit">view all &rarr;</div>
+            </article>
             <article class="card" data-tab="nwpp" style="${nwppStyle} transition: all 0.2s ease;">
                 <div class="metric-label">Organisation NWPP</div>
                 <div class="metric-value" style="color: var(--green);">${numberText(totalNWPP)}</div>
@@ -190,7 +246,169 @@ export function renderOrgImpact(container, summary, search = "", programSettings
             </article>
         </div>
 
-        <!-- Environmental Impact NWPP Visual Tiles -->
+        <!-- Total Combined Environmental Impact Panel -->
+        <div id="orgTotalImpactPanel" class="card ${activeTab === "total" ? "" : "hidden"}" style="padding: 28px; margin-bottom: 24px; background: linear-gradient(135deg, #f0faf5 0%, #e7f4ee 100%); border: 1px solid #cfe5da;">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <span style="color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">COMPREHENSIVE ENVIRONMENTAL IMPACT</span>
+                <h3 style="font-size: 24px; margin: 8px 0 0; font-weight: 900; color: var(--ink); background: linear-gradient(135deg, #247c5c 0%, #2f8f6b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">OUR COMBINED MISSION FOOTPRINT</h3>
+                <p style="color: var(--muted); margin: 8px 0 0; font-size: 13px;">Total impact across NWPP Bags, Garments Upcycling, and Diary Contributions</p>
+            </div>
+            
+            <!-- Key Impact Metrics Grid (3x3) -->
+            <div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px;">
+                <!-- Row 1: Primary Metrics -->
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #cfe5da; box-shadow: 0 2px 8px rgba(36, 124, 92, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #247c5c 0%, #1b5a47 100%); box-shadow: 0 4px 12px rgba(36, 124, 92, 0.3);">
+                        <i class="fa-solid fa-water"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText((waterSaved + garmentWaterPreserved + diaryWaterSaved).toFixed(0))} L</div>
+                    <div style="font-size: 12px; font-weight: 700; color: var(--green); margin-bottom: 8px;">WATER PRESERVED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Fresh water saved</span>
+                        <span style="font-size: 10px;">${numberText(((waterSaved + garmentWaterPreserved + diaryWaterSaved) / 1000).toFixed(0))} thousand liters</span>
+                    </div>
+                </div>
+
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #dbeafe; box-shadow: 0 2px 8px rgba(47, 111, 237, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #2f6fed 0%, #1d4ed8 100%); box-shadow: 0 4px 12px rgba(47, 111, 237, 0.3);">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText((energySaved + garmentEnergyPreserved + diaryEnergySaved).toFixed(1))} kWh</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #2f6fed; margin-bottom: 8px;">ENERGY CONSERVED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Clean energy equivalent</span>
+                        <span style="font-size: 10px;">Enough to power homes</span>
+                    </div>
+                </div>
+
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #fee2e2; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
+                        <i class="fa-solid fa-cloud"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText((co2Reduced + garmentCo2Extended + diaryCo2Avoided).toFixed(1))} kg</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #dc2626; margin-bottom: 8px;">CO₂ EMISSIONS AVOIDED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Carbon footprint reduced</span>
+                        <span style="font-size: 10px;">${numberText(((co2Reduced + garmentCo2Extended + diaryCo2Avoided) / 1000).toFixed(2))} metric tons</span>
+                    </div>
+                </div>
+
+                <!-- Row 2: Secondary Metrics -->
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #dcfce7; box-shadow: 0 2px 8px rgba(47, 143, 107, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #2f8f6b 0%, #065f46 100%); box-shadow: 0 4px 12px rgba(47, 143, 107, 0.3);">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText(plasticPrevented.toFixed(1))} kg</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #2f8f6b; margin-bottom: 8px;">PLASTIC PREVENTED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Single-use plastic diverted</span>
+                        <span style="font-size: 10px;">From landfills and oceans</span>
+                    </div>
+                </div>
+
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #fef3c7; box-shadow: 0 2px 8px rgba(184, 92, 0, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #b85c00 0%, #92400e 100%); box-shadow: 0 4px 12px rgba(184, 92, 0, 0.3);">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText(crudeOilSaved.toFixed(1))} kg</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #b85c00; margin-bottom: 8px;">CRUDE OIL SAVED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Petroleum resources conserved</span>
+                        <span style="font-size: 10px;">Non-renewable energy preserved</span>
+                    </div>
+                </div>
+
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #ecfdf3; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <i class="fa-solid fa-tree"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText((treesPreserved + garmentTreesPreserved + diaryTreesPreserved).toFixed(2))}</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #10b981; margin-bottom: 8px;">TREES PRESERVED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Forest equivalent saved</span>
+                        <span style="font-size: 10px;">Through carbon sequestration</span>
+                    </div>
+                </div>
+
+                <!-- Row 3: Contribution Metrics -->
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #f5d4f5; box-shadow: 0 2px 8px rgba(168, 85, 247, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText(supAvoided)}</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #a855f7; margin-bottom: 8px;">SUP BAGS ELIMINATED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Single-use carrier bags</span>
+                        <span style="font-size: 10px;">Prevented from circulation</span>
+                    </div>
+                </div>
+
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #cfe5da; box-shadow: 0 2px 8px rgba(36, 124, 92, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #247c5c 0%, #1b5a47 100%); box-shadow: 0 4px 12px rgba(36, 124, 92, 0.3);">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText(diaryPages)}</div>
+                    <div style="font-size: 12px; font-weight: 700; color: var(--green); margin-bottom: 8px;">PAGES RECOVERED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Diary pages reused</span>
+                        <span style="font-size: 10px;">${numberText(diaryNotebooks)} notebooks created</span>
+                    </div>
+                </div>
+
+                <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #fdf2f8; box-shadow: 0 2px 8px rgba(190, 24, 93, 0.08); transition: all 0.3s ease;">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #be185d 0%, #831843 100%); box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);">
+                        <i class="fa-solid fa-recycle"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 4px;">${numberText(garmentWasteDiverted.toFixed(1))} kg</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #be185d; margin-bottom: 8px;">TEXTILE WASTE DIVERTED</div>
+                    <div style="font-size: 11px; color: var(--muted); line-height: 1.5;">
+                        <span style="display: block; font-weight: 600;">Garment upcycling impact</span>
+                        <span style="font-size: 10px;">Waste redirected to value</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Impact Summary Card -->
+            <div style="border-radius: 12px; padding: 28px; background: linear-gradient(135deg, #247c5c 0%, #2f8f6b 100%); color: white; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(36, 124, 92, 0.2);">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; align-items: center;">
+                    <div>
+                        <h4 style="margin: 0 0 8px; font-size: 13px; font-weight: 700; opacity: 0.9; letter-spacing: 0.05em; text-transform: uppercase;">Overall Impact</h4>
+                        <div style="font-size: 28px; font-weight: 900;">Multiple Programs</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-top: 6px; font-weight: 500;">
+                            <span>${numberText(totalNWPP + totalGarments + totalDiaries)} total items contributed</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 42px; font-weight: 900; margin-bottom: 4px;">
+                            ${numberText((treesPreserved + garmentTreesPreserved + diaryTreesPreserved).toFixed(1))}
+                        </div>
+                        <div style="font-size: 13px; font-weight: 600; opacity: 0.95;">Trees Equivalent Protected</div>
+                        <div style="font-size: 11px; opacity: 0.8; margin-top: 6px;">
+                            ${numberText(((co2Reduced + garmentCo2Extended + diaryCo2Avoided) / 1000).toFixed(2))} metric tons CO₂ avoided
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Facts Section -->
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+                <div style="background: #ede9fe; border-radius: 10px; padding: 16px; border: 1px solid #ddd6fe;">
+                    <div style="font-size: 11px; font-weight: 800; color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Contributions</div>
+                    <div style="font-size: 18px; font-weight: 900; color: var(--ink);">${numberText(totalNWPP + totalGarments + totalDiaries)}</div>
+                    <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">Total items shared</div>
+                </div>
+                <div style="background: #e0e7ff; border-radius: 10px; padding: 16px; border: 1px solid #c7d2fe;">
+                    <div style="font-size: 11px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Programs</div>
+                    <div style="font-size: 18px; font-weight: 900; color: var(--ink);">3</div>
+                    <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">Active initiatives</div>
+                </div>
+                <div style="background: #dbeafe; border-radius: 10px; padding: 16px; border: 1px solid #bfdbfe;">
+                    <div style="font-size: 11px; font-weight: 800; color: #2f6fed; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Participation</div>
+                    <div style="font-size: 18px; font-weight: 900; color: var(--ink);">${numberText(participantCount)}</div>
+                    <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">Active members</div>
+                </div>
+            </div>
+        </div>
         <div id="orgNwppImpactPanel" class="card ${activeTab === "nwpp" ? "" : "hidden"}" style="padding: 24px; margin-bottom: 24px;">
             <div style="text-align: center; margin-bottom: 24px;">
                 <span style="color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">ECOLOGICAL CONTRIBUTION</span>
@@ -513,21 +731,27 @@ export function renderOrgImpact(container, summary, search = "", programSettings
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${(() => {
-                        const topDepts = [...departments].map(dept => {
-                            const bags = Number(dept.nwpp_bags || 0);
-                            const garments = Number(dept.garments || 0);
-                            const diaries = Number(diariesByDept.get(dept.id) || 0);
-                            const total = bags + garments + diaries;
-                            return { ...dept, bags, garments, diaries, total };
+                      const topDepts = [...departments]
+                        .map((dept) => {
+                          const bags = Number(dept.nwpp_bags || 0);
+                          const garments = Number(dept.garments || 0);
+                          const diaries = Number(
+                            diariesByDept.get(dept.id) || 0,
+                          );
+                          const total = bags + garments + diaries;
+                          return { ...dept, bags, garments, diaries, total };
                         })
-                        .filter(dept => dept.total > 0)
+                        .filter((dept) => dept.total > 0)
                         .sort((a, b) => b.total - a.total)
                         .slice(0, 5);
 
-                        return topDepts.length ? topDepts.map((dept, index) => `
+                      return topDepts.length
+                        ? topDepts
+                            .map(
+                              (dept, index) => `
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? "#ffd700" : index === 1 ? "#c0c0c0" : index === 2 ? "#cd7f32" : "#e2e8f0"}; color: ${index <= 2 ? "#fff" : "var(--muted)"}; display: grid; place-items: center; box-shadow: ${index <= 2 ? "0 2px 4px rgba(0,0,0,0.1)" : "none"};">${index + 1}</span>
                                     <div>
                                         <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(dept.department_name)}</strong>
                                         <span style="font-size: 11px; color: var(--muted);">Nodal: ${escapeHtml(dept.nodal_name || "Unassigned")}</span>
@@ -536,13 +760,16 @@ export function renderOrgImpact(container, summary, search = "", programSettings
                                 <div style="text-align: right;">
                                     <span style="background: #e8f5ef; color: #2f8f6b; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(dept.total)} items</span>
                                     <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
-                                        ${dept.bags ? `Bags: ${numberText(dept.bags)} · ` : ''}
-                                        ${dept.garments ? `Garments: ${numberText(dept.garments)} · ` : ''}
-                                        ${dept.diaries ? `Diaries: ${numberText(dept.diaries)}` : ''}
+                                        ${dept.bags ? `Bags: ${numberText(dept.bags)} · ` : ""}
+                                        ${dept.garments ? `Garments: ${numberText(dept.garments)} · ` : ""}
+                                        ${dept.diaries ? `Diaries: ${numberText(dept.diaries)}` : ""}
                                     </div>
                                 </div>
                             </div>
-                        `).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No contributions logged yet.</div>';
+                        `,
+                            )
+                            .join("")
+                        : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No contributions logged yet.</div>';
                     })()}
                 </div>
             </article>
@@ -554,34 +781,60 @@ export function renderOrgImpact(container, summary, search = "", programSettings
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${(() => {
-                        const nwppContributions = summary.nwpp_contributions || [];
-                        const garmentContributions = summary.garment_contributions || [];
-                        const otherContributions = programContributions || [];
-                        const people = summary.mission_people || [];
+                      const nwppContributions =
+                        summary.nwpp_contributions || [];
+                      const garmentContributions =
+                        summary.garment_contributions || [];
+                      const otherContributions = programContributions || [];
+                      const people = summary.mission_people || [];
 
-                        const topEmployees = people.map(p => {
-                            const bags = nwppContributions.filter(c => c.user_id === p.id).reduce((sum, c) => sum + Number(c.bags_count || 0), 0);
-                            const garments = garmentContributions.filter(c => c.user_id === p.id).reduce((sum, c) => sum + Number(c.garment_count || 0), 0);
-                            const others = otherContributions.filter(c => c.user_id === p.id).reduce((sum, c) => sum + Number(c.quantity || 0), 0);
-                            const total = bags + garments + others;
-                            return {
-                                ...p,
-                                bags,
-                                garments,
-                                others,
-                                total
-                            };
+                      const topEmployees = people
+                        .map((p) => {
+                          const bags = nwppContributions
+                            .filter((c) => c.user_id === p.id)
+                            .reduce(
+                              (sum, c) => sum + Number(c.bags_count || 0),
+                              0,
+                            );
+                          const garments = garmentContributions
+                            .filter((c) => c.user_id === p.id)
+                            .reduce(
+                              (sum, c) => sum + Number(c.garment_count || 0),
+                              0,
+                            );
+                          const others = otherContributions
+                            .filter((c) => c.user_id === p.id)
+                            .reduce(
+                              (sum, c) => sum + Number(c.quantity || 0),
+                              0,
+                            );
+                          const total = bags + garments + others;
+                          return {
+                            ...p,
+                            bags,
+                            garments,
+                            others,
+                            total,
+                          };
                         })
-                        .filter(p => p.total > 0)
+                        .filter((p) => p.total > 0)
                         .sort((a, b) => b.total - a.total)
                         .slice(0, 5);
 
-                        return topEmployees.length ? topEmployees.map((p, index) => {
-                            const fullName = [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(" ");
-                            return `
+                      return topEmployees.length
+                        ? topEmployees
+                            .map((p, index) => {
+                              const fullName = [
+                                p.first_name,
+                                p.middle_name,
+                                p.last_name,
+                              ]
+                                .filter(Boolean)
+                                .join(" ");
+                              return `
                                 <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                        <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? "#ffd700" : index === 1 ? "#c0c0c0" : index === 2 ? "#cd7f32" : "#e2e8f0"}; color: ${index <= 2 ? "#fff" : "var(--muted)"}; display: grid; place-items: center; box-shadow: ${index <= 2 ? "0 2px 4px rgba(0,0,0,0.1)" : "none"};">${index + 1}</span>
                                         <div>
                                             <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(fullName || "Mission Member")}</strong>
                                             <span style="font-size: 11px; color: var(--muted);">Dept: ${escapeHtml(p.department_name || "Organisation leadership")}</span>
@@ -590,14 +843,16 @@ export function renderOrgImpact(container, summary, search = "", programSettings
                                     <div style="text-align: right;">
                                         <span style="background: #eef4ff; color: #2f6fed; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(p.total)} items</span>
                                         <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
-                                            ${p.bags ? `Bags: ${numberText(p.bags)} · ` : ''}
-                                            ${p.garments ? `Garments: ${numberText(p.garments)} · ` : ''}
-                                            ${p.others ? `Other: ${numberText(p.others)}` : ''}
+                                            ${p.bags ? `Bags: ${numberText(p.bags)} · ` : ""}
+                                            ${p.garments ? `Garments: ${numberText(p.garments)} · ` : ""}
+                                            ${p.others ? `Other: ${numberText(p.others)}` : ""}
                                         </div>
                                     </div>
                                 </div>
                             `;
-                        }).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No contributions logged yet.</div>';
+                            })
+                            .join("")
+                        : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No contributions logged yet.</div>';
                     })()}
                 </div>
             </article>
@@ -606,7 +861,9 @@ export function renderOrgImpact(container, summary, search = "", programSettings
         <!-- Department Breakdown Table -->
         <div class="card" style="padding: 24px;">
             <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px;">Department-level impact breakdown</h3>
-            ${filteredDepts.length ? `
+            ${
+              filteredDepts.length
+                ? `
                 <div style="overflow-x: auto;">
                     <table class="data-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
@@ -620,11 +877,17 @@ export function renderOrgImpact(container, summary, search = "", programSettings
                             </tr>
                         </thead>
                         <tbody>
-                            ${filteredDepts.map((dept) => {
+                            ${filteredDepts
+                              .map((dept) => {
                                 const deptBags = Number(dept.nwpp_bags || 0);
                                 const deptGarments = Number(dept.garments || 0);
-                                const deptDiaries = Number(diariesByDept.get(dept.id) || 0);
-                                const combinedTrees = (deptBags * MULTIPLIERS.trees) + (deptGarments * GARMENT_MULTIPLIERS.trees) + (deptDiaries * DIARY_MULTIPLIERS.trees);
+                                const deptDiaries = Number(
+                                  diariesByDept.get(dept.id) || 0,
+                                );
+                                const combinedTrees =
+                                  deptBags * MULTIPLIERS.trees +
+                                  deptGarments * GARMENT_MULTIPLIERS.trees +
+                                  deptDiaries * DIARY_MULTIPLIERS.trees;
                                 return `
                                     <tr>
                                         <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">
@@ -638,250 +901,319 @@ export function renderOrgImpact(container, summary, search = "", programSettings
                                         <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(combinedTrees.toFixed(3))}</td>
                                     </tr>
                                 `;
-                            }).join("")}
+                              })
+                              .join("")}
                         </tbody>
                     </table>
                 </div>
-            ` : `<div style="color: var(--muted); padding: 16px 0; text-align: center;">No nodal departments found matching search term.</div>`}
+            `
+                : `<div style="color: var(--muted); padding: 16px 0; text-align: center;">No nodal departments found matching search term.</div>`
+            }
         </div>
     `;
 
-    setTimeout(() => {
-        // 1. Pie Chart
-        const pieCtx = document.getElementById("orgCategoryPieChart")?.getContext("2d");
-        if (pieCtx) {
-            new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['NWPP Bags', 'Garments', 'Diaries'],
-                    datasets: [{
-                        data: [totalNWPP, totalGarments, totalDiaries],
-                        backgroundColor: ['#2f8f6b', '#2f6fed', '#a0522d'],
-                        borderWidth: 1.5,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10, weight: 'bold' }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 2. Radar Chart
-        const radarCtx = document.getElementById("orgFootprintRadarChart")?.getContext("2d");
-        if (radarCtx) {
-            new Chart(radarCtx, {
-                type: 'radar',
-                data: {
-                    labels: ['SUP Bags (x100)', 'Plastic (kg)', 'Water (L / 10)', 'Energy (kWh)', 'CO2 (kg)'],
-                    datasets: [
-                        {
-                            label: 'NWPP Bags',
-                            data: [totalNWPP, plasticPrevented, waterSaved / 10, energySaved, co2Reduced],
-                            backgroundColor: 'rgba(47, 143, 107, 0.15)',
-                            borderColor: '#2f8f6b',
-                            pointBackgroundColor: '#2f8f6b',
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Garments',
-                            data: [0, garmentWasteDiverted, garmentWaterPreserved / 10, garmentEnergyPreserved, garmentCo2Extended],
-                            backgroundColor: 'rgba(47, 111, 237, 0.15)',
-                            borderColor: '#2f6fed',
-                            pointBackgroundColor: '#2f6fed',
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Diaries',
-                            data: [0, 0, diaryWaterSaved / 10, diaryEnergySaved, diaryCo2Avoided],
-                            backgroundColor: 'rgba(160, 82, 45, 0.15)',
-                            borderColor: '#a0522d',
-                            pointBackgroundColor: '#a0522d',
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10, weight: 'bold' }
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            angleLines: { display: true },
-                            suggestedMin: 0,
-                            ticks: { font: { size: 8 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 3. Bar Chart
-        const barCtx = document.getElementById("orgDeptBarChart")?.getContext("2d");
-        if (barCtx) {
-            const topDeptsData = [...departments].map(dept => {
-                const bags = Number(dept.nwpp_bags || 0);
-                const garments = Number(dept.garments || 0);
-                const diaries = Number(diariesByDept.get(dept.id) || 0);
-                return {
-                    name: dept.department_name || "Unassigned",
-                    bags,
-                    garments,
-                    diaries
-                };
-            })
-            .sort((a, b) => (b.bags + b.garments + b.diaries) - (a.bags + a.garments + a.diaries))
-            .slice(0, 5);
-
-            new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: topDeptsData.map(d => d.name),
-                    datasets: [
-                        {
-                            label: 'NWPP Bags',
-                            data: topDeptsData.map(d => d.bags),
-                            backgroundColor: '#2f8f6b'
-                        },
-                        {
-                            label: 'Garments',
-                            data: topDeptsData.map(d => d.garments),
-                            backgroundColor: '#2f6fed'
-                        },
-                        {
-                            label: 'Diaries',
-                            data: topDeptsData.map(d => d.diaries),
-                            backgroundColor: '#a0522d'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 } } },
-                        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 9 } } }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10, weight: 'bold' }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 4. Line Chart
-        const lineCtx = document.getElementById("orgTrendLineChart")?.getContext("2d");
-        if (lineCtx) {
-            const datesMap = new Map();
-            const addTrend = (dateStr, qty, type) => {
-                if (!dateStr) return;
-                const date = new Date(dateStr);
-                if (Number.isNaN(date.getTime())) return;
-                const key = new Intl.DateTimeFormat("en-IN", { month: "short", year: "numeric" }).format(date);
-                const timestamp = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
-                if (!datesMap.has(key)) {
-                    datesMap.set(key, { key, timestamp, nwpp: 0, garments: 0, diaries: 0 });
-                }
-                datesMap.get(key)[type] += qty;
-            };
-
-            (summary.nwpp_contributions || []).forEach(c => addTrend(c.created_at, Number(c.bags_count || 0), 'nwpp'));
-            (summary.garment_contributions || []).forEach(c => addTrend(c.created_at, Number(c.garment_count || 0), 'garments'));
-            (summary.program_contributions || [])
-                .filter(item => item.program_id === diaryProgramId)
-                .forEach(c => addTrend(c.created_at, Number(c.quantity || 0), 'diaries'));
-
-            const trendData = [...datesMap.values()].sort((a, b) => a.timestamp - b.timestamp);
-
-            new Chart(lineCtx, {
-                type: 'line',
-                data: {
-                    labels: trendData.map(t => t.key),
-                    datasets: [
-                        {
-                            label: 'NWPP Bags',
-                            data: trendData.map(t => t.nwpp),
-                            borderColor: '#2f8f6b',
-                            backgroundColor: 'rgba(47, 143, 107, 0.05)',
-                            borderWidth: 2.5,
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Garments',
-                            data: trendData.map(t => t.garments),
-                            borderColor: '#2f6fed',
-                            backgroundColor: 'rgba(47, 111, 237, 0.05)',
-                            borderWidth: 2.5,
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Diaries',
-                            data: trendData.map(t => t.diaries),
-                            borderColor: '#a0522d',
-                            backgroundColor: 'rgba(160, 82, 45, 0.05)',
-                            borderWidth: 2.5,
-                            tension: 0.3,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10, weight: 'bold' }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { font: { size: 9 } } },
-                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
-                    }
-                }
-            });
-        }
-    }, 0);
-
-    // Delegated container click registration
-    if (!container.dataset.listenerBound) {
-        container.dataset.listenerBound = "true";
-        container.addEventListener("click", (event) => {
-            const tabCard = event.target.closest("[data-tab]");
-            if (tabCard) {
-                activeTab = tabCard.dataset.tab;
-                const searchVal = document.getElementById("orgImpactSearch")?.value || "";
-                renderOrgImpact(container, summary, searchVal, programSettings);
-            }
-        });
+  setTimeout(() => {
+    // 1. Pie Chart
+    const pieCtx = document
+      .getElementById("orgCategoryPieChart")
+      ?.getContext("2d");
+    if (pieCtx) {
+      new Chart(pieCtx, {
+        type: "pie",
+        data: {
+          labels: ["NWPP Bags", "Garments", "Diaries"],
+          datasets: [
+            {
+              data: [totalNWPP, totalGarments, totalDiaries],
+              backgroundColor: ["#2f8f6b", "#2f6fed", "#a0522d"],
+              borderWidth: 1.5,
+              borderColor: "#ffffff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                boxWidth: 12,
+                font: { size: 10, weight: "bold" },
+              },
+            },
+          },
+        },
+      });
     }
+
+    // 2. Radar Chart
+    const radarCtx = document
+      .getElementById("orgFootprintRadarChart")
+      ?.getContext("2d");
+    if (radarCtx) {
+      new Chart(radarCtx, {
+        type: "radar",
+        data: {
+          labels: [
+            "SUP Bags (x100)",
+            "Plastic (kg)",
+            "Water (L / 10)",
+            "Energy (kWh)",
+            "CO2 (kg)",
+          ],
+          datasets: [
+            {
+              label: "NWPP Bags",
+              data: [
+                totalNWPP,
+                plasticPrevented,
+                waterSaved / 10,
+                energySaved,
+                co2Reduced,
+              ],
+              backgroundColor: "rgba(47, 143, 107, 0.15)",
+              borderColor: "#2f8f6b",
+              pointBackgroundColor: "#2f8f6b",
+              borderWidth: 2,
+            },
+            {
+              label: "Garments",
+              data: [
+                0,
+                garmentWasteDiverted,
+                garmentWaterPreserved / 10,
+                garmentEnergyPreserved,
+                garmentCo2Extended,
+              ],
+              backgroundColor: "rgba(47, 111, 237, 0.15)",
+              borderColor: "#2f6fed",
+              pointBackgroundColor: "#2f6fed",
+              borderWidth: 2,
+            },
+            {
+              label: "Diaries",
+              data: [
+                0,
+                0,
+                diaryWaterSaved / 10,
+                diaryEnergySaved,
+                diaryCo2Avoided,
+              ],
+              backgroundColor: "rgba(160, 82, 45, 0.15)",
+              borderColor: "#a0522d",
+              pointBackgroundColor: "#a0522d",
+              borderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                boxWidth: 12,
+                font: { size: 10, weight: "bold" },
+              },
+            },
+          },
+          scales: {
+            r: {
+              angleLines: { display: true },
+              suggestedMin: 0,
+              ticks: { font: { size: 8 } },
+            },
+          },
+        },
+      });
+    }
+
+    // 3. Bar Chart
+    const barCtx = document.getElementById("orgDeptBarChart")?.getContext("2d");
+    if (barCtx) {
+      const topDeptsData = [...departments]
+        .map((dept) => {
+          const bags = Number(dept.nwpp_bags || 0);
+          const garments = Number(dept.garments || 0);
+          const diaries = Number(diariesByDept.get(dept.id) || 0);
+          return {
+            name: dept.department_name || "Unassigned",
+            bags,
+            garments,
+            diaries,
+          };
+        })
+        .sort(
+          (a, b) =>
+            b.bags + b.garments + b.diaries - (a.bags + a.garments + a.diaries),
+        )
+        .slice(0, 5);
+
+      new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: topDeptsData.map((d) => d.name),
+          datasets: [
+            {
+              label: "NWPP Bags",
+              data: topDeptsData.map((d) => d.bags),
+              backgroundColor: "#2f8f6b",
+            },
+            {
+              label: "Garments",
+              data: topDeptsData.map((d) => d.garments),
+              backgroundColor: "#2f6fed",
+            },
+            {
+              label: "Diaries",
+              data: topDeptsData.map((d) => d.diaries),
+              backgroundColor: "#a0522d",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              grid: { display: false },
+              ticks: { font: { size: 9 } },
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              ticks: { font: { size: 9 } },
+            },
+          },
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                boxWidth: 12,
+                font: { size: 10, weight: "bold" },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // 4. Line Chart
+    const lineCtx = document
+      .getElementById("orgTrendLineChart")
+      ?.getContext("2d");
+    if (lineCtx) {
+      const datesMap = new Map();
+      const addTrend = (dateStr, qty, type) => {
+        if (!dateStr) return;
+        const date = new Date(dateStr);
+        if (Number.isNaN(date.getTime())) return;
+        const key = new Intl.DateTimeFormat("en-IN", {
+          month: "short",
+          year: "numeric",
+        }).format(date);
+        const timestamp = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          1,
+        ).getTime();
+        if (!datesMap.has(key)) {
+          datesMap.set(key, {
+            key,
+            timestamp,
+            nwpp: 0,
+            garments: 0,
+            diaries: 0,
+          });
+        }
+        datesMap.get(key)[type] += qty;
+      };
+
+      (summary.nwpp_contributions || []).forEach((c) =>
+        addTrend(c.created_at, Number(c.bags_count || 0), "nwpp"),
+      );
+      (summary.garment_contributions || []).forEach((c) =>
+        addTrend(c.created_at, Number(c.garment_count || 0), "garments"),
+      );
+      (summary.program_contributions || [])
+        .filter((item) => item.program_id === diaryProgramId)
+        .forEach((c) =>
+          addTrend(c.created_at, Number(c.quantity || 0), "diaries"),
+        );
+
+      const trendData = [...datesMap.values()].sort(
+        (a, b) => a.timestamp - b.timestamp,
+      );
+
+      new Chart(lineCtx, {
+        type: "line",
+        data: {
+          labels: trendData.map((t) => t.key),
+          datasets: [
+            {
+              label: "NWPP Bags",
+              data: trendData.map((t) => t.nwpp),
+              borderColor: "#2f8f6b",
+              backgroundColor: "rgba(47, 143, 107, 0.05)",
+              borderWidth: 2.5,
+              tension: 0.3,
+              fill: true,
+            },
+            {
+              label: "Garments",
+              data: trendData.map((t) => t.garments),
+              borderColor: "#2f6fed",
+              backgroundColor: "rgba(47, 111, 237, 0.05)",
+              borderWidth: 2.5,
+              tension: 0.3,
+              fill: true,
+            },
+            {
+              label: "Diaries",
+              data: trendData.map((t) => t.diaries),
+              borderColor: "#a0522d",
+              backgroundColor: "rgba(160, 82, 45, 0.05)",
+              borderWidth: 2.5,
+              tension: 0.3,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                boxWidth: 12,
+                font: { size: 10, weight: "bold" },
+              },
+            },
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { font: { size: 9 } } },
+            x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+          },
+        },
+      });
+    }
+  }, 0);
+
+  // Delegated container click registration
+  if (!container.dataset.listenerBound) {
+    container.dataset.listenerBound = "true";
+    container.addEventListener("click", (event) => {
+      const tabCard = event.target.closest("[data-tab]");
+      if (tabCard) {
+        activeTab = tabCard.dataset.tab;
+        const searchVal =
+          document.getElementById("orgImpactSearch")?.value || "";
+        renderOrgImpact(container, summary, searchVal, programSettings);
+      }
+    });
+  }
 }

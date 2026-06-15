@@ -387,8 +387,26 @@
             justify-content: center;
             z-index: 10 !important;
         }
-        .password-toggle:hover {
-            color: var(--ink) !important;
+        .info-banner {
+            background: #eff6ff;
+            color: #1e40af;
+            border-bottom: 1px solid #bfdbfe;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .info-banner a {
+            color: #1d4ed8;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+        .info-banner a:hover {
+            color: #1e40af;
         }
     </style>
     <script>
@@ -407,6 +425,11 @@
     </script>
 </head>
 <body>
+
+    <div class="info-banner">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>If you are already registered, then you can <a href="/login/">login directly</a> with your mail id and password.</span>
+    </div>
 
     <header class="topbar">
         <a class="brand" href="/">

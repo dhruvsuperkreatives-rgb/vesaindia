@@ -16,6 +16,7 @@ export function buildAdminModel(raw) {
     const diariesBreakdownByOrg = new Map();
 
     for (const item of raw.contributions) {
+        if (item.status !== "submitted" && item.status !== "verified") continue;
         const id = item.organization_registration_id;
         contributionsByOrg.set(id, (contributionsByOrg.get(id) || 0) + Number(item.bags_count || 0));
         if (item.user_id) {
@@ -27,6 +28,7 @@ export function buildAdminModel(raw) {
     }
 
     for (const item of raw.garments) {
+        if (item.status !== "submitted" && item.status !== "verified") continue;
         const id = item.organization_registration_id;
         garmentsByOrg.set(id, (garmentsByOrg.get(id) || 0) + Number(item.garment_count || 0));
         if (item.user_id) {
@@ -56,6 +58,7 @@ export function buildAdminModel(raw) {
     const diaryProgram = raw.programs?.find((p) => p.slug === "diary");
     if (diaryProgram && raw.programContributions) {
         for (const item of raw.programContributions) {
+            if (item.status !== "submitted" && item.status !== "verified") continue;
             if (item.program_id === diaryProgram.id) {
                 const id = item.organization_registration_id;
                 diariesByOrg.set(id, (diariesByOrg.get(id) || 0) + Number(item.quantity || 0));

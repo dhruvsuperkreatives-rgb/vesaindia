@@ -2,33 +2,33 @@ import { emptyState, escapeHtml, numberText } from "./utils.js";
 
 // Impact Multipliers (as shown in the reference images)
 const MULTIPLIERS = {
-    supBags: 100,
-    plasticKg: 0.25,
-    crudeOilKg: 0.44,
-    waterLitres: 45,
-    energyKwh: 3.75,
-    co2Kg: 1.5,
-    trees: 0.075
+  supBags: 100,
+  plasticKg: 0.25,
+  crudeOilKg: 0.44,
+  waterLitres: 45,
+  energyKwh: 3.75,
+  co2Kg: 1.5,
+  trees: 0.075,
 };
 
 const GARMENT_MULTIPLIERS = {
-    divertedKg: 0.7,
-    waterLitres: 7500,
-    energyKwh: 25,
-    co2Kg: 25,
-    trees: 1.2
+  divertedKg: 0.7,
+  waterLitres: 7500,
+  energyKwh: 25,
+  co2Kg: 25,
+  trees: 1.2,
 };
 
 const DIARY_MULTIPLIERS = {
-    pages: 384,
-    notebooks: 8,
-    waterLitres: 40.5,
-    energyKwh: 3,
-    co2Kg: 1.35,
-    trees: 0.015
+  pages: 384,
+  notebooks: 8,
+  waterLitres: 40.5,
+  energyKwh: 3,
+  co2Kg: 1.35,
+  trees: 0.015,
 };
 
-let activeTab = "nwpp";
+let activeTab = "total";
 let currentModel = null;
 
 let topOrgsChart = null;
@@ -37,108 +37,155 @@ let savingsChart = null;
 let polarChart = null;
 
 export function renderImpact(container, model, search = "") {
-    currentModel = model;
-    const organisations = model.organisations || [];
-    const totalOrgs = organisations.length;
-    const totalNWPP = organisations.reduce((sum, org) => sum + (org.nwppAchieved || 0), 0);
-    
-    const nwppProgram = model.programs?.find((p) => p.slug === "nwpp_bag");
-    const nwppTargetPer = nwppProgram ? Number(nwppProgram.target_per_participant || 0) : 10;
-    const totalTarget = organisations.reduce((sum, org) => {
-        const participantCount = Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
-        return sum + (participantCount * nwppTargetPer);
-    }, 0);
+  currentModel = model;
+  const organisations = model.organisations || [];
+  const totalOrgs = organisations.length;
+  const totalNWPP = organisations.reduce(
+    (sum, org) => sum + (org.nwppAchieved || 0),
+    0,
+  );
 
-    const totalGarments = organisations.reduce((sum, org) => sum + (org.garmentsAchieved || 0), 0);
-    const totalDiaries = organisations.reduce((sum, org) => sum + (org.diariesAchieved || 0), 0);
+  const nwppProgram = model.programs?.find((p) => p.slug === "nwpp_bag");
+  const nwppTargetPer = nwppProgram
+    ? Number(nwppProgram.target_per_participant || 0)
+    : 10;
+  const totalTarget = organisations.reduce((sum, org) => {
+    const participantCount =
+      Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
+    return sum + participantCount * nwppTargetPer;
+  }, 0);
 
-    // Calculate total NWPP impact
-    const supAvoided = totalNWPP * MULTIPLIERS.supBags;
-    const plasticPrevented = totalNWPP * MULTIPLIERS.plasticKg;
-    const crudeOilSaved = totalNWPP * MULTIPLIERS.crudeOilKg;
-    const waterSaved = totalNWPP * MULTIPLIERS.waterLitres;
-    const energySaved = totalNWPP * MULTIPLIERS.energyKwh;
-    const co2Reduced = totalNWPP * MULTIPLIERS.co2Kg;
-    const treesPreserved = totalNWPP * MULTIPLIERS.trees;
+  const totalGarments = organisations.reduce(
+    (sum, org) => sum + (org.garmentsAchieved || 0),
+    0,
+  );
+  const totalDiaries = organisations.reduce(
+    (sum, org) => sum + (org.diariesAchieved || 0),
+    0,
+  );
 
-    // Calculate total Garment impact
-    const garmentWasteDiverted = totalGarments * GARMENT_MULTIPLIERS.divertedKg;
-    const garmentWaterPreserved = totalGarments * GARMENT_MULTIPLIERS.waterLitres;
-    const garmentEnergyPreserved = totalGarments * GARMENT_MULTIPLIERS.energyKwh;
-    const garmentCo2Extended = totalGarments * GARMENT_MULTIPLIERS.co2Kg;
-    const garmentTreesPreserved = totalGarments * GARMENT_MULTIPLIERS.trees;
+  // Calculate total NWPP impact
+  const supAvoided = totalNWPP * MULTIPLIERS.supBags;
+  const plasticPrevented = totalNWPP * MULTIPLIERS.plasticKg;
+  const crudeOilSaved = totalNWPP * MULTIPLIERS.crudeOilKg;
+  const waterSaved = totalNWPP * MULTIPLIERS.waterLitres;
+  const energySaved = totalNWPP * MULTIPLIERS.energyKwh;
+  const co2Reduced = totalNWPP * MULTIPLIERS.co2Kg;
+  const treesPreserved = totalNWPP * MULTIPLIERS.trees;
 
-    // Calculate total Diary impact
-    const diaryPages = totalDiaries * DIARY_MULTIPLIERS.pages;
-    const diaryNotebooks = totalDiaries * DIARY_MULTIPLIERS.notebooks;
-    const diaryWaterSaved = totalDiaries * DIARY_MULTIPLIERS.waterLitres;
-    const diaryEnergySaved = totalDiaries * DIARY_MULTIPLIERS.energyKwh;
-    const diaryCo2Avoided = totalDiaries * DIARY_MULTIPLIERS.co2Kg;
-    const diaryTreesPreserved = totalDiaries * DIARY_MULTIPLIERS.trees;
+  // Calculate total Garment impact
+  const garmentWasteDiverted = totalGarments * GARMENT_MULTIPLIERS.divertedKg;
+  const garmentWaterPreserved = totalGarments * GARMENT_MULTIPLIERS.waterLitres;
+  const garmentEnergyPreserved = totalGarments * GARMENT_MULTIPLIERS.energyKwh;
+  const garmentCo2Extended = totalGarments * GARMENT_MULTIPLIERS.co2Kg;
+  const garmentTreesPreserved = totalGarments * GARMENT_MULTIPLIERS.trees;
 
-    // Filter organizations for table view
-    const term = search.trim().toLowerCase();
-    const filteredOrgs = organisations.filter((org) => (
-        !term || String(org.organization_name || "").toLowerCase().includes(term)
-    ));
+  // Calculate total Diary impact
+  const diaryPages = totalDiaries * DIARY_MULTIPLIERS.pages;
+  const diaryNotebooks = totalDiaries * DIARY_MULTIPLIERS.notebooks;
+  const diaryWaterSaved = totalDiaries * DIARY_MULTIPLIERS.waterLitres;
+  const diaryEnergySaved = totalDiaries * DIARY_MULTIPLIERS.energyKwh;
+  const diaryCo2Avoided = totalDiaries * DIARY_MULTIPLIERS.co2Kg;
+  const diaryTreesPreserved = totalDiaries * DIARY_MULTIPLIERS.trees;
 
-    // Get Top 5 organisations for the bar chart
-    const topOrgs = [...organisations]
-        .sort((a, b) => (b.nwppAchieved || 0) - (a.nwppAchieved || 0))
-        .slice(0, 5);
-    const maxAchieved = Math.max(...topOrgs.map(o => o.nwppAchieved || 0), 1);
+  // Filter organizations for table view
+  const term = search.trim().toLowerCase();
+  const filteredOrgs = organisations.filter(
+    (org) =>
+      !term ||
+      String(org.organization_name || "")
+        .toLowerCase()
+        .includes(term),
+  );
 
-    // Donut chart calculation based on active tab
-    const garmentProgram = model.programs?.find((p) => p.slug === "garment");
-    const garmentTargetPer = garmentProgram && Number(garmentProgram.target_per_participant) > 0 
-        ? Number(garmentProgram.target_per_participant) 
-        : 1;
-    const totalGarmentTarget = organisations.reduce((sum, org) => {
-        const participantCount = Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
-        return sum + (participantCount * garmentTargetPer);
-    }, 0);
+  // Get Top 5 organisations for the bar chart
+  const topOrgs = [...organisations]
+    .sort((a, b) => ((b.nwppAchieved || 0) + (b.garmentsAchieved || 0) + (b.diariesAchieved || 0)) - ((a.nwppAchieved || 0) + (a.garmentsAchieved || 0) + (a.diariesAchieved || 0)))
+    .slice(0, 5);
+  const maxAchieved = Math.max(...topOrgs.map((o) => (o.nwppAchieved || 0) + (o.garmentsAchieved || 0) + (o.diariesAchieved || 0)), 1);
 
-    const diaryProgram = model.programs?.find((p) => p.slug === "diary");
-    const diaryTargetPer = diaryProgram && Number(diaryProgram.target_per_participant) > 0 
-        ? Number(diaryProgram.target_per_participant) 
-        : 1;
-    const totalDiaryTarget = organisations.reduce((sum, org) => {
-        const participantCount = Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
-        return sum + (participantCount * diaryTargetPer);
-    }, 0);
+  // Donut chart calculation based on active tab
+  const garmentProgram = model.programs?.find((p) => p.slug === "garment");
+  const garmentTargetPer =
+    garmentProgram && Number(garmentProgram.target_per_participant) > 0
+      ? Number(garmentProgram.target_per_participant)
+      : 1;
+  const totalGarmentTarget = organisations.reduce((sum, org) => {
+    const participantCount =
+      Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
+    return sum + participantCount * garmentTargetPer;
+  }, 0);
 
-    let currentAchieved = totalNWPP;
-    let currentTarget = totalTarget;
-    let activeColor = "var(--green)";
-    let unitLabel = "target bags";
+  const diaryProgram = model.programs?.find((p) => p.slug === "diary");
+  const diaryTargetPer =
+    diaryProgram && Number(diaryProgram.target_per_participant) > 0
+      ? Number(diaryProgram.target_per_participant)
+      : 1;
+  const totalDiaryTarget = organisations.reduce((sum, org) => {
+    const participantCount =
+      Number(org.employeeCount || 0) + Number(org.nodalCount || 0);
+    return sum + participantCount * diaryTargetPer;
+  }, 0);
 
-    if (activeTab === "garments") {
-        currentAchieved = totalGarments;
-        currentTarget = totalGarmentTarget;
-        activeColor = "var(--blue)";
-        unitLabel = "target garments";
-    } else if (activeTab === "diaries") {
-        currentAchieved = totalDiaries;
-        currentTarget = totalDiaryTarget;
-        activeColor = "#a0522d";
-        unitLabel = "target diaries";
-    }
+  let currentAchieved = totalNWPP;
+  let currentTarget = totalTarget;
+  let activeColor = "var(--green)";
+  let unitLabel = "target bags";
 
-    const overallPct = currentTarget > 0 ? Math.round((currentAchieved / currentTarget) * 100) : 0;
-    const radius = 50;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (Math.min(100, overallPct) / 100) * circumference;
+  if (activeTab === "total") {
+    currentAchieved = totalNWPP + totalGarments + totalDiaries;
+    currentTarget = totalTarget + totalGarmentTarget + totalDiaryTarget;
+    activeColor = "var(--green)";
+    unitLabel = "target items";
+  } else if (activeTab === "garments") {
+    currentAchieved = totalGarments;
+    currentTarget = totalGarmentTarget;
+    activeColor = "var(--blue)";
+    unitLabel = "target garments";
+  } else if (activeTab === "diaries") {
+    currentAchieved = totalDiaries;
+    currentTarget = totalDiaryTarget;
+    activeColor = "#a0522d";
+    unitLabel = "target diaries";
+  }
 
-    const totalConfirmedParticipants = model.missionPeople ? model.missionPeople.length : 0;
+  const overallPct =
+    currentTarget > 0 ? Math.round((currentAchieved / currentTarget) * 100) : 0;
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset =
+    circumference - (Math.min(100, overallPct) / 100) * circumference;
 
-    // Active tab styles
-    const nwppStyle = activeTab === "nwpp" ? "border: 2px solid var(--green); box-shadow: 0 4px 20px rgba(47, 143, 107, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
-    const garmentStyle = activeTab === "garments" ? "border: 2px solid var(--blue); box-shadow: 0 4px 20px rgba(47, 111, 237, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
-    const diaryStyle = activeTab === "diaries" ? "border: 2px solid #a0522d; box-shadow: 0 4px 20px rgba(160, 82, 45, 0.15); transform: translateY(-2px);" : "cursor: pointer;";
+  const totalConfirmedParticipants = model.missionPeople
+    ? model.missionPeople.length
+    : 0;
 
-    container.innerHTML = `
+  // Active tab styles
+  const totalStyle =
+    activeTab === "total"
+      ? "border: 2px solid var(--green); box-shadow: 0 4px 20px rgba(36, 124, 92, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+  const nwppStyle =
+    activeTab === "nwpp"
+      ? "border: 2px solid var(--green); box-shadow: 0 4px 20px rgba(47, 143, 107, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+  const garmentStyle =
+    activeTab === "garments"
+      ? "border: 2px solid var(--blue); box-shadow: 0 4px 20px rgba(47, 111, 237, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+  const diaryStyle =
+    activeTab === "diaries"
+      ? "border: 2px solid #a0522d; box-shadow: 0 4px 20px rgba(160, 82, 45, 0.15); transform: translateY(-2px);"
+      : "cursor: pointer;";
+
+  container.innerHTML = `
         <!-- Top Summary Cards -->
-        <div class="stats-grid" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+        <div class="stats-grid" style="grid-template-columns: repeat(6, minmax(0, 1fr));">
+            <article class="stat-card" data-tab="total" style="${totalStyle} transition: all 0.2s ease;">
+                <div class="stat-label">Total Impact</div>
+                <div class="stat-value" style="color: var(--green);">Combined</div>
+                <div class="stat-detail">View all &rarr;</div>
+            </article>
             <article class="stat-card" style="transition: all 0.2s ease;">
                 <div class="stat-label">Total Organisations</div>
                 <div class="stat-value">${numberText(totalOrgs)}</div>
@@ -164,6 +211,120 @@ export function renderImpact(container, model, search = "") {
                 <div class="stat-value" style="color: #a0522d;">${numberText(totalDiaries)}</div>
                 <div class="stat-detail">Diaries contributed &rarr;</div>
             </article>
+        </div>
+
+        <!-- Total Combined Environmental Impact Panel -->
+        <div id="totalImpactPanel" class="impact-graphics-section card ${activeTab === "total" ? "" : "hidden"}" style="margin-top: 24px; padding: 28px; background: linear-gradient(135deg, #f0faf5 0%, #e7f4ee 100%); border: 1px solid #cfe5da;">
+            <div class="impact-section-header" style="text-align: center; margin-bottom: 28px;">
+                <span class="eyebrow" style="font-size: 13px; color: var(--green);">Comprehensive environmental impact</span>
+                <h3 style="font-size: 24px; margin-top: 8px; color: var(--ink);">COMBINED MISSION FOOTPRINT</h3>
+                <p style="color: var(--muted); margin: 8px 0 0; font-size: 13px;">Total impact across NWPP Bags, Garments Upcycling, and Diary Contributions</p>
+            </div>
+            
+            <!-- Key Impact Metrics Grid (3x3) -->
+            <div class="impact-grid" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px;">
+                <!-- Water Preserved -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #cfe5da; box-shadow: 0 2px 8px rgba(36, 124, 92, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #247c5c 0%, #1b5a47 100%);">
+                        <i class="fa-solid fa-water"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText((waterSaved + garmentWaterPreserved + diaryWaterSaved).toFixed(0))} L</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: var(--green);">WATER PRESERVED</div>
+                </div>
+
+                <!-- Energy Conserved -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #dbeafe; box-shadow: 0 2px 8px rgba(47, 111, 237, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #2f6fed 0%, #1d4ed8 100%);">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText((energySaved + garmentEnergyPreserved + diaryEnergySaved).toFixed(1))} kWh</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: #2f6fed;">ENERGY CONSERVED</div>
+                </div>
+
+                <!-- CO2 Avoided -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #fee2e2; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
+                        <i class="fa-solid fa-cloud"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText((co2Reduced + garmentCo2Extended + diaryCo2Avoided).toFixed(1))} kg</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: #dc2626;">CO₂ EMISSIONS AVOIDED</div>
+                </div>
+
+                <!-- Plastic Prevented -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #dcfce7; box-shadow: 0 2px 8px rgba(47, 143, 107, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #2f8f6b 0%, #065f46 100%);">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText(plasticPrevented.toFixed(1))} kg</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: #2f8f6b;">PLASTIC PREVENTED</div>
+                </div>
+
+                <!-- Crude Oil Saved -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #fef3c7; box-shadow: 0 2px 8px rgba(184, 92, 0, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #b85c00 0%, #92400e 100%);">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText(crudeOilSaved.toFixed(1))} kg</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: #b85c00;">CRUDE OIL SAVED</div>
+                </div>
+
+                <!-- Trees Preserved -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #ecfdf3; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fa-solid fa-tree"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText((treesPreserved + garmentTreesPreserved + diaryTreesPreserved).toFixed(2))}</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: #10b981;">TREES PRESERVED</div>
+                </div>
+
+                <!-- SUP Bags -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #f5d4f5; box-shadow: 0 2px 8px rgba(168, 85, 247, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText(supAvoided)}</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: #a855f7;">SUP BAGS ELIMINATED</div>
+                </div>
+
+                <!-- Pages Recovered -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #cfe5da; box-shadow: 0 2px 8px rgba(36, 124, 92, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #247c5c 0%, #1b5a47 100%);">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText(diaryPages)}</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: var(--green);">PAGES RECOVERED</div>
+                </div>
+
+                <!-- Textile Waste Diverted -->
+                <div class="impact-tile" style="padding: 24px; text-align: center; border-radius: 12px; background: #ffffff; border: 2px solid #fdf2f8; box-shadow: 0 2px 8px rgba(190, 24, 93, 0.08);">
+                    <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #be185d 0%, #831843 100%);">
+                        <i class="fa-solid fa-recycle"></i>
+                    </div>
+                    <div class="impact-value" style="font-size: 22px; font-weight: 900; color: var(--ink);">${numberText(garmentWasteDiverted.toFixed(1))} kg</div>
+                    <div class="impact-label" style="font-size: 12px; font-weight: 700; color: #be185d;">TEXTILE WASTE DIVERTED</div>
+                </div>
+            </div>
+
+            <!-- Overall Impact Summary -->
+            <div style="border-radius: 12px; padding: 24px; background: linear-gradient(135deg, #247c5c 0%, #2f8f6b 100%); color: white; margin-bottom: 24px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; align-items: center;">
+                    <div>
+                        <h4 style="margin: 0 0 8px; font-size: 12px; font-weight: 700; opacity: 0.9;">TOTAL ITEMS</h4>
+                        <div style="font-size: 26px; font-weight: 900;">${numberText(totalNWPP + totalGarments + totalDiaries)}</div>
+                        <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">Items contributed</div>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 8px; font-size: 12px; font-weight: 700; opacity: 0.9;">TREE EQUIVALENT</h4>
+                        <div style="font-size: 26px; font-weight: 900;">${numberText((treesPreserved + garmentTreesPreserved + diaryTreesPreserved).toFixed(1))}</div>
+                        <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">Trees protected</div>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 8px; font-size: 12px; font-weight: 700; opacity: 0.9;">CARBON IMPACT</h4>
+                        <div style="font-size: 26px; font-weight: 900;">${numberText(((co2Reduced + garmentCo2Extended + diaryCo2Avoided) / 1000).toFixed(2))}</div>
+                        <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">Metric tons CO₂ avoided</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Environmental Impact NWPP Section -->
@@ -203,7 +364,7 @@ export function renderImpact(container, model, search = "") {
                     <div class="impact-label">Water Saved</div>
                 </div>
                 <div class="impact-tile">
-                    <div class="impact-icon-wrap purple">
+                    <div class="impact-icon-wrap green">
                         <i class="fa-solid fa-lightbulb"></i>
                     </div>
                     <div class="impact-value">${numberText(energySaved.toFixed(2))} kWh</div>
@@ -301,7 +462,7 @@ export function renderImpact(container, model, search = "") {
                     <div class="impact-label">Utility Bags Created</div>
                 </div>
                 <div class="impact-tile">
-                    <div class="impact-icon-wrap purple">
+                    <div class="impact-icon-wrap green">
                         <i class="fa-solid fa-scissors"></i>
                     </div>
                     <div class="impact-value">Enabled</div>
@@ -487,75 +648,86 @@ export function renderImpact(container, model, search = "") {
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${(() => {
-                        const deptTotalsMap = new Map();
-                        const employeeTotalsMap = new Map();
-                        const userProfileMap = new Map((model.missionPeople || []).map(p => [p.id, p]));
-                        const diaryProgram = (model.programs || []).find((p) => p.slug === "diary");
-                        const diaryProgramId = diaryProgram?.id;
+                      const deptTotalsMap = new Map();
+                      const employeeTotalsMap = new Map();
+                      const userProfileMap = new Map(
+                        (model.missionPeople || []).map((p) => [p.id, p]),
+                      );
+                      const diaryProgram = (model.programs || []).find(
+                        (p) => p.slug === "diary",
+                      );
+                      const diaryProgramId = diaryProgram?.id;
 
-                        const getDeptEntry = (userProfile) => {
-                            if (!userProfile || !userProfile.department_id) return null;
-                            const depId = userProfile.department_id;
-                            if (!deptTotalsMap.has(depId)) {
-                                deptTotalsMap.set(depId, {
-                                    department_name: userProfile.department_name,
-                                    organization_name: userProfile.organization_name,
-                                    bags: 0,
-                                    garments: 0,
-                                    diaries: 0,
-                                    total: 0
-                                });
+                      const getDeptEntry = (userProfile) => {
+                        if (!userProfile || !userProfile.department_id)
+                          return null;
+                        const depId = userProfile.department_id;
+                        if (!deptTotalsMap.has(depId)) {
+                          deptTotalsMap.set(depId, {
+                            department_name: userProfile.department_name,
+                            organization_name: userProfile.organization_name,
+                            bags: 0,
+                            garments: 0,
+                            diaries: 0,
+                            total: 0,
+                          });
+                        }
+                        return deptTotalsMap.get(depId);
+                      };
+
+                      (model.contributions || []).forEach((c) => {
+                        const profile = userProfileMap.get(c.user_id);
+                        const bags = Number(c.bags_count || 0);
+                        if (profile) {
+                          const dept = getDeptEntry(profile);
+                          if (dept) {
+                            dept.bags += bags;
+                            dept.total += bags;
+                          }
+                        }
+                      });
+
+                      (model.garments || []).forEach((g) => {
+                        const profile = userProfileMap.get(g.user_id);
+                        const garments = Number(g.garment_count || 0);
+                        if (profile) {
+                          const dept = getDeptEntry(profile);
+                          if (dept) {
+                            dept.garments += garments;
+                            dept.total += garments;
+                          }
+                        }
+                      });
+
+                      (model.programContributions || []).forEach((pc) => {
+                        const profile = userProfileMap.get(pc.user_id);
+                        const qty = Number(pc.quantity || 0);
+                        if (profile) {
+                          const dept = getDeptEntry(profile);
+                          if (dept) {
+                            if (
+                              diaryProgramId &&
+                              pc.program_id === diaryProgramId
+                            ) {
+                              dept.diaries += qty;
                             }
-                            return deptTotalsMap.get(depId);
-                        };
+                            dept.total += qty;
+                          }
+                        }
+                      });
 
-                        (model.contributions || []).forEach(c => {
-                            const profile = userProfileMap.get(c.user_id);
-                            const bags = Number(c.bags_count || 0);
-                            if (profile) {
-                                const dept = getDeptEntry(profile);
-                                if (dept) {
-                                    dept.bags += bags;
-                                    dept.total += bags;
-                                }
-                            }
-                        });
+                      const topAdminDepts = [...deptTotalsMap.values()]
+                        .filter((d) => d.total > 0)
+                        .sort((a, b) => b.total - a.total)
+                        .slice(0, 5);
 
-                        (model.garments || []).forEach(g => {
-                            const profile = userProfileMap.get(g.user_id);
-                            const garments = Number(g.garment_count || 0);
-                            if (profile) {
-                                const dept = getDeptEntry(profile);
-                                if (dept) {
-                                    dept.garments += garments;
-                                    dept.total += garments;
-                                }
-                            }
-                        });
-
-                        (model.programContributions || []).forEach(pc => {
-                            const profile = userProfileMap.get(pc.user_id);
-                            const qty = Number(pc.quantity || 0);
-                            if (profile) {
-                                const dept = getDeptEntry(profile);
-                                if (dept) {
-                                    if (diaryProgramId && pc.program_id === diaryProgramId) {
-                                        dept.diaries += qty;
-                                    }
-                                    dept.total += qty;
-                                }
-                            }
-                        });
-
-                        const topAdminDepts = [...deptTotalsMap.values()]
-                            .filter(d => d.total > 0)
-                            .sort((a, b) => b.total - a.total)
-                            .slice(0, 5);
-
-                        return topAdminDepts.length ? topAdminDepts.map((dept, index) => `
+                      return topAdminDepts.length
+                        ? topAdminDepts
+                            .map(
+                              (dept, index) => `
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? "#ffd700" : index === 1 ? "#c0c0c0" : index === 2 ? "#cd7f32" : "#e2e8f0"}; color: ${index <= 2 ? "#fff" : "var(--muted)"}; display: grid; place-items: center; box-shadow: ${index <= 2 ? "0 2px 4px rgba(0,0,0,0.1)" : "none"};">${index + 1}</span>
                                     <div>
                                         <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(dept.department_name)}</strong>
                                         <span style="font-size: 11px; color: var(--muted);">${escapeHtml(dept.organization_name)}</span>
@@ -564,13 +736,16 @@ export function renderImpact(container, model, search = "") {
                                 <div style="text-align: right;">
                                     <span style="background: #e8f5ef; color: #2f8f6b; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(dept.total)} items</span>
                                     <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
-                                        ${dept.bags ? `Bags: ${numberText(dept.bags)} · ` : ''}
-                                        ${dept.garments ? `Garments: ${numberText(dept.garments)} · ` : ''}
-                                        ${dept.diaries ? `Diaries: ${numberText(dept.diaries)}` : ''}
+                                        ${dept.bags ? `Bags: ${numberText(dept.bags)} · ` : ""}
+                                        ${dept.garments ? `Garments: ${numberText(dept.garments)} · ` : ""}
+                                        ${dept.diaries ? `Diaries: ${numberText(dept.diaries)}` : ""}
                                     </div>
                                 </div>
                             </div>
-                        `).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No department contributions logged yet.</div>';
+                        `,
+                            )
+                            .join("")
+                        : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No department contributions logged yet.</div>';
                     })()}
                 </div>
             </article>
@@ -582,75 +757,93 @@ export function renderImpact(container, model, search = "") {
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${(() => {
-                        const employeeTotalsMap = new Map();
-                        const userProfileMap = new Map((model.missionPeople || []).map(p => [p.id, p]));
-                        const diaryProgram = (model.programs || []).find((p) => p.slug === "diary");
-                        const diaryProgramId = diaryProgram?.id;
+                      const employeeTotalsMap = new Map();
+                      const userProfileMap = new Map(
+                        (model.missionPeople || []).map((p) => [p.id, p]),
+                      );
+                      const diaryProgram = (model.programs || []).find(
+                        (p) => p.slug === "diary",
+                      );
+                      const diaryProgramId = diaryProgram?.id;
 
-                        const getEmpEntry = (userProfile) => {
-                            if (!userProfile) return null;
-                            const uid = userProfile.id;
-                            if (!employeeTotalsMap.has(uid)) {
-                                employeeTotalsMap.set(uid, {
-                                    fullName: [userProfile.first_name, userProfile.middle_name, userProfile.last_name].filter(Boolean).join(" "),
-                                    department_name: userProfile.department_name || "Organisation leadership",
-                                    organization_name: userProfile.organization_name,
-                                    bags: 0,
-                                    garments: 0,
-                                    diaries: 0,
-                                    total: 0
-                                });
+                      const getEmpEntry = (userProfile) => {
+                        if (!userProfile) return null;
+                        const uid = userProfile.id;
+                        if (!employeeTotalsMap.has(uid)) {
+                          employeeTotalsMap.set(uid, {
+                            fullName: [
+                              userProfile.first_name,
+                              userProfile.middle_name,
+                              userProfile.last_name,
+                            ]
+                              .filter(Boolean)
+                              .join(" "),
+                            department_name:
+                              userProfile.department_name ||
+                              "Organisation leadership",
+                            organization_name: userProfile.organization_name,
+                            bags: 0,
+                            garments: 0,
+                            diaries: 0,
+                            total: 0,
+                          });
+                        }
+                        return employeeTotalsMap.get(uid);
+                      };
+
+                      (model.contributions || []).forEach((c) => {
+                        const profile = userProfileMap.get(c.user_id);
+                        const bags = Number(c.bags_count || 0);
+                        if (profile) {
+                          const emp = getEmpEntry(profile);
+                          if (emp) {
+                            emp.bags += bags;
+                            emp.total += bags;
+                          }
+                        }
+                      });
+
+                      (model.garments || []).forEach((g) => {
+                        const profile = userProfileMap.get(g.user_id);
+                        const garments = Number(g.garment_count || 0);
+                        if (profile) {
+                          const emp = getEmpEntry(profile);
+                          if (emp) {
+                            emp.garments += garments;
+                            emp.total += garments;
+                          }
+                        }
+                      });
+
+                      (model.programContributions || []).forEach((pc) => {
+                        const profile = userProfileMap.get(pc.user_id);
+                        const qty = Number(pc.quantity || 0);
+                        if (profile) {
+                          const emp = getEmpEntry(profile);
+                          if (emp) {
+                            if (
+                              diaryProgramId &&
+                              pc.program_id === diaryProgramId
+                            ) {
+                              emp.diaries += qty;
                             }
-                            return employeeTotalsMap.get(uid);
-                        };
+                            emp.total += qty;
+                          }
+                        }
+                      });
 
-                        (model.contributions || []).forEach(c => {
-                            const profile = userProfileMap.get(c.user_id);
-                            const bags = Number(c.bags_count || 0);
-                            if (profile) {
-                                const emp = getEmpEntry(profile);
-                                if (emp) {
-                                    emp.bags += bags;
-                                    emp.total += bags;
-                                }
-                            }
-                        });
+                      const topAdminEmployees = [...employeeTotalsMap.values()]
+                        .filter((e) => e.total > 0)
+                        .sort((a, b) => b.total - a.total)
+                        .slice(0, 5);
 
-                        (model.garments || []).forEach(g => {
-                            const profile = userProfileMap.get(g.user_id);
-                            const garments = Number(g.garment_count || 0);
-                            if (profile) {
-                                const emp = getEmpEntry(profile);
-                                if (emp) {
-                                    emp.garments += garments;
-                                    emp.total += garments;
-                                }
-                            }
-                        });
-
-                        (model.programContributions || []).forEach(pc => {
-                            const profile = userProfileMap.get(pc.user_id);
-                            const qty = Number(pc.quantity || 0);
-                            if (profile) {
-                                const emp = getEmpEntry(profile);
-                                if (emp) {
-                                    if (diaryProgramId && pc.program_id === diaryProgramId) {
-                                        emp.diaries += qty;
-                                    }
-                                    emp.total += qty;
-                                }
-                            }
-                        });
-
-                        const topAdminEmployees = [...employeeTotalsMap.values()]
-                            .filter(e => e.total > 0)
-                            .sort((a, b) => b.total - a.total)
-                            .slice(0, 5);
-
-                        return topAdminEmployees.length ? topAdminEmployees.map((p, index) => `
+                      return topAdminEmployees.length
+                        ? topAdminEmployees
+                            .map(
+                              (p, index) => `
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); transition: all 0.2s ease;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e2e8f0'}; color: ${index <= 2 ? '#fff' : 'var(--muted)'}; display: grid; place-items: center; box-shadow: ${index <= 2 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'};">${index + 1}</span>
+                                    <span style="font-weight: 800; font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: ${index === 0 ? "#ffd700" : index === 1 ? "#c0c0c0" : index === 2 ? "#cd7f32" : "#e2e8f0"}; color: ${index <= 2 ? "#fff" : "var(--muted)"}; display: grid; place-items: center; box-shadow: ${index <= 2 ? "0 2px 4px rgba(0,0,0,0.1)" : "none"};">${index + 1}</span>
                                     <div>
                                         <strong style="font-size: 13px; color: var(--ink); display: block; font-weight: 700;">${escapeHtml(p.fullName || "Mission Member")}</strong>
                                         <span style="font-size: 11px; color: var(--muted);">${escapeHtml(p.organization_name)} · Dept: ${escapeHtml(p.department_name)}</span>
@@ -659,13 +852,16 @@ export function renderImpact(container, model, search = "") {
                                 <div style="text-align: right;">
                                     <span style="background: #eef4ff; color: #2f6fed; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; display: inline-block;">${numberText(p.total)} items</span>
                                     <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">
-                                        ${p.bags ? `Bags: ${numberText(p.bags)} · ` : ''}
-                                        ${p.garments ? `Garments: ${numberText(p.garments)} · ` : ''}
-                                        ${p.diaries ? `Diaries: ${numberText(p.diaries)}` : ''}
+                                        ${p.bags ? `Bags: ${numberText(p.bags)} · ` : ""}
+                                        ${p.garments ? `Garments: ${numberText(p.garments)} · ` : ""}
+                                        ${p.diaries ? `Diaries: ${numberText(p.diaries)}` : ""}
                                     </div>
                                 </div>
                             </div>
-                        `).join("") : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No employee contributions logged yet.</div>';
+                        `,
+                            )
+                            .join("")
+                        : '<div style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line);">No employee contributions logged yet.</div>';
                     })()}
                 </div>
             </article>
@@ -673,7 +869,9 @@ export function renderImpact(container, model, search = "") {
 
         <!-- Organisation Breakdown Section -->
         <div style="margin-top: 28px;">
-            ${filteredOrgs.length ? `
+            ${
+              filteredOrgs.length
+                ? `
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -688,11 +886,15 @@ export function renderImpact(container, model, search = "") {
                             </tr>
                         </thead>
                         <tbody>
-                            ${filteredOrgs.map((org) => {
+                            ${filteredOrgs
+                              .map((org) => {
                                 const orgBags = org.nwppAchieved || 0;
                                 const orgGarments = org.garmentsAchieved || 0;
                                 const orgDiaries = org.diariesAchieved || 0;
-                                const combinedTrees = (orgBags * MULTIPLIERS.trees) + (orgGarments * GARMENT_MULTIPLIERS.trees) + (orgDiaries * DIARY_MULTIPLIERS.trees);
+                                const combinedTrees =
+                                  orgBags * MULTIPLIERS.trees +
+                                  orgGarments * GARMENT_MULTIPLIERS.trees +
+                                  orgDiaries * DIARY_MULTIPLIERS.trees;
                                 return `
                                     <tr>
                                         <td><strong>${escapeHtml(org.organization_name)}</strong></td>
@@ -704,229 +906,392 @@ export function renderImpact(container, model, search = "") {
                                         <td>${numberText(combinedTrees.toFixed(3))}</td>
                                     </tr>
                                 `;
-                            }).join("")}
+                              })
+                              .join("")}
                         </tbody>
                     </table>
                 </div>
-            ` : emptyState("fa-building", "No organisations found", "No organizations match your search term.")}
+            `
+                : emptyState(
+                    "fa-building",
+                    "No organisations found",
+                    "No organizations match your search term.",
+                  )
+            }
         </div>
     `;
 
-    // Delegated container click registration
-    if (!container.dataset.listenerBound) {
-        container.dataset.listenerBound = "true";
-        container.addEventListener("click", (event) => {
-            const tabCard = event.target.closest("[data-tab]");
-            if (tabCard) {
-                activeTab = tabCard.dataset.tab;
-                const searchVal = document.getElementById("impactSearch")?.value || "";
-                renderImpact(container, currentModel, searchVal);
-            }
-        });
+  // Delegated container click registration
+  if (!container.dataset.listenerBound) {
+    container.dataset.listenerBound = "true";
+    container.addEventListener("click", (event) => {
+      const tabCard = event.target.closest("[data-tab]");
+      if (tabCard) {
+        activeTab = tabCard.dataset.tab;
+        const searchVal = document.getElementById("impactSearch")?.value || "";
+        renderImpact(container, currentModel, searchVal);
+      }
+    });
+  }
+
+  // Initialize Radar Chart
+  setTimeout(() => {
+    // Horizontal Bar Chart: Top Organisations bags vs garments
+    const topOrgsHorizontalCtx = document
+      .getElementById("topOrgsHorizontalBar")
+      ?.getContext("2d");
+    if (topOrgsHorizontalCtx) {
+      if (topOrgsChart) topOrgsChart.destroy();
+      topOrgsChart = new Chart(topOrgsHorizontalCtx, {
+        type: "bar",
+        data: {
+          labels: topOrgs.map((org) => org.organization_name),
+          datasets: [
+            {
+              label: "NWPP Bags",
+              data: topOrgs.map((org) => org.nwppAchieved || 0),
+              backgroundColor: "#2f8f6b",
+            },
+            {
+              label: "Garments",
+              data: topOrgs.map((org) => org.garmentsAchieved || 0),
+              backgroundColor: "#2f6fed",
+            },
+            {
+              label: "Diaries",
+              data: topOrgs.map((org) => org.diariesAchieved || 0),
+              backgroundColor: "#a0522d",
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10, font: { size: 10 } },
+            },
+          },
+          scales: {
+            x: { stacked: true, beginAtZero: true },
+            y: { stacked: true, grid: { display: false } },
+          },
+        },
+      });
     }
 
-    // Initialize Radar Chart
-    setTimeout(() => {
-        // Horizontal Bar Chart: Top Organisations bags vs garments
-        const topOrgsHorizontalCtx = document.getElementById("topOrgsHorizontalBar")?.getContext("2d");
-        if (topOrgsHorizontalCtx) {
-            if (topOrgsChart) topOrgsChart.destroy();
-            topOrgsChart = new Chart(topOrgsHorizontalCtx, {
-                type: 'bar',
-                data: {
-                    labels: topOrgs.map(org => org.organization_name),
-                    datasets: [
-                        {
-                            label: 'NWPP Bags',
-                            data: topOrgs.map(org => org.nwppAchieved || 0),
-                            backgroundColor: '#2f8f6b'
-                        },
-                        {
-                            label: 'Garments',
-                            data: topOrgs.map(org => org.garmentsAchieved || 0),
-                            backgroundColor: '#2f6fed'
-                        }
-                    ]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
-                    },
-                    scales: {
-                        x: { stacked: true, beginAtZero: true },
-                        y: { stacked: true, grid: { display: false } }
-                    }
-                }
-            });
-        }
+    const radarOrgs = [...organisations]
+      .sort(
+        (a, b) =>
+          (b.nwppAchieved || 0) +
+          (b.garmentsAchieved || 0) +
+          (b.diariesAchieved || 0) -
+          ((a.nwppAchieved || 0) +
+            (a.garmentsAchieved || 0) +
+            (a.diariesAchieved || 0)),
+      )
+      .slice(0, 3);
 
-        const radarOrgs = [...organisations]
-            .sort((a, b) => ((b.nwppAchieved || 0) + (b.garmentsAchieved || 0) + (b.diariesAchieved || 0)) - ((a.nwppAchieved || 0) + (a.garmentsAchieved || 0) + (a.diariesAchieved || 0)))
-            .slice(0, 3);
+    const radarCtx = document
+      .getElementById("impactRadarChart")
+      ?.getContext("2d");
+    if (radarCtx && radarOrgs.length > 0) {
+      if (radarChart) radarChart.destroy();
+      radarChart = new Chart(radarCtx, {
+        type: "radar",
+        data: {
+          labels: [
+            "NWPP Bags",
+            "Garments Donated",
+            "Diaries Contributed",
+            "Trees Preserved x10",
+          ],
+          datasets: radarOrgs.map((org, index) => {
+            const colors = [
+              { border: "#2f8f6b", bg: "rgba(47, 143, 107, 0.15)" },
+              { border: "#2f6fed", bg: "rgba(47, 111, 237, 0.15)" },
+              { border: "#a0522d", bg: "rgba(160, 82, 45, 0.15)" },
+            ];
+            const c = colors[index % colors.length];
+            const orgBags = org.nwppAchieved || 0;
+            const orgGarments = org.garmentsAchieved || 0;
+            const orgDiaries = org.diariesAchieved || 0;
+            const combinedTrees =
+              orgBags * MULTIPLIERS.trees +
+              orgGarments * GARMENT_MULTIPLIERS.trees +
+              orgDiaries * DIARY_MULTIPLIERS.trees;
 
-        const radarCtx = document.getElementById("impactRadarChart")?.getContext("2d");
-        if (radarCtx && radarOrgs.length > 0) {
-            if (radarChart) radarChart.destroy();
-            radarChart = new Chart(radarCtx, {
-                type: 'radar',
-                data: {
-                    labels: ['NWPP Bags', 'Garments Donated', 'Diaries Contributed', 'Trees Preserved x10'],
-                    datasets: radarOrgs.map((org, index) => {
-                        const colors = [
-                            { border: '#2f8f6b', bg: 'rgba(47, 143, 107, 0.15)' },
-                            { border: '#2f6fed', bg: 'rgba(47, 111, 237, 0.15)' },
-                            { border: '#a0522d', bg: 'rgba(160, 82, 45, 0.15)' }
-                        ];
-                        const c = colors[index % colors.length];
-                        const orgBags = org.nwppAchieved || 0;
-                        const orgGarments = org.garmentsAchieved || 0;
-                        const orgDiaries = org.diariesAchieved || 0;
-                        const combinedTrees = (orgBags * MULTIPLIERS.trees) + (orgGarments * GARMENT_MULTIPLIERS.trees) + (orgDiaries * DIARY_MULTIPLIERS.trees);
+            return {
+              label: org.organization_name,
+              data: [
+                orgBags,
+                orgGarments,
+                orgDiaries,
+                Math.round(combinedTrees * 10),
+              ],
+              borderColor: c.border,
+              backgroundColor: c.bg,
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointBackgroundColor: "#ffffff",
+              pointBorderColor: c.border,
+              pointBorderWidth: 1.5,
+            };
+          }),
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                boxWidth: 12,
+                font: { size: 11, weight: "bold" },
+              },
+            },
+          },
+          scales: {
+            r: {
+              angleLines: { display: true },
+              suggestedMin: 0,
+              ticks: { font: { size: 9 } },
+            },
+          },
+        },
+      });
+    }
 
-                        return {
-                            label: org.organization_name,
-                            data: [orgBags, orgGarments, orgDiaries, Math.round(combinedTrees * 10)],
-                            borderColor: c.border,
-                            backgroundColor: c.bg,
-                            borderWidth: 2.5,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: c.border,
-                            pointBorderWidth: 1.5
-                        };
-                    })
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 11, weight: 'bold' }
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            angleLines: { display: true },
-                            suggestedMin: 0,
-                            ticks: { font: { size: 9 } }
-                        }
-                    }
-                }
-            });
-        }
+    // Environmental Savings Trend Chart
+    const envSavingsCtx = document
+      .getElementById("impactSavingsTrendChart")
+      ?.getContext("2d");
+    if (envSavingsCtx) {
+      const diaryProgram = (model.programs || []).find((p) => p.slug === "diary");
+      const diaryProgramId = diaryProgram?.id;
+      const diaryContributions = diaryProgramId && model.programContributions
+        ? model.programContributions.filter((pc) => pc.program_id === diaryProgramId)
+        : [];
 
-        // Environmental Savings Trend Chart
-        const envSavingsCtx = document.getElementById("impactSavingsTrendChart")?.getContext("2d");
-        if (envSavingsCtx) {
-            const chronologicalContributions = [
-                ...(model.contributions || []).map(c => ({ date: c.created_at.split("T")[0], val: c.bags_count, type: 'bags' })),
-                ...(model.garments || []).map(g => ({ date: g.created_at.split("T")[0], val: g.garment_count, type: 'garments' }))
-            ].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const chronologicalContributions = [
+        ...(model.contributions || []).map((c) => ({
+          date: c.created_at.split("T")[0],
+          val: c.bags_count,
+          type: "bags",
+        })),
+        ...(model.garments || []).map((g) => ({
+          date: g.created_at.split("T")[0],
+          val: g.garment_count,
+          type: "garments",
+        })),
+        ...diaryContributions.map((d) => ({
+          date: d.created_at.split("T")[0],
+          val: d.quantity,
+          type: "diaries",
+        })),
+      ].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            let cumulativeCO2 = 0;
-            let cumulativeTrees = 0;
-            const savingsData = [];
+      let cumulativeCO2 = 0;
+      let cumulativeTrees = 0;
+      let cumulativeWater = 0;
+      let cumulativeEnergy = 0;
+      let cumulativePlastics = 0;
+      let cumulativeCrudeOil = 0;
+      let cumulativeTextileWaste = 0;
+      const savingsData = [];
 
-            chronologicalContributions.forEach(item => {
-                const bagsVal = item.type === 'bags' ? item.val : 0;
-                const garmentVal = item.type === 'garments' ? item.val : 0;
-                
-                cumulativeCO2 += (bagsVal * MULTIPLIERS.co2Kg) + (garmentVal * GARMENT_MULTIPLIERS.co2Kg);
-                cumulativeTrees += (bagsVal * MULTIPLIERS.trees) + (garmentVal * GARMENT_MULTIPLIERS.trees);
+      chronologicalContributions.forEach((item) => {
+        const bagsVal = item.type === "bags" ? item.val : 0;
+        const garmentVal = item.type === "garments" ? item.val : 0;
+        const diaryVal = item.type === "diaries" ? item.val : 0;
 
-                savingsData.push({
-                    date: new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short" }).format(new Date(item.date)),
-                    co2: cumulativeCO2,
-                    trees: cumulativeTrees
-                });
-            });
+        cumulativeCO2 +=
+          bagsVal * MULTIPLIERS.co2Kg +
+          garmentVal * GARMENT_MULTIPLIERS.co2Kg +
+          diaryVal * DIARY_MULTIPLIERS.co2Kg;
+        cumulativeTrees +=
+          bagsVal * MULTIPLIERS.trees +
+          garmentVal * GARMENT_MULTIPLIERS.trees +
+          diaryVal * DIARY_MULTIPLIERS.trees;
+        cumulativeWater +=
+          bagsVal * MULTIPLIERS.waterLitres +
+          garmentVal * GARMENT_MULTIPLIERS.waterLitres +
+          diaryVal * DIARY_MULTIPLIERS.waterLitres;
+        cumulativeEnergy +=
+          bagsVal * MULTIPLIERS.energyKwh +
+          garmentVal * GARMENT_MULTIPLIERS.energyKwh +
+          diaryVal * DIARY_MULTIPLIERS.energyKwh;
+        cumulativePlastics +=
+          bagsVal * MULTIPLIERS.plasticKg;
+        cumulativeCrudeOil +=
+          bagsVal * MULTIPLIERS.crudeOilKg;
+        cumulativeTextileWaste +=
+          garmentVal * GARMENT_MULTIPLIERS.divertedKg;
 
-            if (savingsData.length === 0) {
-                savingsData.push({ date: 'Start', co2: 0, trees: 0 });
-            }
+        savingsData.push({
+          date: new Intl.DateTimeFormat("en-IN", {
+            day: "2-digit",
+            month: "short",
+          }).format(new Date(item.date)),
+          co2: cumulativeCO2,
+          trees: cumulativeTrees,
+          water: cumulativeWater,
+          energy: cumulativeEnergy,
+          plastics: cumulativePlastics,
+          crudeOil: cumulativeCrudeOil,
+          textileWaste: cumulativeTextileWaste,
+        });
+      });
 
-            if (savingsChart) savingsChart.destroy();
-            savingsChart = new Chart(envSavingsCtx, {
-                type: 'line',
-                data: {
-                    labels: savingsData.map(d => d.date),
-                    datasets: [
-                        {
-                            label: 'CO2 Avoided (kg)',
-                            data: savingsData.map(d => d.co2),
-                            borderColor: '#e11d48',
-                            backgroundColor: 'rgba(225, 29, 72, 0.05)',
-                            fill: true,
-                            tension: 0.3,
-                            borderWidth: 2.5
-                        },
-                        {
-                            label: 'Tree Equivalent',
-                            data: savingsData.map(d => d.trees),
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                            fill: true,
-                            tension: 0.3,
-                            borderWidth: 2.5
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10 } }
-                    },
-                    scales: {
-                        x: { grid: { display: false } },
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
+      if (savingsData.length === 0) {
+        savingsData.push({
+          date: "Start",
+          co2: 0,
+          trees: 0,
+          water: 0,
+          energy: 0,
+          plastics: 0,
+          crudeOil: 0,
+          textileWaste: 0,
+        });
+      }
 
-        // Resource Footprint Breakdown (Water & Energy) Polar Chart
-        const resourcePolarCtx = document.getElementById("resourceFootprintPolarChart")?.getContext("2d");
-        if (resourcePolarCtx) {
-            if (polarChart) polarChart.destroy();
-            polarChart = new Chart(resourcePolarCtx, {
-                type: 'polarArea',
-                data: {
-                    labels: ['NWPP Water Saved', 'NWPP Energy Saved', 'Garment Water Preserved', 'Garment Energy Preserved', 'Diary Water Saved', 'Diary Energy Saved'],
-                    datasets: [{
-                        data: [
-                            waterSaved,
-                            energySaved,
-                            garmentWaterPreserved,
-                            garmentEnergyPreserved,
-                            diaryWaterSaved,
-                            diaryEnergySaved
-                        ],
-                        backgroundColor: [
-                            'rgba(59, 130, 246, 0.6)',
-                            'rgba(245, 158, 11, 0.6)',
-                            'rgba(37, 99, 235, 0.6)',
-                            'rgba(217, 119, 6, 0.6)',
-                            'rgba(96, 165, 250, 0.6)',
-                            'rgba(251, 191, 36, 0.6)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 } } }
-                    }
-                }
-            });
-        }
-    }, 0);
+      if (savingsChart) savingsChart.destroy();
+      savingsChart = new Chart(envSavingsCtx, {
+        type: "line",
+        data: {
+          labels: savingsData.map((d) => d.date),
+          datasets: [
+            {
+              label: "CO2 Avoided (kg)",
+              data: savingsData.map((d) => d.co2),
+              borderColor: "#e11d48",
+              backgroundColor: "rgba(225, 29, 72, 0.05)",
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+            {
+              label: "Tree Equivalent",
+              data: savingsData.map((d) => d.trees),
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.05)",
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+            {
+              label: "Water Saved (L)",
+              data: savingsData.map((d) => d.water),
+              borderColor: "#3b82f6",
+              backgroundColor: "rgba(59, 130, 246, 0.05)",
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+            {
+              label: "Energy Saved (kWh)",
+              data: savingsData.map((d) => d.energy),
+              borderColor: "#f59e0b",
+              backgroundColor: "rgba(245, 158, 11, 0.05)",
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+            {
+              label: "Plastics Prevented (kg)",
+              data: savingsData.map((d) => d.plastics),
+              borderColor: "#06b6d4",
+              backgroundColor: "rgba(6, 182, 212, 0.05)",
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+            {
+              label: "Crude Oil Saved (kg)",
+              data: savingsData.map((d) => d.crudeOil),
+              borderColor: "#64748b",
+              backgroundColor: "rgba(100, 116, 139, 0.05)",
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+            {
+              label: "Textile Waste Diverted (kg)",
+              data: savingsData.map((d) => d.textileWaste),
+              borderColor: "#be185d",
+              backgroundColor: "rgba(190, 24, 93, 0.05)",
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 10 } },
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    // Resource Footprint Breakdown (Water & Energy) Polar Chart
+    const resourcePolarCtx = document
+      .getElementById("resourceFootprintPolarChart")
+      ?.getContext("2d");
+    if (resourcePolarCtx) {
+      if (polarChart) polarChart.destroy();
+      polarChart = new Chart(resourcePolarCtx, {
+        type: "polarArea",
+        data: {
+          labels: [
+            "NWPP Water Saved",
+            "NWPP Energy Saved",
+            "Garment Water Preserved",
+            "Garment Energy Preserved",
+            "Diary Water Saved",
+            "Diary Energy Saved",
+          ],
+          datasets: [
+            {
+              data: [
+                waterSaved,
+                energySaved,
+                garmentWaterPreserved,
+                garmentEnergyPreserved,
+                diaryWaterSaved,
+                diaryEnergySaved,
+              ],
+              backgroundColor: [
+                "rgba(59, 130, 246, 0.6)",
+                "rgba(245, 158, 11, 0.6)",
+                "rgba(37, 99, 235, 0.6)",
+                "rgba(217, 119, 6, 0.6)",
+                "rgba(96, 165, 250, 0.6)",
+                "rgba(251, 191, 36, 0.6)",
+              ],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: { boxWidth: 10, font: { size: 9 } },
+            },
+          },
+        },
+      });
+    }
+  }, 0);
 }

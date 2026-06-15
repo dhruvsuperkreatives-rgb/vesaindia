@@ -181,7 +181,7 @@ export function renderHome(container, model) {
                     labels: Object.keys(sectorCounts),
                     datasets: [{
                         data: Object.values(sectorCounts),
-                        backgroundColor: ['#1e3a8a', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'],
+                        backgroundColor: ['#1e3a8a', '#3b82f6', '#10b981', '#f59e0b', '#247c5c', '#64748b'],
                         borderWidth: 1.5,
                         borderColor: '#ffffff'
                     }]
