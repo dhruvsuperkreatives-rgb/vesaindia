@@ -245,10 +245,14 @@
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0 12px;
+            gap: 16px 20px;
         }
         .form-grid.three {
             grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .form-grid label:not(.checkbox) {
+            margin-top: 0;
+            margin-bottom: 6px;
         }
         .full { grid-column: 1 / -1; }
         .primary {
@@ -833,15 +837,19 @@
 
                     <section class="dashboard-panel" data-panel="people">
                         <div class="grid">
-                            <form id="employeeForm" class="card hidden">
+                            <form id="employeeForm" class="card hidden" style="grid-column: 1 / -1;">
                                 <h2 id="employeeFormTitle">Create Employee Login</h2>
                                 <div class="form-grid" data-employee-fields></div>
-                                <label for="employee_password">Password</label>
-                                <div class="password-wrapper">
-                                    <input id="employee_password" name="employee_password" type="password" minlength="8">
-                                    <button class="password-toggle" type="button" onclick="togglePasswordVisibility('employee_password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                                <div class="form-grid" style="margin-top: 16px;">
+                                    <div class="full">
+                                        <label for="employee_password">Password</label>
+                                        <div class="password-wrapper">
+                                            <input id="employee_password" name="employee_password" type="password" minlength="8">
+                                            <button class="password-toggle" type="button" onclick="togglePasswordVisibility('employee_password', this)" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="row">
+                                <div class="row" style="margin-top: 20px;">
                                     <button class="primary" type="submit"><i class="fa-solid fa-user-plus"></i> Save Employee</button>
                                     <button id="cancelEmployeeEdit" class="hidden" type="button"><i class="fa-solid fa-xmark"></i> Cancel</button>
                                 </div>
