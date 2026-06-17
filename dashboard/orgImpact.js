@@ -32,7 +32,26 @@ export function renderOrgImpact(
   summary,
   search = "",
   programSettings = [],
+  selectedProgramIds = []
 ) {
+  // Store selectedProgramIds on container so that interactive tab clicks have access to it
+  if (selectedProgramIds && selectedProgramIds.length > 0) {
+    container.selectedProgramIds = selectedProgramIds;
+  }
+  const currentSelectedProgramIds = selectedProgramIds && selectedProgramIds.length > 0
+    ? selectedProgramIds
+    : (container.selectedProgramIds || []);
+
+  const isSelected = (slug) => {
+    if (!currentSelectedProgramIds || currentSelectedProgramIds.length === 0) return true;
+    const prog = programSettings.find((p) => p.slug === slug);
+    return prog ? currentSelectedProgramIds.includes(prog.id) : true;
+  };
+
+  const showNwpp = isSelected("nwpp_bag");
+  const showGarments = isSelected("garment");
+  const showDiaries = isSelected("diary");
+
   const org = summary.organization || {};
   const orgTotals = summary.org_totals || {};
   const departments = summary.departments || [];
@@ -125,28 +144,28 @@ export function renderOrgImpact(
   );
 
   // Calculate total NWPP impact
-  const supAvoided = totalNWPP * MULTIPLIERS.supBags;
-  const plasticPrevented = totalNWPP * MULTIPLIERS.plasticKg;
-  const crudeOilSaved = totalNWPP * MULTIPLIERS.crudeOilKg;
-  const waterSaved = totalNWPP * MULTIPLIERS.waterLitres;
-  const energySaved = totalNWPP * MULTIPLIERS.energyKwh;
-  const co2Reduced = totalNWPP * MULTIPLIERS.co2Kg;
-  const treesPreserved = totalNWPP * MULTIPLIERS.trees;
+  const supAvoided = showNwpp ? totalNWPP * MULTIPLIERS.supBags : 0;
+  const plasticPrevented = showNwpp ? totalNWPP * MULTIPLIERS.plasticKg : 0;
+  const crudeOilSaved = showNwpp ? totalNWPP * MULTIPLIERS.crudeOilKg : 0;
+  const waterSaved = showNwpp ? totalNWPP * MULTIPLIERS.waterLitres : 0;
+  const energySaved = showNwpp ? totalNWPP * MULTIPLIERS.energyKwh : 0;
+  const co2Reduced = showNwpp ? totalNWPP * MULTIPLIERS.co2Kg : 0;
+  const treesPreserved = showNwpp ? totalNWPP * MULTIPLIERS.trees : 0;
 
   // Calculate total Garment impact
-  const garmentWasteDiverted = totalGarments * GARMENT_MULTIPLIERS.divertedKg;
-  const garmentWaterPreserved = totalGarments * GARMENT_MULTIPLIERS.waterLitres;
-  const garmentEnergyPreserved = totalGarments * GARMENT_MULTIPLIERS.energyKwh;
-  const garmentCo2Extended = totalGarments * GARMENT_MULTIPLIERS.co2Kg;
-  const garmentTreesPreserved = totalGarments * GARMENT_MULTIPLIERS.trees;
+  const garmentWasteDiverted = showGarments ? totalGarments * GARMENT_MULTIPLIERS.divertedKg : 0;
+  const garmentWaterPreserved = showGarments ? totalGarments * GARMENT_MULTIPLIERS.waterLitres : 0;
+  const garmentEnergyPreserved = showGarments ? totalGarments * GARMENT_MULTIPLIERS.energyKwh : 0;
+  const garmentCo2Extended = showGarments ? totalGarments * GARMENT_MULTIPLIERS.co2Kg : 0;
+  const garmentTreesPreserved = showGarments ? totalGarments * GARMENT_MULTIPLIERS.trees : 0;
 
   // Calculate total Diary impact
-  const diaryPages = totalDiaries * DIARY_MULTIPLIERS.pages;
-  const diaryNotebooks = totalDiaries * DIARY_MULTIPLIERS.notebooks;
-  const diaryWaterSaved = totalDiaries * DIARY_MULTIPLIERS.waterLitres;
-  const diaryEnergySaved = totalDiaries * DIARY_MULTIPLIERS.energyKwh;
-  const diaryCo2Avoided = totalDiaries * DIARY_MULTIPLIERS.co2Kg;
-  const diaryTreesPreserved = totalDiaries * DIARY_MULTIPLIERS.trees;
+  const diaryPages = showDiaries ? totalDiaries * DIARY_MULTIPLIERS.pages : 0;
+  const diaryNotebooks = showDiaries ? totalDiaries * DIARY_MULTIPLIERS.notebooks : 0;
+  const diaryWaterSaved = showDiaries ? totalDiaries * DIARY_MULTIPLIERS.waterLitres : 0;
+  const diaryEnergySaved = showDiaries ? totalDiaries * DIARY_MULTIPLIERS.energyKwh : 0;
+  const diaryCo2Avoided = showDiaries ? totalDiaries * DIARY_MULTIPLIERS.co2Kg : 0;
+  const diaryTreesPreserved = showDiaries ? totalDiaries * DIARY_MULTIPLIERS.trees : 0;
 
   // Filter departments for table view
   const term = search.trim().toLowerCase();
@@ -221,29 +240,34 @@ export function renderOrgImpact(
       .replaceAll("'", "&#039;");
   }
 
+  const visibleTabs = [true, showNwpp, showGarments, showDiaries].filter(Boolean).length;
+
   container.innerHTML = `
         <!-- Top Summary Cards (Interactive Tabs) -->
-        <div class="stats" style="grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 24px;">
+        <div class="stats" style="grid-template-columns: repeat(${visibleTabs}, minmax(0, 1fr)); margin-bottom: 24px;">
             <article class="card" data-tab="total" style="${totalStyle} transition: all 0.2s ease;">
                 <div class="metric-label">Total Impact</div>
                 <div class="metric-value" style="color: var(--green);">Combined</div>
                 <div class="metric-unit">view all &rarr;</div>
             </article>
+            ${showNwpp ? `
             <article class="card" data-tab="nwpp" style="${nwppStyle} transition: all 0.2s ease;">
                 <div class="metric-label">Organisation NWPP</div>
                 <div class="metric-value" style="color: var(--green);">${numberText(totalNWPP)}</div>
                 <div class="metric-unit">bags &rarr;</div>
-            </article>
+            </article>` : ""}
+            ${showGarments ? `
             <article class="card" data-tab="garments" style="${garmentStyle} transition: all 0.2s ease;">
                 <div class="metric-label">Organisation Garments</div>
                 <div class="metric-value" style="color: var(--blue);">${numberText(totalGarments)}</div>
                 <div class="metric-unit">items &rarr;</div>
-            </article>
+            </article>` : ""}
+            ${showDiaries ? `
             <article class="card" data-tab="diaries" style="${diaryStyle} transition: all 0.2s ease;">
                 <div class="metric-label">Organisation Diaries</div>
                 <div class="metric-value" style="color: #a0522d;">${numberText(totalDiaries)}</div>
                 <div class="metric-unit">diaries &rarr;</div>
-            </article>
+            </article>` : ""}
         </div>
 
         <!-- Total Combined Environmental Impact Panel -->
@@ -255,7 +279,7 @@ export function renderOrgImpact(
             </div>
             
             <!-- Key Impact Metrics Grid (3x3) -->
-            <div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px;">
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 28px;">
                 <!-- Row 1: Primary Metrics -->
                 <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #cfe5da; box-shadow: 0 2px 8px rgba(36, 124, 92, 0.08); transition: all 0.3s ease;">
                     <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #247c5c 0%, #1b5a47 100%); box-shadow: 0 4px 12px rgba(36, 124, 92, 0.3);">
@@ -294,6 +318,7 @@ export function renderOrgImpact(
                 </div>
 
                 <!-- Row 2: Secondary Metrics -->
+                ${showNwpp ? `
                 <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #dcfce7; box-shadow: 0 2px 8px rgba(47, 143, 107, 0.08); transition: all 0.3s ease;">
                     <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #2f8f6b 0%, #065f46 100%); box-shadow: 0 4px 12px rgba(47, 143, 107, 0.3);">
                         <i class="fa-solid fa-leaf"></i>
@@ -316,7 +341,7 @@ export function renderOrgImpact(
                         <span style="display: block; font-weight: 600;">Petroleum resources conserved</span>
                         <span style="font-size: 10px;">Non-renewable energy preserved</span>
                     </div>
-                </div>
+                </div>` : ""}
 
                 <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #ecfdf3; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08); transition: all 0.3s ease;">
                     <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
@@ -331,6 +356,7 @@ export function renderOrgImpact(
                 </div>
 
                 <!-- Row 3: Contribution Metrics -->
+                ${showNwpp ? `
                 <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #f5d4f5; box-shadow: 0 2px 8px rgba(168, 85, 247, 0.08); transition: all 0.3s ease;">
                     <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);">
                         <i class="fa-solid fa-bag-shopping"></i>
@@ -341,8 +367,9 @@ export function renderOrgImpact(
                         <span style="display: block; font-weight: 600;">Single-use carrier bags</span>
                         <span style="font-size: 10px;">Prevented from circulation</span>
                     </div>
-                </div>
+                </div>` : ""}
 
+                ${showDiaries ? `
                 <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #cfe5da; box-shadow: 0 2px 8px rgba(36, 124, 92, 0.08); transition: all 0.3s ease;">
                     <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #247c5c 0%, #1b5a47 100%); box-shadow: 0 4px 12px rgba(36, 124, 92, 0.3);">
                         <i class="fa-solid fa-file-lines"></i>
@@ -353,8 +380,9 @@ export function renderOrgImpact(
                         <span style="display: block; font-weight: 600;">Diary pages reused</span>
                         <span style="font-size: 10px;">${numberText(diaryNotebooks)} notebooks created</span>
                     </div>
-                </div>
+                </div>` : ""}
 
+                ${showGarments ? `
                 <div class="impact-tile" style="text-align: center; padding: 24px; border-radius: 12px; background: #ffffff; border: 2px solid #fdf2f8; box-shadow: 0 2px 8px rgba(190, 24, 93, 0.08); transition: all 0.3s ease;">
                     <div class="impact-icon-wrap" style="width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; color: #ffffff; background: linear-gradient(135deg, #be185d 0%, #831843 100%); box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);">
                         <i class="fa-solid fa-recycle"></i>
@@ -365,7 +393,7 @@ export function renderOrgImpact(
                         <span style="display: block; font-weight: 600;">Garment upcycling impact</span>
                         <span style="font-size: 10px;">Waste redirected to value</span>
                     </div>
-                </div>
+                </div>` : ""}
             </div>
 
             <!-- Overall Impact Summary Card -->
@@ -375,7 +403,7 @@ export function renderOrgImpact(
                         <h4 style="margin: 0 0 8px; font-size: 13px; font-weight: 700; opacity: 0.9; letter-spacing: 0.05em; text-transform: uppercase;">Overall Impact</h4>
                         <div style="font-size: 28px; font-weight: 900;">Multiple Programs</div>
                         <div style="font-size: 12px; opacity: 0.8; margin-top: 6px; font-weight: 500;">
-                            <span>${numberText(totalNWPP + totalGarments + totalDiaries)} total items contributed</span>
+                            <span>${numberText((showNwpp ? totalNWPP : 0) + (showGarments ? totalGarments : 0) + (showDiaries ? totalDiaries : 0))} total items contributed</span>
                         </div>
                     </div>
                     <div style="text-align: right;">
@@ -394,12 +422,12 @@ export function renderOrgImpact(
             <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
                 <div style="background: #ede9fe; border-radius: 10px; padding: 16px; border: 1px solid #ddd6fe;">
                     <div style="font-size: 11px; font-weight: 800; color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Contributions</div>
-                    <div style="font-size: 18px; font-weight: 900; color: var(--ink);">${numberText(totalNWPP + totalGarments + totalDiaries)}</div>
+                    <div style="font-size: 18px; font-weight: 900; color: var(--ink);">${numberText((showNwpp ? totalNWPP : 0) + (showGarments ? totalGarments : 0) + (showDiaries ? totalDiaries : 0))}</div>
                     <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">Total items shared</div>
                 </div>
                 <div style="background: #e0e7ff; border-radius: 10px; padding: 16px; border: 1px solid #c7d2fe;">
                     <div style="font-size: 11px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Programs</div>
-                    <div style="font-size: 18px; font-weight: 900; color: var(--ink);">3</div>
+                    <div style="font-size: 18px; font-weight: 900; color: var(--ink);">${numberText(visibleTabs - 1)}</div>
                     <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500;">Active initiatives</div>
                 </div>
                 <div style="background: #dbeafe; border-radius: 10px; padding: 16px; border: 1px solid #bfdbfe;">
@@ -722,7 +750,7 @@ export function renderOrgImpact(
             </article>
         </div>
 
-         <!-- Leaderboards / Top Performers Section -->
+         // Leaderboards / Top Performers Section
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 24px; margin-bottom: 24px;">
             <!-- Top Departments -->
             <article class="card" style="padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px;">
@@ -733,11 +761,9 @@ export function renderOrgImpact(
                     ${(() => {
                       const topDepts = [...departments]
                         .map((dept) => {
-                          const bags = Number(dept.nwpp_bags || 0);
-                          const garments = Number(dept.garments || 0);
-                          const diaries = Number(
-                            diariesByDept.get(dept.id) || 0,
-                          );
+                          const bags = showNwpp ? Number(dept.nwpp_bags || 0) : 0;
+                          const garments = showGarments ? Number(dept.garments || 0) : 0;
+                          const diaries = showDiaries ? Number(diariesByDept.get(dept.id) || 0) : 0;
                           const total = bags + garments + diaries;
                           return { ...dept, bags, garments, diaries, total };
                         })
@@ -790,24 +816,24 @@ export function renderOrgImpact(
 
                       const topEmployees = people
                         .map((p) => {
-                          const bags = nwppContributions
+                          const bags = showNwpp ? nwppContributions
                             .filter((c) => c.user_id === p.id)
                             .reduce(
                               (sum, c) => sum + Number(c.bags_count || 0),
                               0,
-                            );
-                          const garments = garmentContributions
+                            ) : 0;
+                          const garments = showGarments ? garmentContributions
                             .filter((c) => c.user_id === p.id)
                             .reduce(
                               (sum, c) => sum + Number(c.garment_count || 0),
                               0,
-                            );
-                          const others = otherContributions
+                            ) : 0;
+                          const others = showDiaries ? otherContributions
                             .filter((c) => c.user_id === p.id)
                             .reduce(
                               (sum, c) => sum + Number(c.quantity || 0),
                               0,
-                            );
+                            ) : 0;
                           const total = bags + garments + others;
                           return {
                             ...p,
@@ -869,10 +895,10 @@ export function renderOrgImpact(
                         <thead>
                             <tr>
                                 <th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Department / Nodal</th>
-                                <th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">NWPP Bags</th>
-                                <th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Garments</th>
-                                <th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Diaries</th>
-                                <th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Pages Recovered</th>
+                                ${showNwpp ? `<th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">NWPP Bags</th>` : ""}
+                                ${showGarments ? `<th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Garments</th>` : ""}
+                                ${showDiaries ? `<th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Diaries</th>` : ""}
+                                ${showDiaries ? `<th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Pages Recovered</th>` : ""}
                                 <th style="text-align: left; padding: 10px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted);">Total Trees Preserved</th>
                             </tr>
                         </thead>
@@ -885,19 +911,19 @@ export function renderOrgImpact(
                                   diariesByDept.get(dept.id) || 0,
                                 );
                                 const combinedTrees =
-                                  deptBags * MULTIPLIERS.trees +
-                                  deptGarments * GARMENT_MULTIPLIERS.trees +
-                                  deptDiaries * DIARY_MULTIPLIERS.trees;
+                                  (showNwpp ? deptBags * MULTIPLIERS.trees : 0) +
+                                  (showGarments ? deptGarments * GARMENT_MULTIPLIERS.trees : 0) +
+                                  (showDiaries ? deptDiaries * DIARY_MULTIPLIERS.trees : 0);
                                 return `
                                     <tr>
                                         <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">
                                             <strong>${escapeHtml(dept.department_name)}</strong><br>
                                             <span style="font-size: 11px; color: var(--muted);">${escapeHtml(dept.nodal_name || "Unassigned")}</span>
                                         </td>
-                                        <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptBags)}</td>
-                                        <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptGarments)}</td>
-                                        <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptDiaries)}</td>
-                                        <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptDiaries * DIARY_MULTIPLIERS.pages)}</td>
+                                        ${showNwpp ? `<td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptBags)}</td>` : ""}
+                                        ${showGarments ? `<td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptGarments)}</td>` : ""}
+                                        ${showDiaries ? `<td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptDiaries)}</td>` : ""}
+                                        ${showDiaries ? `<td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(deptDiaries * DIARY_MULTIPLIERS.pages)}</td>` : ""}
                                         <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${numberText(combinedTrees.toFixed(3))}</td>
                                     </tr>
                                 `;
@@ -918,14 +944,32 @@ export function renderOrgImpact(
       .getElementById("orgCategoryPieChart")
       ?.getContext("2d");
     if (pieCtx) {
+      const pieLabels = [];
+      const pieData = [];
+      const pieColors = [];
+      if (showNwpp) {
+        pieLabels.push("NWPP Bags");
+        pieData.push(totalNWPP);
+        pieColors.push("#2f8f6b");
+      }
+      if (showGarments) {
+        pieLabels.push("Garments");
+        pieData.push(totalGarments);
+        pieColors.push("#2f6fed");
+      }
+      if (showDiaries) {
+        pieLabels.push("Diaries");
+        pieData.push(totalDiaries);
+        pieColors.push("#a0522d");
+      }
       new Chart(pieCtx, {
         type: "pie",
         data: {
-          labels: ["NWPP Bags", "Garments", "Diaries"],
+          labels: pieLabels,
           datasets: [
             {
-              data: [totalNWPP, totalGarments, totalDiaries],
-              backgroundColor: ["#2f8f6b", "#2f6fed", "#a0522d"],
+              data: pieData,
+              backgroundColor: pieColors,
               borderWidth: 1.5,
               borderColor: "#ffffff",
             },
@@ -963,7 +1007,7 @@ export function renderOrgImpact(
             "CO2 (kg)",
           ],
           datasets: [
-            {
+            showNwpp && {
               label: "NWPP Bags",
               data: [
                 totalNWPP,
@@ -977,7 +1021,7 @@ export function renderOrgImpact(
               pointBackgroundColor: "#2f8f6b",
               borderWidth: 2,
             },
-            {
+            showGarments && {
               label: "Garments",
               data: [
                 0,
@@ -991,7 +1035,7 @@ export function renderOrgImpact(
               pointBackgroundColor: "#2f6fed",
               borderWidth: 2,
             },
-            {
+            showDiaries && {
               label: "Diaries",
               data: [
                 0,
@@ -1005,7 +1049,7 @@ export function renderOrgImpact(
               pointBackgroundColor: "#a0522d",
               borderWidth: 2,
             },
-          ],
+          ].filter(Boolean),
         },
         options: {
           responsive: true,
@@ -1035,9 +1079,9 @@ export function renderOrgImpact(
     if (barCtx) {
       const topDeptsData = [...departments]
         .map((dept) => {
-          const bags = Number(dept.nwpp_bags || 0);
-          const garments = Number(dept.garments || 0);
-          const diaries = Number(diariesByDept.get(dept.id) || 0);
+          const bags = showNwpp ? Number(dept.nwpp_bags || 0) : 0;
+          const garments = showGarments ? Number(dept.garments || 0) : 0;
+          const diaries = showDiaries ? Number(diariesByDept.get(dept.id) || 0) : 0;
           return {
             name: dept.department_name || "Unassigned",
             bags,
@@ -1056,22 +1100,22 @@ export function renderOrgImpact(
         data: {
           labels: topDeptsData.map((d) => d.name),
           datasets: [
-            {
+            showNwpp && {
               label: "NWPP Bags",
               data: topDeptsData.map((d) => d.bags),
               backgroundColor: "#2f8f6b",
             },
-            {
+            showGarments && {
               label: "Garments",
               data: topDeptsData.map((d) => d.garments),
               backgroundColor: "#2f6fed",
             },
-            {
+            showDiaries && {
               label: "Diaries",
               data: topDeptsData.map((d) => d.diaries),
               backgroundColor: "#a0522d",
             },
-          ],
+          ].filter(Boolean),
         },
         options: {
           responsive: true,
@@ -1153,7 +1197,7 @@ export function renderOrgImpact(
         data: {
           labels: trendData.map((t) => t.key),
           datasets: [
-            {
+            showNwpp && {
               label: "NWPP Bags",
               data: trendData.map((t) => t.nwpp),
               borderColor: "#2f8f6b",
@@ -1162,7 +1206,7 @@ export function renderOrgImpact(
               tension: 0.3,
               fill: true,
             },
-            {
+            showGarments && {
               label: "Garments",
               data: trendData.map((t) => t.garments),
               borderColor: "#2f6fed",
@@ -1171,7 +1215,7 @@ export function renderOrgImpact(
               tension: 0.3,
               fill: true,
             },
-            {
+            showDiaries && {
               label: "Diaries",
               data: trendData.map((t) => t.diaries),
               borderColor: "#a0522d",
@@ -1180,7 +1224,7 @@ export function renderOrgImpact(
               tension: 0.3,
               fill: true,
             },
-          ],
+          ].filter(Boolean),
         },
         options: {
           responsive: true,
@@ -1212,7 +1256,7 @@ export function renderOrgImpact(
         activeTab = tabCard.dataset.tab;
         const searchVal =
           document.getElementById("orgImpactSearch")?.value || "";
-        renderOrgImpact(container, summary, searchVal, programSettings);
+        renderOrgImpact(container, summary, searchVal, programSettings, currentSelectedProgramIds);
       }
     });
   }

@@ -72,21 +72,43 @@ export function buildAdminModel(raw) {
         }
     }
 
+    const programIdToSlug = new Map((raw.programs || []).map((p) => [p.id, p.slug]));
+    const selectedProgramsByOrg = new Map();
+    if (raw.organizationPrograms) {
+        for (const item of raw.organizationPrograms) {
+            const orgId = item.organization_registration_id;
+            if (!selectedProgramsByOrg.has(orgId)) {
+                selectedProgramsByOrg.set(orgId, new Set());
+            }
+            selectedProgramsByOrg.get(orgId).add(item.program_id);
+        }
+    }
+
     const organisations = raw.organisations.map((org) => {
         const people = peopleByOrg.get(org.id) || { nodal: 0, employees: 0 };
         const nwB = nwppBreakdownByOrg.get(org.id) || getBreakdownObj();
         const garB = garmentsBreakdownByOrg.get(org.id) || getBreakdownObj();
         const diaB = diariesBreakdownByOrg.get(org.id) || getBreakdownObj();
+        const orgSelectedIds = Array.from(selectedProgramsByOrg.get(org.id) || []);
+        const orgSelectedSlugs = orgSelectedIds.map(id => programIdToSlug.get(id)).filter(Boolean);
+
+        const hasSelection = orgSelectedSlugs.length > 0;
+        const showNwpp = !hasSelection || orgSelectedSlugs.includes("nwpp_bag");
+        const showGarments = !hasSelection || orgSelectedSlugs.includes("garment");
+        const showDiaries = !hasSelection || orgSelectedSlugs.includes("diary");
+
         return {
             ...org,
-            nwppAchieved: contributionsByOrg.get(org.id) || 0,
-            garmentsAchieved: garmentsByOrg.get(org.id) || 0,
-            diariesAchieved: diariesByOrg.get(org.id) || 0,
-            nwppBreakdown: { employee: nwB.employee.size, nodal: nwB.nodal_officer.size, head: nwB.org_head.size },
-            garmentsBreakdown: { employee: garB.employee.size, nodal: garB.nodal_officer.size, head: garB.org_head.size },
-            diariesBreakdown: { employee: diaB.employee.size, nodal: diaB.nodal_officer.size, head: diaB.org_head.size },
+            nwppAchieved: showNwpp ? (contributionsByOrg.get(org.id) || 0) : 0,
+            garmentsAchieved: showGarments ? (garmentsByOrg.get(org.id) || 0) : 0,
+            diariesAchieved: showDiaries ? (diariesByOrg.get(org.id) || 0) : 0,
+            nwppBreakdown: showNwpp ? { employee: nwB.employee.size, nodal: nwB.nodal_officer.size, head: nwB.org_head.size } : { employee: 0, nodal: 0, head: 0 },
+            garmentsBreakdown: showGarments ? { employee: garB.employee.size, nodal: garB.nodal_officer.size, head: garB.org_head.size } : { employee: 0, nodal: 0, head: 0 },
+            diariesBreakdown: showDiaries ? { employee: diaB.employee.size, nodal: diaB.nodal_officer.size, head: diaB.org_head.size } : { employee: 0, nodal: 0, head: 0 },
             nodalCount: Math.max(people.nodal, departmentsByOrg.get(org.id) || 0),
-            employeeCount: people.employees
+            employeeCount: people.employees,
+            selectedProgramIds: orgSelectedIds,
+            selectedProgramSlugs: orgSelectedSlugs
         };
     });
 

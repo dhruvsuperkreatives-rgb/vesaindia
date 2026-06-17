@@ -86,6 +86,10 @@ export function renderOrganisations(container, model, search = "") {
 
         const headFullName = [org.organization_head_first_name, org.organization_head_middle_name, org.organization_head_last_name].filter(Boolean).join(" ");
 
+        const showNwpp = !org.selectedProgramSlugs || org.selectedProgramSlugs.length === 0 || org.selectedProgramSlugs.includes("nwpp_bag");
+        const showGarments = !org.selectedProgramSlugs || org.selectedProgramSlugs.length === 0 || org.selectedProgramSlugs.includes("garment");
+        const showDiaries = !org.selectedProgramSlugs || org.selectedProgramSlugs.length === 0 || org.selectedProgramSlugs.includes("diary");
+
         return `
             <article class="organisation-card">
                 <div class="org-heading">
@@ -111,21 +115,24 @@ export function renderOrganisations(container, model, search = "") {
                     <div><i class="fa-solid fa-envelope" style="font-size: 11px; margin-right: 6px; color: var(--muted);"></i>${escapeHtml(org.organization_head_email || "---")}</div>
                 </div>
                 <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                    ${showNwpp ? `
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
                         <div style="font-size: 11px; font-weight: 750; color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">NWPP Bags</div>
                         <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.nwppAchieved)} / ${numberText(targetNWPP)}</div>
                         <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${formatParticipantBreakdown(org.nwppBreakdown)}</div>
-                    </div>
+                    </div>` : ""}
+                    ${showGarments ? `
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
                         <div style="font-size: 11px; font-weight: 750; color: var(--blue); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Garments</div>
                         <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.garmentsAchieved)} / ${numberText(targetGarments)}</div>
                         <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${formatParticipantBreakdown(org.garmentsBreakdown)}</div>
-                    </div>
+                    </div>` : ""}
+                    ${showDiaries ? `
                     <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center;">
                         <div style="font-size: 11px; font-weight: 750; color: #a0522d; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Diaries</div>
                         <div style="font-size: 15px; font-weight: 800; color: var(--ink);">${numberText(org.diariesAchieved)} / ${numberText(targetDiaries)}</div>
                         <div style="font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600;">${formatParticipantBreakdown(org.diariesBreakdown)}</div>
-                    </div>
+                    </div>` : ""}
                 </div>
                 <div class="card-actions">
                     <button class="primary-button" type="button" data-org-view="reports" data-org-id="${escapeHtml(org.id)}">

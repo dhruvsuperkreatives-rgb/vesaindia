@@ -179,7 +179,7 @@
         }
         .stats {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 14px;
             margin: 18px 0;
         }
@@ -659,26 +659,31 @@
                         <p class="lead">Your organisation account is created. Until admin approval, this login can only view public platform totals.</p>
                         <span class="pill warn" id="pendingStatus">Pending</span>
                     </article>
-                    <div class="stats">
-                        <article class="card">
-                            <div class="metric-label">Public NWPP total</div>
-                            <div class="metric-value" id="publicNwpp">0</div>
-                            <div class="metric-unit">bags</div>
+                    <div class="stats" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                        <article class="card" style="border-top: 4px solid var(--blue);">
+                            <div class="metric-label">Organisations Joined</div>
+                            <div class="metric-value" id="organizationsJoined">0</div>
+                            <div class="metric-unit">Active partners</div>
                         </article>
-                        <article class="card">
-                            <div class="metric-label">Public garment total</div>
-                            <div class="metric-value" id="publicGarments">0</div>
-                            <div class="metric-unit">garments</div>
+                        <article class="card" style="border-top: 4px solid #3b82f6;">
+                            <div class="metric-label"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> Water Saved</div>
+                            <div class="metric-value" id="waterSavedMetric">0</div>
+                            <div class="metric-unit">litres</div>
                         </article>
-                        <article class="card">
-                            <div class="metric-label">Utility bags requested</div>
-                            <div class="metric-value" id="publicUtility">0</div>
-                            <div class="metric-unit">requests</div>
+                        <article class="card" style="border-top: 4px solid #8b5cf6;">
+                            <div class="metric-label"><i class="fa-solid fa-cloud" style="color: #8b5cf6;"></i> CO2 Reduced</div>
+                            <div class="metric-value" id="co2ReducedMetric">0</div>
+                            <div class="metric-unit">kilograms</div>
                         </article>
-                        <article class="card">
-                            <div class="metric-label">Labour fee pending</div>
-                            <div class="metric-value" id="publicFee">0</div>
-                            <div class="metric-unit">rupees</div>
+                        <article class="card" style="border-top: 4px solid #64748b;">
+                            <div class="metric-label"><i class="fa-solid fa-oil-can" style="color: #64748b;"></i> Crude Oil Saved</div>
+                            <div class="metric-value" id="crudeOilMetric">0</div>
+                            <div class="metric-unit">kilograms</div>
+                        </article>
+                        <article class="card" style="border-top: 4px solid #22c55e;">
+                            <div class="metric-label"><i class="fa-solid fa-tree" style="color: #22c55e;"></i> Trees Equivalent</div>
+                            <div class="metric-value" id="treesMetric">0</div>
+                            <div class="metric-unit">trees planted</div>
                         </article>
                     </div>
                 </section>
@@ -686,25 +691,35 @@
                 <section id="approvedPanel" class="hidden">
                     <section class="dashboard-panel active" data-panel="overview">
                         <div class="stats">
-                            <article class="card">
+                            <article class="card" id="orgNwppCard">
                                 <div class="metric-label">Organisation NWPP</div>
                                 <div class="metric-value" id="orgNwpp">0</div>
                                 <div class="metric-unit">bags</div>
                             </article>
-                            <article class="card">
+                            <article class="card" id="orgGarmentsCard">
                                 <div class="metric-label">Organisation garments</div>
                                 <div class="metric-value" id="orgGarments">0</div>
                                 <div class="metric-unit">items</div>
                             </article>
-                            <article class="card">
+                            <article class="card" id="orgDiariesCard">
+                                <div class="metric-label">Organisation Diaries</div>
+                                <div class="metric-value" id="orgDiaries">0</div>
+                                <div class="metric-unit">diaries</div>
+                            </article>
+                            <article class="card" id="deptNwppCard">
                                 <div class="metric-label">Nodal Officer NWPP</div>
                                 <div class="metric-value" id="deptNwpp">0</div>
                                 <div class="metric-unit">bags</div>
                             </article>
-                            <article class="card">
+                            <article class="card" id="deptGarmentsCard">
                                 <div class="metric-label">Nodal Officer garments</div>
                                 <div class="metric-value" id="deptGarments">0</div>
                                 <div class="metric-unit">items</div>
+                            </article>
+                            <article class="card" id="deptDiariesCard">
+                                <div class="metric-label">Nodal Officer Diaries</div>
+                                <div class="metric-value" id="deptDiaries">0</div>
+                                <div class="metric-unit">diaries</div>
                             </article>
                         </div>
                         <div class="grid">
@@ -1410,12 +1425,33 @@
 
         function renderPending() {
             const org = summary.organization;
+            const orgTotals = summary.org_totals || {};
+            
             pageTitle.textContent = org?.organization_name || "Organisation Dashboard";
-            pageLead.textContent = "Admin approval is pending. Public totals remain visible while private tools are locked.";
+            pageLead.textContent = "Admin approval is pending. Your estimated ecological impact and mission scale are visible below.";
             pendingPanel.classList.remove("hidden");
             approvedPanel.classList.add("hidden");
             document.getElementById("pendingStatus").textContent = org?.status || "pending";
-            renderPublicTotals("public", summary.public_totals || {});
+            
+            document.getElementById("organizationsJoined").textContent = numberText(summary.organizations_joined_count || 0);
+            
+            const showNwpp = programSettings.some(p => p.slug === "nwpp_bag" && selectedProgramIds.includes(p.id));
+            const showGarments = programSettings.some(p => p.slug === "garment" && selectedProgramIds.includes(p.id));
+            const showDiaries = programSettings.some(p => p.slug === "diary" && selectedProgramIds.includes(p.id));
+
+            const totalBags = showNwpp ? Number(orgTotals.nwpp_bags || 0) : 0;
+            const totalGarments = showGarments ? Number(orgTotals.garments || 0) : 0;
+            const totalDiaries = 0; // diaries not applicable in pending
+            
+            const waterSaved = (totalBags * 45) + (totalGarments * 7500) + (totalDiaries * 40.5);
+            const co2Reduced = (totalBags * 1.5) + (totalGarments * 25) + (totalDiaries * 1.35);
+            const crudeOilSaved = showNwpp ? totalBags * 0.44 : 0;
+            const treesEquivalent = (totalBags * 0.075) + (totalGarments * 1.2) + (totalDiaries * 0.015);
+            
+            document.getElementById("waterSavedMetric").textContent = numberText(waterSaved);
+            document.getElementById("co2ReducedMetric").textContent = numberText(co2Reduced);
+            document.getElementById("crudeOilMetric").textContent = numberText(crudeOilSaved);
+            document.getElementById("treesMetric").textContent = numberText(treesEquivalent);
         }
 
         function renderApproved() {
@@ -1452,10 +1488,41 @@
                 }
             }
 
-            document.getElementById("orgNwpp").textContent = numberText(orgTotals.nwpp_bags);
-            document.getElementById("orgGarments").textContent = numberText(orgTotals.garments);
-            document.getElementById("deptNwpp").textContent = numberText(deptTotals.nwpp_bags);
-            document.getElementById("deptGarments").textContent = numberText(deptTotals.garments);
+            const showNwpp = programSettings.some(p => p.slug === "nwpp_bag" && selectedProgramIds.includes(p.id));
+            const showGarments = programSettings.some(p => p.slug === "garment" && selectedProgramIds.includes(p.id));
+            const showDiaries = programSettings.some(p => p.slug === "diary" && selectedProgramIds.includes(p.id));
+
+            document.getElementById("orgNwppCard")?.classList.toggle("hidden", !showNwpp);
+            document.getElementById("deptNwppCard")?.classList.toggle("hidden", !showNwpp);
+            document.getElementById("orgGarmentsCard")?.classList.toggle("hidden", !showGarments);
+            document.getElementById("deptGarmentsCard")?.classList.toggle("hidden", !showGarments);
+            document.getElementById("orgDiariesCard")?.classList.toggle("hidden", !showDiaries);
+            document.getElementById("deptDiariesCard")?.classList.toggle("hidden", !showDiaries);
+
+            if (showNwpp) {
+                document.getElementById("orgNwpp").textContent = numberText(orgTotals.nwpp_bags);
+                document.getElementById("deptNwpp").textContent = numberText(deptTotals.nwpp_bags);
+            }
+            if (showGarments) {
+                document.getElementById("orgGarments").textContent = numberText(orgTotals.garments);
+                document.getElementById("deptGarments").textContent = numberText(deptTotals.garments);
+            }
+            if (showDiaries) {
+                const diaryProg = programSettings.find((p) => p.slug === "diary");
+                const totalDiaries = diaryProg
+                    ? (summary.program_contributions || [])
+                        .filter((item) => item.program_id === diaryProg.id)
+                        .reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+                    : 0;
+                document.getElementById("orgDiaries").textContent = numberText(totalDiaries);
+
+                const deptDiaries = (diaryProg && dept)
+                    ? (summary.program_contributions || [])
+                        .filter((item) => item.program_id === diaryProg.id && item.department_id === dept.id)
+                        .reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+                    : 0;
+                document.getElementById("deptDiaries").textContent = numberText(deptDiaries);
+            }
 
             document.getElementById("snapshotList").innerHTML = `
                 <li><strong>${escapeHtml(org.organization_name)}</strong><br><span class="muted">${escapeHtml(role.replaceAll("_", " "))}</span></li>
@@ -1490,7 +1557,7 @@
             const container = document.getElementById("orgImpactContent");
             if (!container) return;
             const search = document.getElementById("orgImpactSearch")?.value || "";
-            renderOrgImpact(container, summary, search, programSettings);
+            renderOrgImpact(container, summary, search, programSettings, selectedProgramIds);
         }
 
         function renderOverviewCharts() {
@@ -1498,17 +1565,47 @@
             const orgTotals = summary.org_totals || {};
             const departments = summary.departments || [];
 
+            const showNwpp = programSettings.some(p => p.slug === "nwpp_bag" && selectedProgramIds.includes(p.id));
+            const showGarments = programSettings.some(p => p.slug === "garment" && selectedProgramIds.includes(p.id));
+            const showDiaries = programSettings.some(p => p.slug === "diary" && selectedProgramIds.includes(p.id));
+
             // 1. Share of direct Org Head vs all Nodal Officers / Departments
             const allDeptsBags = departments.reduce((sum, d) => sum + Number(d.nwpp_bags || 0), 0);
             const allDeptsGarments = departments.reduce((sum, d) => sum + Number(d.garments || 0), 0);
             const totalBags = Number(orgTotals.nwpp_bags || 0);
             const totalGarments = Number(orgTotals.garments || 0);
-            
+
+            const diaryProgram = (programSettings || []).find((p) => p.slug === "diary");
+            const diaryProgramId = diaryProgram?.id;
+            const diariesByDept = new Map();
+            if (diaryProgramId) {
+                (summary.program_contributions || [])
+                    .filter((item) => item.program_id === diaryProgramId && item.department_id)
+                    .forEach((item) => {
+                        diariesByDept.set(
+                            item.department_id,
+                            (diariesByDept.get(item.department_id) || 0) + Number(item.quantity || 0)
+                        );
+                    });
+            }
+
+            const allDeptsDiaries = diaryProgramId
+                ? (summary.program_contributions || [])
+                    .filter((c) => c.program_id === diaryProgramId && c.department_id)
+                    .reduce((sum, c) => sum + Number(c.quantity || 0), 0)
+                : 0;
+            const totalDiaries = diaryProgramId
+                ? (summary.program_contributions || [])
+                    .filter((c) => c.program_id === diaryProgramId)
+                    .reduce((sum, c) => sum + Number(c.quantity || 0), 0)
+                : 0;
+
             const orgHeadBags = Math.max(0, totalBags - allDeptsBags);
             const orgHeadGarments = Math.max(0, totalGarments - allDeptsGarments);
+            const orgHeadDiaries = Math.max(0, totalDiaries - allDeptsDiaries);
             
-            const headTotal = orgHeadBags + orgHeadGarments;
-            const nodalTotal = allDeptsBags + allDeptsGarments;
+            const headTotal = (showNwpp ? orgHeadBags : 0) + (showGarments ? orgHeadGarments : 0) + (showDiaries ? orgHeadDiaries : 0);
+            const nodalTotal = (showNwpp ? allDeptsBags : 0) + (showGarments ? allDeptsGarments : 0) + (showDiaries ? allDeptsDiaries : 0);
 
             const shareCtx = document.getElementById("overviewSharePieChart")?.getContext("2d");
             if (shareCtx) {
@@ -1540,7 +1637,15 @@
             const barCtx = document.getElementById("overviewDeptsBarChart")?.getContext("2d");
             if (barCtx) {
                 const deptsData = [...departments]
-                    .sort((a, b) => (Number(b.nwpp_bags || 0) + Number(b.garments || 0)) - (Number(a.nwpp_bags || 0) + Number(a.garments || 0)))
+                    .sort((a, b) => {
+                        const aVal = (showNwpp ? Number(a.nwpp_bags || 0) : 0) + 
+                                     (showGarments ? Number(a.garments || 0) : 0) + 
+                                     (showDiaries ? Number(diariesByDept.get(a.id) || 0) : 0);
+                        const bVal = (showNwpp ? Number(b.nwpp_bags || 0) : 0) + 
+                                     (showGarments ? Number(b.garments || 0) : 0) + 
+                                     (showDiaries ? Number(diariesByDept.get(b.id) || 0) : 0);
+                        return bVal - aVal;
+                    })
                     .slice(0, 5);
 
                 new Chart(barCtx, {
@@ -1548,17 +1653,22 @@
                     data: {
                         labels: deptsData.map(d => d.department_name || "Unassigned"),
                         datasets: [
-                            {
+                            showNwpp && {
                                 label: 'NWPP Bags',
                                 data: deptsData.map(d => Number(d.nwpp_bags || 0)),
                                 backgroundColor: '#2f8f6b'
                             },
-                            {
+                            showGarments && {
                                 label: 'Garments',
                                 data: deptsData.map(d => Number(d.garments || 0)),
                                 backgroundColor: '#2f6fed'
+                            },
+                            showDiaries && {
+                                label: 'Diaries',
+                                data: deptsData.map(d => Number(diariesByDept.get(d.id) || 0)),
+                                backgroundColor: '#a0522d'
                             }
-                        ]
+                        ].filter(Boolean)
                     },
                     options: {
                         responsive: true,
@@ -1580,45 +1690,46 @@
             // 3. Ecological Impact Breakdown Chart
             const ecoCtx = document.getElementById("overviewEcologicalImpactChart")?.getContext("2d");
             if (ecoCtx) {
-                const diaryProgram = (programSettings || []).find((p) => p.slug === "diary");
-                const totalDiaries = diaryProgram
-                    ? (summary.program_contributions || [])
-                        .filter((item) => item.program_id === diaryProgram.id)
-                        .reduce((sum, item) => sum + Number(item.quantity || 0), 0)
-                    : 0;
+                const plasticPrevented = (showNwpp ? totalBags * 0.25 : 0) + (showGarments ? totalGarments * 0.7 : 0);
+                const crudeOilSaved = showNwpp ? totalBags * 0.44 : 0;
+                const waterSaved = (showNwpp ? totalBags * 45 : 0) + (showGarments ? totalGarments * 7500 : 0) + (showDiaries ? totalDiaries * 40.5 : 0);
+                const energySaved = (showNwpp ? totalBags * 3.75 : 0) + (showGarments ? totalGarments * 25 : 0) + (showDiaries ? totalDiaries * 3 : 0);
+                const co2Reduced = (showNwpp ? totalBags * 1.5 : 0) + (showGarments ? totalGarments * 25 : 0) + (showDiaries ? totalDiaries * 1.35 : 0);
 
-                const plasticPrevented = (totalBags * 0.25) + (totalGarments * 0.7);
-                const crudeOilSaved = totalBags * 0.44;
-                const waterSaved = (totalBags * 45) + (totalGarments * 7500) + (totalDiaries * 40.5);
-                const energySaved = (totalBags * 3.75) + (totalGarments * 25) + (totalDiaries * 3);
-                const co2Reduced = (totalBags * 1.5) + (totalGarments * 25) + (totalDiaries * 1.35);
+                const labels = [];
+                const data = [];
+                const backgroundColors = [];
+
+                if (showNwpp || showGarments) {
+                    labels.push('Plastic Prevented (kg)');
+                    data.push(Number(plasticPrevented.toFixed(1)));
+                    backgroundColors.push('#10b981');
+                }
+                if (showNwpp) {
+                    labels.push('Crude Oil Saved (kg)');
+                    data.push(Number(crudeOilSaved.toFixed(1)));
+                    backgroundColors.push('#d97706');
+                }
+                labels.push('Water Saved (L)');
+                data.push(Number(waterSaved.toFixed(1)));
+                backgroundColors.push('#3b82f6');
+
+                labels.push('Energy Saved (kWh)');
+                data.push(Number(energySaved.toFixed(1)));
+                backgroundColors.push('#f59e0b');
+
+                labels.push('CO₂ Reduced (kg)');
+                data.push(Number(co2Reduced.toFixed(1)));
+                backgroundColors.push('#8b5cf6');
 
                 new Chart(ecoCtx, {
                     type: 'bar',
                     data: {
-                        labels: [
-                            'Plastic Prevented (kg)',
-                            'Crude Oil Saved (kg)',
-                            'Water Saved (L)',
-                            'Energy Saved (kWh)',
-                            'CO₂ Reduced (kg)'
-                        ],
+                        labels: labels,
                         datasets: [{
                             label: 'Ecological Metrics',
-                            data: [
-                                Number(plasticPrevented.toFixed(1)),
-                                Number(crudeOilSaved.toFixed(1)),
-                                Number(waterSaved.toFixed(1)),
-                                Number(energySaved.toFixed(1)),
-                                Number(co2Reduced.toFixed(1))
-                            ],
-                            backgroundColor: [
-                                '#10b981', // Plastic
-                                '#d97706', // Crude Oil
-                                '#3b82f6', // Water
-                                '#f59e0b', // Energy
-                                '#8b5cf6'  // CO2
-                            ],
+                            data: data,
+                            backgroundColor: backgroundColors,
                             borderRadius: 6,
                             borderWidth: 0
                         }]

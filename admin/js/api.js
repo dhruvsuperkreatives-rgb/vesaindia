@@ -30,7 +30,7 @@ export async function loadAdminData() {
 
     if (organisationsResult.error) throw organisationsResult.error;
 
-    const [nwpp, garments, profiles, departments, programs, missionPeople, programContributions] = await Promise.all([
+    const [nwpp, garments, profiles, departments, programs, missionPeople, programContributions, organizationPrograms] = await Promise.all([
         optionalQuery("NWPP contributions", supabase
             .from("nwpp_contributions")
             .select("id, created_at, organization_registration_id, user_id, bags_count, status")),
@@ -51,7 +51,10 @@ export async function loadAdminData() {
         optionalQuery("Mission people", supabase.rpc("get_mission_people")),
         optionalQuery("Program contributions", supabase
             .from("program_contributions")
-            .select("id, created_at, organization_registration_id, user_id, program_id, quantity, status"))
+            .select("id, created_at, organization_registration_id, user_id, program_id, quantity, status")),
+        optionalQuery("Organization programs", supabase
+            .from("organization_programs")
+            .select("organization_registration_id, program_id"))
     ]);
 
     return {
@@ -63,7 +66,8 @@ export async function loadAdminData() {
         programs: programs.data,
         missionPeople: missionPeople.data,
         programContributions: programContributions.data,
-        warnings: [nwpp.warning, garments.warning, profiles.warning, departments.warning, programs.warning, missionPeople.warning, programContributions.warning].filter(Boolean)
+        organizationPrograms: organizationPrograms.data,
+        warnings: [nwpp.warning, garments.warning, profiles.warning, departments.warning, programs.warning, missionPeople.warning, programContributions.warning, organizationPrograms.warning].filter(Boolean)
     };
 }
 

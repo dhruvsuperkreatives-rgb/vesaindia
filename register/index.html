@@ -718,6 +718,16 @@
 
                 </div>
 
+                <!-- Ecological Impact Strip -->
+                <div id="ecologicalImpactStrip" style="margin-top: 20px; display: none; background: linear-gradient(135deg, #f0fdf4 0%, #e6f9ed 100%); border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(47, 143, 107, 0.05);">
+                    <h3 style="margin: 0 0 12px 0; font-size: 15px; color: var(--green); display: flex; align-items: center; gap: 8px; font-weight: 700;">
+                        <i class="fa-solid fa-leaf"></i> Estimated Ecological Impact
+                    </h3>
+                    <div id="stripImpactBreakdown" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px;">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
             </fieldset>
 
 
@@ -1167,12 +1177,90 @@
                 .replaceAll("'", "&#039;");
         }
 
+        function updateEcologicalImpact() {
+            const estimatedParticipants = Number(value("estimated_participants") || 0);
+            const selectedIds = selectedProgramIds();
+            const strip = document.getElementById("ecologicalImpactStrip");
+            const breakdown = document.getElementById("stripImpactBreakdown");
+
+            if (estimatedParticipants <= 0 || selectedIds.length === 0) {
+                strip.style.display = "none";
+                return;
+            }
+
+            let totalWater = 0;
+            let totalCO2 = 0;
+            let totalCrudeOil = 0;
+            let totalTrees = 0;
+
+            availablePrograms.filter(p => selectedIds.includes(p.id)).forEach(program => {
+                const targetPerPart = Number(program.target_per_participant || 0);
+                const units = estimatedParticipants * targetPerPart;
+                if (program.slug === 'nwpp_bag') {
+                    totalWater += units * 45;
+                    totalCO2 += units * 1.5;
+                    totalCrudeOil += units * 0.44;
+                    totalTrees += units * 0.075;
+                } else if (program.slug === 'garment') {
+                    totalWater += units * 7500;
+                    totalCO2 += units * 25;
+                    totalTrees += units * 1.2;
+                } else if (program.slug === 'diary') {
+                    totalWater += units * 40.5;
+                    totalCO2 += units * 1.35;
+                    totalTrees += units * 0.015;
+                }
+            });
+
+            strip.style.display = "block";
+            breakdown.innerHTML = `
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; border: 1px solid rgba(47, 143, 107, 0.1); display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0f2fe; display: flex; align-items: center; justify-content: center; color: #0284c7;">
+                        <i class="fa-solid fa-droplet" style="font-size: 16px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Water Saved</div>
+                        <div style="font-size: 16px; font-weight: 800; color: var(--ink);">${totalWater.toLocaleString()} L</div>
+                    </div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; border: 1px solid rgba(47, 143, 107, 0.1); display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #faf5ff; display: flex; align-items: center; justify-content: center; color: #7c3aed;">
+                        <i class="fa-solid fa-cloud" style="font-size: 15px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">CO2 Reduced</div>
+                        <div style="font-size: 16px; font-weight: 800; color: var(--ink);">${totalCO2.toLocaleString()} kg</div>
+                    </div>
+                </div>
+                ${totalCrudeOil > 0 ? `
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; border: 1px solid rgba(47, 143, 107, 0.1); display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #475569;">
+                        <i class="fa-solid fa-oil-can" style="font-size: 15px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Crude Oil Saved</div>
+                        <div style="font-size: 16px; font-weight: 800; color: var(--ink);">${totalCrudeOil.toLocaleString()} kg</div>
+                    </div>
+                </div>` : ''}
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; border: 1px solid rgba(47, 143, 107, 0.1); display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #f0fdf4; display: flex; align-items: center; justify-content: center; color: #16a34a;">
+                        <i class="fa-solid fa-tree" style="font-size: 16px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Trees Equivalent</div>
+                        <div style="font-size: 16px; font-weight: 800; color: var(--ink);">${totalTrees.toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+        }
+
         function updateTargetHint() {
             const selectedIds = selectedProgramIds();
             const selectedPrograms = availablePrograms.filter((program) => selectedIds.includes(program.id));
 
             if (selectedPrograms.length === 0) {
                 document.getElementById("participantTargetHint").textContent = "Select programs to view participant targets.";
+                updateEcologicalImpact();
                 return;
             }
 
@@ -1183,6 +1271,7 @@
             });
 
             document.getElementById("participantTargetHint").innerHTML = hints.join("<br>");
+            updateEcologicalImpact();
         }
 
         let activeTabId = "";
@@ -1595,6 +1684,7 @@
 
         loadPrograms();
         initStatesAndDistricts();
+        document.getElementById("estimated_participants").addEventListener("input", updateEcologicalImpact);
 
         const registrationTypeSelect = document.getElementById("registration_type");
         const otherRegTypeContainer = document.getElementById("other_registration_type_container");
